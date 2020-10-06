@@ -10,8 +10,9 @@
 
 #define INIT_ARGS(ARGS_COUNT)                                                                      \
 	napi_value argv[ARGS_COUNT];                                                                   \
+	napi_value this;																			   \
 	size_t argc = ARGS_COUNT;                                                                      \
-	napi_get_cb_info(env, info, &argc, argv, NULL, NULL);                                          \
+	napi_get_cb_info(env, info, &argc, argv, &this, NULL);                                         \
 	if (argc < ARGS_COUNT) {                                                                       \
 		napi_throw_error(env, "EINVAL", "Too few arguments");                                      \
 		return NULL;                                                                               \

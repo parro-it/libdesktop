@@ -4,7 +4,8 @@
   "description": "node desktop gui library",
   "scripts": {
     "test": "ts-node test.ts",
-    "build": "node-gyp configure build"
+    "build": "node-gyp configure build",
+    "clear": "rm -rf build node_modules"
   },
   "repository": "parro-it/libdesktop.git",
   "keywords": [
