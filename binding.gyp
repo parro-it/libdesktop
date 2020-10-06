@@ -1,6 +1,6 @@
 {
 	"targets": [{
-		"target_name": "libdesktop",
+		"target_name": "desktop",
 		"include_dirs": ["<(module_root_dir)/includes"],
 		"sources": [
 			'<!@(node tools/list-sources.js)'
