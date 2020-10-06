@@ -1,9 +1,9 @@
 #include "napi_utils.h"
 
-napi_value _app_init_core(napi_env env, napi_value exports);
+napi_value app_init_core(napi_env env, napi_value exports);
 
 static napi_value init_all(napi_env env, napi_value exports) {
-	_app_init_core(env, exports);
+	app_init_core(env, exports);
 
 	return exports;
 }

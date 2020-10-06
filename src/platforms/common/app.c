@@ -6,7 +6,7 @@ LIBUI_FUNCTION(createApp) {
     return make_utf8_string(env,"createApp");;
 }
 
-napi_value _app_init_core(napi_env env, napi_value exports) {
+napi_value app_init_core(napi_env env, napi_value exports) {
     DEFINE_MODULE()
     LIBUI_EXPORT(createApp)
     LIBUI_EXPORT(appArch)
