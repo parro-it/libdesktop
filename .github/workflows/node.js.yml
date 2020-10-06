@@ -37,10 +37,11 @@ jobs:
       shell: bash
     - run: npm ci
     - run: |
-           ls
-           ls build
-           ls build/Release
-           ls build/Debug
+           ls || true
+           ls build|| true
+           ls build/Release || true
+           ls Release || true
+           ls build/Debug || true
       shell: bash
     - run: npm run build --if-present
     - run: npm test
