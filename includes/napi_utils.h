@@ -245,7 +245,6 @@ bool debug_enabled_for_module(const char *module);
 
 #endif
 
-#include "napi_utils.h"
 #include <uv.h>
 #define UNINITIALIZED 100042
 
