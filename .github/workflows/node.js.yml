@@ -25,7 +25,7 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - name: Install dependencies
+    - name: Install OS Dependencies
       run:  |
             if [ "$RUNNER_OS" == "Linux" ]; then
                   sudo apt-get install libgtk-3-dev
@@ -35,13 +35,7 @@ jobs:
                   echo "$RUNNER_OS"
             fi
       shell: bash
-    - run: npm ci
-    - run: |
-           ls || true
-           ls build|| true
-           ls build/Release || true
-           ls Release || true
-           ls build/Debug || true
-      shell: bash
-    - run: npm run build --if-present
-    - run: npm test
+    - name: Build
+      run: npm ci
+    - name: Run tests
+      run: npm test
