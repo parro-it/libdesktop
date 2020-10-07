@@ -5,19 +5,18 @@
 		"sources": [
 			'<!@(node tools/list-sources.js)'
 		],
+		"libraries": [
+			'<!@(pkg-config gtk+-3.0 --libs-only-l)'
+		],
 		"conditions": [
 			["OS=='win'", {
-				"libraries": [
-				]
+				
 			}],
 			["OS=='linux'", {
 				"cflags": [
 					"-std=gnu11",
 					'<!@(pkg-config gtk+-3.0 --cflags-only-I)'
-				],
-				"ldflags": [
-					'<!@(pkg-config gtk+-3.0 --libs)'
-				],
+				]
 			}]
 		]
 	}]

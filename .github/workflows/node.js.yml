@@ -34,7 +34,6 @@ jobs:
             else
                   echo "$RUNNER_OS"
             fi
-            pkg-config gtk+-3.0 --libs
       shell: bash
     - name: Build
       run: npm ci
