@@ -16,7 +16,7 @@
 					'<!@(pkg-config gtk+-3.0 --cflags-only-I)'
 				],
 				"ldflags": [
-					'<!@(pkg-config gtk+-3.0 --libs-only-l)'
+					'<!@(pkg-config gtk+-3.0 --libs)'
 				],
 			}]
 		]
