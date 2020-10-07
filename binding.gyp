@@ -11,12 +11,12 @@
 				]
 			}],
 			["OS=='linux'", {
-				"cflags": ["-std=gnu11"],
-				'include_dirs': [
-					'<!@(pkg-config gtk+-3.0 --cflags-only-I | sed s/-I//g)'
+				"cflags": [
+					"-std=gnu11",
+					'<!@(pkg-config gtk+-3.0 --cflags-only-I)'
 				],
-				'libraries': [
-					'<!@(pkg-config gtk+-3.0 --cflags-only-I | sed s/-l//g)'
+				"ldflags": [
+					'<!@(pkg-config gtk+-3.0 --libs-only-l)'
 				],
 			}]
 		]

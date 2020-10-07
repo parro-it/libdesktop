@@ -6,6 +6,16 @@
 
 int uiEventsPending();
 int uiLoopWakeup();
+
+const char *uiInit();
+
+void uiMainSteps(void);
+int uiMainStep(int wait);
+void uiQuit(void);
+
+void uiQueueMain(void (*f)(void *data), void *data);
+
+
 int waitForNodeEvents(uv_loop_t *loop, int timeout);
 // bool uiWaitForEvents(int timeout);
 

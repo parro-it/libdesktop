@@ -222,11 +222,11 @@ NULL, &ret); \
 	}
 // debug
 
-#define UI_NODE_DEBUG 0
+#define UI_NODE_DEBUG 1
 
 #if UI_NODE_DEBUG
 
-bool debug_enabled_for_module(const char *module);
+static bool debug_enabled_for_module(const char *module);
 #define LIBUI_NODE_DEBUG(msg)                                                                      \
 	{                                                                                              \
 		if (debug_enabled_for_module(MODULE)) {                                                    \

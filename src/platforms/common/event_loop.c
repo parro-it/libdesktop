@@ -200,6 +200,7 @@ LIBUI_FUNCTION(start) {
 	LIBUI_NODE_DEBUG("🧐 LOOP STARTING");
 	uv_barrier_init(&all_threads_are_waiting, 2);
 	uv_barrier_init(&all_threads_are_awaked, 2);
+	LIBUI_NODE_DEBUG("barrier passed");
 
 	event_loop_started_cb_ref = cb_ref;
 
@@ -282,5 +283,14 @@ napi_value _libui_init_event_loop(napi_env env, napi_value exports) {
 	LIBUI_EXPORT(wakeupBackgroundThread);
 	LIBUI_EXPORT(start);
 	LIBUI_EXPORT(stop);
+
+	const char *err = uiInit();
+	if (err != NULL) {
+		napi_throw_error(env, NULL, err);
+		free((void*)err);
+	}
+	ln_init_loop_status();
+
 	return module;
 }
+
