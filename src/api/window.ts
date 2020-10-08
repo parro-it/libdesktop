@@ -1,27 +1,14 @@
+import { Control } from "./control";
+
+const {win} = require("../../build/Release/desktop.node")
 
 /**
- * The UiWindow class is responsible for showing and managing native windows.
- * A UiWindow instance can contain only one child. If you need
+ * The Window class is responsible for showing and managing native windows.
+ * A Window instance can contain only one child. If you need
  * more than one, you have to use [Containers](containers.md).
  */
-export interface UiWindow {
-	/**
-	 * Create a new UiWindow object.
-	 *
-	 * @param title - text to show in window title bar.
-	 * @param width - width of window in pixels.
-	 * @param height -  height of window in pixels.
-	 * @param hasMenubar - whether this window has a menu bar.
-	 * See [Menu](#menubar).
-	 */
-	//constructor(title: string, width: number, height: number, hasMenubar: boolean);
-
-	/**
-	 * Show the window.
-	 * LibUi always returns null
-	 */
-	show(): void;
-
+export interface Window {
+	
 	/**
 	 * Add a listener to the `closing` event. This event is emitted when the OS
 	 * window close button is clicked. You are responsible for closing the
@@ -56,15 +43,6 @@ export interface UiWindow {
 	 */
 	contentSize: {width: number; height: number};
 
-	/**
-	 * Set the control to show in this window content area.
-	 * UiWindow instances can contain only one child. If you need
-	 * more, you have to use [Containers](containers.md).
-	 *
-	 * @param control - the control to add as child.
-	 * @param stretchy - whever the control should fill all the available space.
-	 */
-	setChild(control: any): void;
 
 	/**
 	 * When true, an internal margin is added to the window.
@@ -80,4 +58,30 @@ export interface UiWindow {
 	 * When true, the window is displayed in full screen mode.
 	 */
 	fullscreen: boolean;
+
+	/**
+	 * Set or return whether the window is visible.
+	 */
+	visible: boolean;
+
+	/**
+	 * Set or return the width of the window.
+	 */
+	width: number;
+
+	/**
+	 * Set or return the height of the window.
+	 */
+	height: number;
 }
+
+
+export const Window: {
+	/**
+	 * Create a new Window object.
+	 *
+	 * @param props - property of the windows to create.
+	 * @param children - children widgets of the window
+	 */
+	new(props: any, children: Array<Control>): Window
+} = win.Window;
