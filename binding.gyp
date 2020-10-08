@@ -10,6 +10,9 @@
 			["OS=='win'", {
 				
 			}],
+			["OS=='mac'", {
+				"libraries": ["-framework AppKit"]
+			}],
 			["OS=='linux'", {
 				"libraries": [
 					'<!@(pkg-config gtk+-3.0 --libs-only-l)'
@@ -19,6 +22,7 @@
 					'<!@(pkg-config gtk+-3.0 --cflags-only-I)'
 				]
 			}]
+
 		]
 	}]
 }

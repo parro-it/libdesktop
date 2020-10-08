@@ -3,7 +3,6 @@
 #include "napi_utils.h"
 
 #define DSK_UNWRAP_WIDGET() \
-    GtkWidget* widget; \
     {\
     napi_status status = napi_unwrap(env, this, (void**)&widget);\
     CHECK_STATUS_THROW(status, napi_unwrap);                     \
