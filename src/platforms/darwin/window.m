@@ -1,5 +1,6 @@
 #include "napi_utils.h"
 #include "widget.h"
+#import <Cocoa/Cocoa.h>
 
 #define MODULE "win"
 
