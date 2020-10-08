@@ -1,7 +1,14 @@
 // 6 april 2015
-#import "uipriv_darwin.h"
-#import "attrstr.h"
+#import <Cocoa/Cocoa.h>
+#import <dlfcn.h>		// see future.m
+#import <Cocoa/Cocoa.h>
+#import <CoreFoundation/CoreFoundation.h>
+#include <sys/event.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <uv.h>
 
+/*
 static BOOL canQuit = NO;
 static NSAutoreleasePool *globalPool;
 static uiprivApplicationClass *app;
@@ -270,7 +277,7 @@ void uiQueueMain(void (*f)(void *data), void *data)
 }
 
 @end
-
+*/
 
 // TODO figure out the best way to clean the above up in uiUninit(), if it's even necessary
 // TODO that means figure out if timers can still fire without the main loop
