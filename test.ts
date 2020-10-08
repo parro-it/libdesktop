@@ -30,7 +30,7 @@ test('start stop', async (t:any): Promise<void> => {
         )),
     ])
 })
-/*
+
 test('Window', async (t:any): Promise<void> => {
     t.equal(typeof Window, "function")
     const app = App.create()
@@ -44,4 +44,3 @@ test('Window', async (t:any): Promise<void> => {
     console.log(win.title)
     app.start()
 })
-*/
