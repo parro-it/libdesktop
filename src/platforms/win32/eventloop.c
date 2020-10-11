@@ -1,11 +1,30 @@
 // 6 april 2015
-#include "winapi.hpp"
+//#include <windows.h>
+//#include "event-loop.h"
+#include <stdio.h>
+#include <uv.h>
+
+// ui internal window messages
+// TODO make these either not messages or WM_USER-based, so we can be sane about reserving WM_APP
+/*enum {
+	// redirected WM_COMMAND and WM_NOTIFY
+	msgCOMMAND = WM_APP + 0x40,		// start offset just to be safe
+	msgNOTIFY,
+	msgHSCROLL,
+	msgQueued,
+	msgD2DScratchPaint,
+	msgD2DScratchLButtonDown,
+};*/
+void uiQueueMain(void (*f)(void *data), void *data);
+
+const char *uiInit(){}
+void noop(void *data) {}
 
 int uiLoopWakeup() {
 	uiQueueMain(noop, NULL);
 	return 0;
 }
-
+#if 0
 static HHOOK filter;
 
 static LRESULT CALLBACK filterProc(int code, WPARAM wParam, LPARAM lParam)
@@ -15,9 +34,9 @@ static LRESULT CALLBACK filterProc(int code, WPARAM wParam, LPARAM lParam)
 	if (code < 0)
 		goto callNext;
 
-	if (areaFilter(msg))		// don't continue to our IsDialogMessage() hack if the area handled it
+	/*if (areaFilter(msg))		// don't continue to our IsDialogMessage() hack if the area handled it
 		goto discard;
-
+*/
 	// TODO IsDialogMessage() hack here
 
 	// otherwise keep going
@@ -48,9 +67,35 @@ void unregisterMessageFilter(void)
 
 // LONGTERM http://blogs.msdn.com/b/oldnewthing/archive/2005/04/08/406509.aspx when adding accelerators, TranslateAccelerators() before IsDialogMessage()
 
-static void processMessage(MSG *msg)
+
+void uiMain(void)
 {
-	HWND correctParent;
+	while (uiMainStep(1))
+		;
+}
+#endif
+
+void uiMainSteps(void)
+{
+	// don't need to do anything here
+}
+
+static int peekMessage(/*MSG *msg*/)
+{
+	/*BOOL res;
+
+	res = PeekMessageW(msg, NULL, 0, 0, PM_REMOVE);
+	if (res == 0)
+		return 2;		// no message available
+	if (msg->message != WM_QUIT)
+		return 1;		// a message*/
+	return 0;			// WM_QUIT
+}
+
+
+static void processMessage(/*MSG *msg*/)
+{
+	/*HWND correctParent;
 
 	if (msg->hwnd != NULL)
 		correctParent = parentToplevel(msg->hwnd);
@@ -61,12 +106,12 @@ static void processMessage(MSG *msg)
 		if (IsDialogMessage(correctParent, msg) != 0)
 			return;
 	TranslateMessage(msg);
-	DispatchMessageW(msg);
+	DispatchMessageW(msg);*/
 }
 
-static int waitMessage(MSG *msg)
+static int waitMessage(/*MSG *msg*/)
 {
-	int res;
+	/*int res;
 
 	res = GetMessageW(msg, NULL, 0, 0);
 	if (res < 0) {
@@ -74,34 +119,13 @@ static int waitMessage(MSG *msg)
 		return 0;		// bail out on error
 	}
 	return res != 0;		// returns false on WM_QUIT
+	*/
 }
 
-void uiMain(void)
-{
-	while (uiMainStep(1))
-		;
-}
-
-void uiMainSteps(void)
-{
-	// don't need to do anything here
-}
-
-static int peekMessage(MSG *msg)
-{
-	BOOL res;
-
-	res = PeekMessageW(msg, NULL, 0, 0, PM_REMOVE);
-	if (res == 0)
-		return 2;		// no message available
-	if (msg->message != WM_QUIT)
-		return 1;		// a message
-	return 0;			// WM_QUIT
-}
 
 int uiMainStep(int wait)
 {
-	MSG msg;
+	/*MSG msg;
 
 	if (wait) {
 		if (!waitMessage(&msg))
@@ -118,34 +142,30 @@ int uiMainStep(int wait)
 	case 1:		// process a message
 		processMessage(&msg);
 		// fall out to the case for no message
-	}
+	}*/
 	return 1;		// no message
 }
 
 void uiQuit(void)
 {
-	PostQuitMessage(0);
+	//PostQuitMessage(0);
 }
 
 void uiQueueMain(void (*f)(void *data), void *data)
 {
-	if (PostMessageW(utilWindow, msgQueued, (WPARAM) f, (LPARAM) data) == 0)
+	/*if (PostMessageW(utilWindow, msgQueued, (WPARAM) f, (LPARAM) data) == 0)
 		// LONGTERM this is likely not safe to call across threads (allocates memory)
-		logLastError(L"error queueing function to run on main thread");
+		logLastError(L"error queueing function to run on main thread");*/
 }
-
-static std::map<uiprivTimer *, bool> timers;
-
 
 
 int uiEventsPending() {
-	MSG msg;
-	return PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
+	//MSG msg;
+	//return PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
 }
 
-
 int waitForNodeEvents(uv_loop_t *loop, int timeout) {
-	DWORD bytes;
+	/*DWORD bytes;
 	ULONG_PTR key;
 	OVERLAPPED *overlapped;
 
@@ -171,5 +191,5 @@ int waitForNodeEvents(uv_loop_t *loop, int timeout) {
 		PostQueuedCompletionStatus(_loop->iocp, bytes, key, overlapped);
 	}
 
-	return ret;
+	return ret; */
 }

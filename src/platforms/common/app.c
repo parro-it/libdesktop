@@ -11,7 +11,7 @@ LIBUI_FUNCTION(appVer) {
 
 LIBUI_FUNCTION(createApp) {
     napi_value instance;
-    napi_value args[0];
+    napi_value args;
 
     napi_value cons;
     napi_status status;
@@ -19,7 +19,7 @@ LIBUI_FUNCTION(createApp) {
     CHECK_STATUS_THROW(status, napi_get_reference_value);                                          
 
 
-    status = napi_new_instance(env, cons, 0, args, &instance);
+    status = napi_new_instance(env, cons, 0, &args, &instance);
     CHECK_STATUS_THROW(status, napi_new_instance);                                          
 
     return instance;
