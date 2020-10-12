@@ -1,8 +1,8 @@
 // 6 april 2015
-//#include <windows.h>
+#include <windows.h>
 //#include "event-loop.h"
 #include <stdio.h>
-#include <uv.h>
+//#include <uv.h>
 
 // ui internal window messages
 // TODO make these either not messages or WM_USER-based, so we can be sane about reserving WM_APP
@@ -15,9 +15,18 @@
 	msgD2DScratchPaint,
 	msgD2DScratchLButtonDown,
 };*/
-void uiQueueMain(void (*f)(void *data), void *data);
 
-const char *uiInit(){}
+
+
+void uiQueueMain(void (*f)(void *data), void *data);
+ATOM registerWindowClass(HICON hDefaultIcon, HCURSOR hDefaultCursor);
+
+
+const char *uiInit(){
+	if (registerWindowClass(NULL, NULL) == 0)
+		printf("error registering uiWindow window class\n");
+	return NULL;
+}
 void noop(void *data) {}
 
 int uiLoopWakeup() {
@@ -80,22 +89,27 @@ void uiMainSteps(void)
 	// don't need to do anything here
 }
 
-static int peekMessage(/*MSG *msg*/)
+static int peekMessage(MSG *msg)
 {
-	/*BOOL res;
+	BOOL res;
 
 	res = PeekMessageW(msg, NULL, 0, 0, PM_REMOVE);
 	if (res == 0)
 		return 2;		// no message available
 	if (msg->message != WM_QUIT)
-		return 1;		// a message*/
+		return 1;		// a message
 	return 0;			// WM_QUIT
 }
 
 
-static void processMessage(/*MSG *msg*/)
+HWND parentToplevel(HWND child)
 {
-	/*HWND correctParent;
+	return GetAncestor(child, GA_ROOT);
+}
+
+static void processMessage(MSG *msg)
+{
+	HWND correctParent;
 
 	if (msg->hwnd != NULL)
 		correctParent = parentToplevel(msg->hwnd);
@@ -106,26 +120,26 @@ static void processMessage(/*MSG *msg*/)
 		if (IsDialogMessage(correctParent, msg) != 0)
 			return;
 	TranslateMessage(msg);
-	DispatchMessageW(msg);*/
+	DispatchMessageW(msg);
 }
 
-static int waitMessage(/*MSG *msg*/)
+static int waitMessage(MSG *msg)
 {
-	/*int res;
+	int res;
 
 	res = GetMessageW(msg, NULL, 0, 0);
 	if (res < 0) {
-		logLastError(L"error calling GetMessage()");
+		printf("error calling GetMessage()\n");
 		return 0;		// bail out on error
 	}
 	return res != 0;		// returns false on WM_QUIT
-	*/
+	
 }
 
 
 int uiMainStep(int wait)
 {
-	/*MSG msg;
+	MSG msg;
 
 	if (wait) {
 		if (!waitMessage(&msg))
@@ -142,13 +156,13 @@ int uiMainStep(int wait)
 	case 1:		// process a message
 		processMessage(&msg);
 		// fall out to the case for no message
-	}*/
+	}
 	return 1;		// no message
 }
 
 void uiQuit(void)
 {
-	//PostQuitMessage(0);
+	PostQuitMessage(0);
 }
 
 void uiQueueMain(void (*f)(void *data), void *data)
@@ -160,12 +174,61 @@ void uiQueueMain(void (*f)(void *data), void *data)
 
 
 int uiEventsPending() {
-	//MSG msg;
-	//return PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
+	MSG msg;
+	return PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
 }
 
-int waitForNodeEvents(uv_loop_t *loop, int timeout) {
-	/*DWORD bytes;
+
+
+struct _internal_uv_loop_s {
+	/* User data - use this for whatever. */
+	void *data;
+	/* Loop reference counting. */
+	unsigned int active_handles;
+	void *handle_queue[2];
+	void *active_reqs[2];
+	/* Internal flag to signal loop stop. */
+	unsigned int stop_flag;
+	/* The loop's I/O completion port */
+	void *iocp;
+	/* The current time according to the event loop. in msecs.
+	//  uint64_t tim
+	// Tail of a single-linked circular queue of pending reqs. If the queue
+	// is empty, tail_ is NULL. If there is only one item,
+	// tail_->next_req == tail_
+	void* pending_reqs_tail;
+	// Head of a single-linked list of closed handles
+	void* endgame_handles;
+	// The head of the timers tree
+	struct uv_timer_tree_s timers;
+	// Lists of active loop (prepare / check / idle) watchers
+	uv_prepare_t* prepare_handles;
+	uv_check_t* check_handles;
+	uv_idle_t* idle_handles;
+	// This pointer will refer to the prepare/check/idle handle whose
+	// callback is scheduled to be called next. This is needed to allow
+	// safe removal from one of the lists above while that list being
+	// iterated over.
+	uv_prepare_t* next_prepare_handle;
+	uv_check_t* next_check_handle;
+	uv_idle_t* next_idle_handle;
+	// This handle holds the peer sockets for the fast variant of uv_poll_t
+	SOCKET poll_peer_sockets[UV_MSAFD_PROVIDER_COUNT];
+	// Counter to keep track of active tcp streams
+	unsigned int active_tcp_streams;
+	// Counter to keep track of active udp streams
+	unsigned int active_udp_streams;
+	// Counter to started timer
+	uint64_t timer_counter;
+	// Threadpool
+	void* wq[2];
+	uv_mutex_t wq_mutex;
+	uv_async_t wq_async;
+	*/
+};
+
+int waitForNodeEvents(void *loop, int timeout) {
+	DWORD bytes;
 	ULONG_PTR key;
 	OVERLAPPED *overlapped;
 
@@ -191,5 +254,5 @@ int waitForNodeEvents(uv_loop_t *loop, int timeout) {
 		PostQueuedCompletionStatus(_loop->iocp, bytes, key, overlapped);
 	}
 
-	return ret; */
+	return ret; 
 }
