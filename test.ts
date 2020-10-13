@@ -1,6 +1,6 @@
 import test from 'tape-async'
-import {App,Window,Label} from './index'
-
+import {App,Window,Label,Container} from './index'
+/*
 test('run on multiple platforms', async (t:any): Promise<void> => {
     t.equal(typeof App.create, "function")
     const app = App.create()
@@ -30,20 +30,30 @@ test('start stop', async (t:any): Promise<void> => {
         )),
     ])
 })
-/*
+*/
 test('Window', async (t:any): Promise<void> => {
     t.equal(typeof Window, "function")
     const app = App.create()
-    const win = new Window({},[new Label({},[])])
+    const [l1,l2,l3] = [
+        new Label({},[]),
+        new Label({},[]),
+        new Label({},[])
+    ]
+    const win = new Window({},[
+        new Container({},[l1,l2,l3])
+    ])
+
+    l1.top = 30
+    l2.top = 60
+    l3.top = 90
+
     console.log({win})
     console.log(win.title)
     win.title = "Prova";
     win.width=640
     win.height=480
     win.visible = true;
-
     
     console.log(win.title)
     app.start()
 })
-*/

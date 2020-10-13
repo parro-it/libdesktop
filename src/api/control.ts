@@ -16,6 +16,9 @@ export interface Control {
 	 */
 	toplevel: boolean;
 	
+
+	left: number
+	top: number
 	/**
 	 * Create a new UiControl object.
 	 */

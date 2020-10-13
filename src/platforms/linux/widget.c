@@ -55,7 +55,47 @@ LIBUI_FUNCTION(widgetGetPropI32) {
 
     int32_t result;
     g_object_get(widget, propname, &result, NULL);
+
     return make_int32(env, result);
+}
+
+LIBUI_FUNCTION(widgetSetChildPropI32) {
+    INIT_ARGS(1);
+    ARG_INT32(value, 0);
+    GtkWidget* widget; 
+    DSK_UNWRAP_WIDGET();
+    LOAD_PROP_NAME();
+    printf("SET CHILD %s %d\n",propname,value);
+
+    GtkContainer* container = GTK_CONTAINER(gtk_widget_get_parent(widget));
+    if (container==NULL) {
+        printf("CONT NULL\n");
+        return NULL;    
+    } 
+    printf("CONT %p %s\n",container,propname);
+    GValue val = G_VALUE_INIT;
+    g_value_init(&val,G_TYPE_INT);
+    g_value_set_int(&val,value);
+    printf("gval %d\n",value);
+    gtk_container_child_set_property(container, widget, propname, &val);
+        printf("gval %d DONE\n",value);
+
+    return NULL;
+
+}
+
+LIBUI_FUNCTION(widgetGetChildPropI32) {
+    INIT_EMPTY_ARGS();
+    GtkWidget* widget; 
+    DSK_UNWRAP_WIDGET();                                                                               
+    LOAD_PROP_NAME();                                        
+
+    int32_t result;
+    g_object_get(widget, propname, &result, NULL);
+    GtkContainer* container = GTK_CONTAINER(gtk_widget_get_parent(widget));
+    GValue value;
+    gtk_container_child_get_property(container, widget, propname, &value);
+    return make_int32(env, g_value_get_int(&value));
 }
 
 LIBUI_FUNCTION(widgetSetPropBool) {
