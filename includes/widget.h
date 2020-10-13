@@ -26,4 +26,8 @@ LIBUI_FUNCTION(widgetGetPropI32);
 LIBUI_FUNCTION(widgetSetPropBool);
 LIBUI_FUNCTION(widgetGetPropBool);
 
+napi_value _dsk_define_class(napi_env env, napi_value exports, const char* name, napi_callback constructor,const napi_property_descriptor properties[], size_t propertiesCount);
+
+#define dsk_define_class(env, exports,  name,  constructor, properties) \
+    _dsk_define_class(env,exports,name,constructor,(properties), sizeof((properties))/sizeof(napi_property_descriptor))
 #endif

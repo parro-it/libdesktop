@@ -5,6 +5,7 @@
 LIBUI_FUNCTION(widgetSetPropS) {
     INIT_ARGS(1);
     ARG_STRING(value, 0);
+    GtkWidget* widget; 
     DSK_UNWRAP_WIDGET();
     LOAD_PROP_NAME();
 
@@ -60,6 +61,7 @@ LIBUI_FUNCTION(widgetGetPropI32) {
 LIBUI_FUNCTION(widgetSetPropBool) {
     INIT_ARGS(1);
     ARG_BOOL(value, 0);
+    GtkWidget* widget; 
     DSK_UNWRAP_WIDGET();
     LOAD_PROP_NAME();
     printf("SET %s %d",propname,value);

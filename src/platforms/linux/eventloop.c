@@ -23,11 +23,6 @@ const char *uiInit()
 	return NULL;
 }
 
-void uiFreeInitError(const char *err)
-{
-	g_free((gpointer) err);
-}
-
 static gboolean (*iteration)(gboolean) = NULL;
 
 void uiMain(void)

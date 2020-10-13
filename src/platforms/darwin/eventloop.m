@@ -1,5 +1,3 @@
-// 6 april 2015
-#import <Cocoa/Cocoa.h>
 #import <dlfcn.h>		// see future.m
 #import <Cocoa/Cocoa.h>
 #import <CoreFoundation/CoreFoundation.h>
