@@ -9,6 +9,10 @@ static void window_finalize(napi_env env, void *finalize_data, void *finalize_hi
 
 }
 
+GtkWidget* container_new_gtk();
+void append_all_children_gtk(napi_env env,GtkWidget* widget,napi_value children);
+void calculate_layout_gtk(GtkWidget* container);
+
 LIBUI_FUNCTION(windowNew) {
     INIT_ARGS(2);
 
@@ -17,20 +21,11 @@ LIBUI_FUNCTION(windowNew) {
     napi_status status = napi_wrap(env, this, window, window_finalize, NULL, NULL);
     CHECK_STATUS_THROW(status, napi_wrap);                                          
 
-    uint32_t len;
-    napi_get_array_length(env,argv[1],&len);
-    printf("child count %d\n",len);
-    for (uint32_t i=0; i < len; i++) {
-        printf("add %d\n",i);
-        napi_value idx;
-        napi_create_uint32(env,i,&idx);
-        napi_value child;
-        napi_get_property(env,argv[1],idx,&child);
-        GtkWidget* child_gtk;
-        napi_unwrap(env,child,(void**)&child_gtk);
+    GtkWidget* child_gtk = container_new_gtk();
+    append_all_children_gtk(env, child_gtk, argv[1]);
+    gtk_container_add(GTK_CONTAINER( window), child_gtk);
+    calculate_layout_gtk(child_gtk);
 
-        gtk_container_add(GTK_CONTAINER( window), child_gtk);
-    }
     gtk_widget_show_all(GTK_WIDGET(window));
     return this;
 }

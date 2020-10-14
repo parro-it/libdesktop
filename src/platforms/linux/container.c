@@ -2,46 +2,22 @@
 #include "widget.h"
 #include <gtk/gtk.h>
 
+#include <yoga/Yoga.h>
+
 #define MODULE "container"
 
-
 static void container_finalize(napi_env env, void *finalize_data, void *finalize_hint) {
-
+    GtkWidget* widget = finalize_data;
+    YGNodeRef node = g_object_get_data(G_OBJECT( widget),"yoganode");
+    YGNodeFree(node);
 }
 
-LIBUI_FUNCTION(containerNew) {
-    INIT_ARGS(2);
-
-   	GtkWidget* widget = gtk_fixed_new();
-    napi_status status = napi_wrap(env, this, widget, container_finalize, NULL, NULL);
-    CHECK_STATUS_THROW(status, napi_wrap);                                          
-
-    napi_value children = argv[1];
-    uint32_t len;
-    napi_get_array_length(env, children, &len);
-    printf("container children count %d\n", len);
-    for (uint32_t i=0; i < len; i++) {
-        printf("add %d\n",i);
-        napi_value idx;
-        napi_create_uint32(env,i,&idx);
-        napi_value child;
-        napi_get_property(env,children,idx,&child);
-        GtkWidget* child_gtk;
-        napi_unwrap(env,child,(void**)&child_gtk);
-        gtk_container_add(GTK_CONTAINER(widget), child_gtk);
-
-        /*napi_value x;
-        napi_create_uint32(env,0,&x);
-
-        napi_value y;
-        napi_create_uint32(env,i*30,&y);
-        printf("X:Y = %d:%d\n",0,i*30);
-        napi_set_named_property(env,child,"left",x);
-        napi_set_named_property(env,child,"top",y);
-        */
-    }
-
-    return this;
+void add_child_gtk(GtkWidget* parent, GtkWidget* child) {
+    gtk_container_add(GTK_CONTAINER(parent), child);
+    YGNodeRef node = g_object_get_data(G_OBJECT(parent),"yoganode");
+    YGNodeRef childNode = g_object_get_data(G_OBJECT(child),"yoganode");
+    uint32_t childrenCount = YGNodeGetChildCount(node);
+    YGNodeInsertChild(node, childNode, childrenCount);
 }
 
 LIBUI_FUNCTION(containerAppend) {
@@ -53,8 +29,65 @@ LIBUI_FUNCTION(containerAppend) {
     return this;
 }
 
+void calculate_layout_gtk(GtkContainer* container) {
+    YGNodeRef node = g_object_get_data(G_OBJECT(container),"yoganode");
+    
+    YGNodeCalculateLayout(node,800,600,YGDirectionInherit);
+    uint32_t childrenCount = YGNodeGetChildCount(node);
+    
+    for (uint32_t i=0; i < childrenCount; i++) {
+        YGNodeRef childNode = YGNodeGetChild(node,i);
+        GtkWidget* child_gtk = YGNodeGetContext(childNode);
+        GValue x = G_VALUE_INIT;
+        g_value_init(&x,G_TYPE_INT);
+        g_value_set_int(&x,YGNodeLayoutGetLeft(childNode));
+        GValue y = G_VALUE_INIT;
+        g_value_init(&y,G_TYPE_INT);
+        g_value_set_int(&y,YGNodeLayoutGetTop(childNode));
+        gtk_container_child_set_property(container, child_gtk, "x", &x);
+        gtk_container_child_set_property(container, child_gtk, "y", &y);
+        
+        printf("X:Y = %f:%f\n",YGNodeLayoutGetLeft(childNode),YGNodeLayoutGetTop(childNode));
+    }
+}
 
+GtkWidget* container_new_gtk() {
+    GtkWidget* widget = gtk_fixed_new();
+    YGNodeRef node = YGNodeNew();
+    YGNodeStyleSetFlexDirection(node,YGFlexDirectionRow);
+    g_object_set_data(G_OBJECT(widget),"yoganode", node);
+    YGNodeSetContext(node, widget);
+    return widget;
+}
 
+void append_all_children_gtk(napi_env env,GtkWidget* widget,napi_value children) {
+    uint32_t len;
+    napi_get_array_length(env, children, &len);
+    printf("container children count %d\n", len);
+    for (uint32_t i=0; i < len; i++) {
+        printf("add %d\n",i);
+        napi_value idx;
+        napi_create_uint32(env,i,&idx);
+        napi_value child;
+        napi_get_property(env,children,idx,&child);
+        GtkWidget* child_gtk;
+        napi_unwrap(env,child,(void**)&child_gtk);
+        add_child_gtk(widget, child_gtk);
+    }
+}
+
+LIBUI_FUNCTION(containerNew) {
+    INIT_ARGS(2);
+
+   	GtkWidget* widget = container_new_gtk();
+    
+    napi_status status = napi_wrap(env, this, widget, container_finalize, NULL, NULL);
+    CHECK_STATUS_THROW(status, napi_wrap);                                          
+        
+    append_all_children_gtk(env,widget,argv[1]);
+
+    return this;
+}
 
 napi_value container_init(napi_env env, napi_value exports) {
     DEFINE_MODULE()
