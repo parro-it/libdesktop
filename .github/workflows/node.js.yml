@@ -42,7 +42,7 @@ jobs:
     - name: Build
       run:  npm ci
     - name: Setup Xvfb 
-      if: matrix.os == 'ubuntu-latest'
+      if:   matrix.os == 'ubuntu-latest'
       run:  |
             export DISPLAY=':99.0'
             Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
