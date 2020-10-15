@@ -15,6 +15,7 @@ LIBUI_FUNCTION(styleNew) {
     return this;
 }
 
+
 typedef void Setter(const YGNodeRef node,const int32_t value);
 typedef int32_t Getter(const YGNodeConstRef node);
 
@@ -22,6 +23,11 @@ struct prop_fns {
     Setter* setter;
     Getter* getter;
 };
+
+static struct prop_fns mk_prop_fns(Getter* getter, Setter* setter) {
+   struct prop_fns fns= {.getter=getter,.setter=setter};
+   return fns;
+}
 
 
 LIBUI_FUNCTION(setPropI32) {                                                           
@@ -59,14 +65,10 @@ LIBUI_FUNCTION(getPropI32) {
     return make_int32(env, result);                                                    
 }                                                                                      
 
-static struct prop_fns mk_prop_fns(Getter* getter, Setter* setter) {
-   struct prop_fns fns= {.getter=getter,.setter=setter};
-   return fns;
-}
-
 struct prop_fns direction_fns;
 
 #define PROP_I32(NAME,FNS) (napi_property_descriptor) {.utf8name = #NAME, .getter = getPropI32, .setter = setPropI32, .data = FNS}                        
+
 
 napi_value style_init(napi_env env, napi_value exports) {
     DEFINE_MODULE()
@@ -74,7 +76,7 @@ napi_value style_init(napi_env env, napi_value exports) {
     direction_fns = mk_prop_fns((Getter*)YGNodeStyleGetDirection, (Setter*)YGNodeStyleSetDirection);
     
     dsk_define_class(env,module,"Style",styleNew,((napi_property_descriptor[]){
-      PROP_I32("direction",&direction_fns)
+      PROP_I32(direction,&direction_fns)
     }));
 
     return exports;
