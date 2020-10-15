@@ -8,7 +8,6 @@ test('Style object creation', async (t:any): Promise<void> => {
     t.equal(typeof (s as any).otherFiled, "undefined")
 })
 
-
 test('direction can be set', async (t:any): Promise<void> => {
     const s = new Style({})
     t.equal(s.direction, YogaDirection.Inherit)
