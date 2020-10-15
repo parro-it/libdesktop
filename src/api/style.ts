@@ -5,10 +5,58 @@ const {style} = require("../../build/Release/desktop.node")
  * to customize a control layout behaviour.
  */
 export interface Style {
+    /**
+     * Justify content describes how to align children within the main axis of their container. For 
+     * example, you can use this property to center a child horizontally within a container with flex 
+     * direction set to row or vertically within a container with flex direction set to column.
+     * 
+     *   * FLEX START (DEFAULT) Align children of a container to the start of the 
+     *     container's main axis.
+     *   * FLEX END Align children of a container to the end of the container's main axis.
+     *   * CENTER Align children of a container in the center of the container's main axis.
+     *   * SPACE BETWEEN Evenly space of children across the container's main axis, 
+     *     distributing remaining space between the children.
+     *   * SPACE AROUND Evenly space of children across the container's main axis, 
+     *     distributing remaining space around the children. Compared to space between 
+     *     using space around will result in space being distributed to the beginning of the 
+     *     first child and end of the last child.
+     *   * SPACE EVENLY Evenly distributed within the alignment container along the 
+     *     main axis. The spacing between each pair of adjacent items, the main-start edge and 
+     *     the first item, and the main-end edge and the last item, are all exactly the same.
+     */
+    justifyContent: YogaJustifyContent;
+
 	/**
 	 *  Set the text direction for the control, LTR or RTL.
+     * 
+     *  Property direction specifies the direction in which children and text in 
+     *  a hierarchy should be laid out. Layout direction also effects what edge 
+     *  start and end refer to. By default Yoga lays out with LTR layout direction. 
+     *  In this mode start refers to left and end refers to right. When localizing your 
+     *  apps for markets with RTL languages you should customize this by either by passing
+     *  a direction to the CalculateLayout call or by setting the direction on the root node.
+     * 
+     *    * LTR (DEFAULT) Text and children and laid out from left to right. Margin and padding applied the start of an element are applied on the left side.
+     *    * RTL Text and children and laid out from right to left. Margin and padding applied the start of an element are applied on the right side.
 	 */
-	direction: YogaDirection;
+    direction: YogaDirection;
+    
+    /**
+	 * Property flexDirection controls the direction in which children of a node are laid out. 
+     * This is also referred to as the main axis. The main axis is the direction in which 
+     * children are laid out. The cross axis the the axis perpendicular to the main axis, 
+     * or the axis which wrapping lines are laid out in.
+     * 
+     *   * ROW (DEFAULT) Align children from left to right. If wrapping is enabled then the 
+     *     next line will start under the first item on the left of the container.
+     *   * COLUMN Align children from top to bottom. If wrapping is enabled then the next 
+     *     line will start to the left first item on the top of the container.
+     *   * ROW REVERSE Align children from right to left. If wrapping is enabled then the 
+     *     ext line will start under the first item on the right of the container.
+     *   * COLUMN REVERSE Align children from bottom to top. If wrapping is enabled then the 
+     *     next line will start to the left first item on the bottom of the container.
+	 */
+	flexDirection: YogaFlexDirection;
 }
 
 
@@ -184,13 +232,14 @@ const WRAP_WRAP = 1;
 const WRAP_WRAP_REVERSE = 2;
 
 
-export type YogaJustifyContent =
-    | typeof JUSTIFY_CENTER
-    | typeof JUSTIFY_FLEX_END
-    | typeof JUSTIFY_FLEX_START
-    | typeof JUSTIFY_SPACE_AROUND
-    | typeof JUSTIFY_SPACE_BETWEEN
-    | typeof JUSTIFY_SPACE_EVENLY;
+export enum YogaJustifyContent {
+    Center = JUSTIFY_CENTER,
+    FlexEnd = JUSTIFY_FLEX_END,
+    FlexStart = JUSTIFY_FLEX_START,
+    SpaceAround = JUSTIFY_SPACE_AROUND,
+    SpaceBetween = JUSTIFY_SPACE_BETWEEN,
+    SpaceEvenly = JUSTIFY_SPACE_EVENLY,
+}
 
 export type YogaAlign =
     | typeof ALIGN_AUTO
@@ -202,14 +251,15 @@ export type YogaAlign =
     | typeof ALIGN_SPACE_BETWEEN
     | typeof ALIGN_STRETCH;
 
-export type YogaFlexDirection =
-    | typeof FLEX_DIRECTION_COLUMN
-    | typeof FLEX_DIRECTION_COLUMN_REVERSE
-    | typeof FLEX_DIRECTION_COUNT
-    | typeof FLEX_DIRECTION_ROW
-    | typeof FLEX_DIRECTION_ROW_REVERSE;
+export enum YogaFlexDirection {
+    Column = FLEX_DIRECTION_COLUMN,
+    ColumnReverse = FLEX_DIRECTION_COLUMN_REVERSE,
+    Count = FLEX_DIRECTION_COUNT,
+    Row = FLEX_DIRECTION_ROW,
+    RowReverse = FLEX_DIRECTION_ROW_REVERSE,
+}
 
-export enum YogaDirection{
+export enum YogaDirection {
     Inherit = DIRECTION_INHERIT,
     LTR = DIRECTION_LTR,
     RTL = DIRECTION_RTL,

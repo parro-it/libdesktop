@@ -66,6 +66,8 @@ LIBUI_FUNCTION(getPropI32) {
 }                                                                                      
 
 static struct prop_fns direction_fns;
+static struct prop_fns flex_direction_fns;
+static struct prop_fns justify_content_fns;
 
 #define PROP_I32(NAME,FNS) (napi_property_descriptor) {.utf8name = #NAME, .getter = getPropI32, .setter = setPropI32, .data = FNS}                        
 
@@ -74,9 +76,13 @@ napi_value style_init(napi_env env, napi_value exports) {
     DEFINE_MODULE()
 
     direction_fns = mk_prop_fns((Getter*)YGNodeStyleGetDirection, (Setter*)YGNodeStyleSetDirection);
+    flex_direction_fns = mk_prop_fns((Getter*)YGNodeStyleGetFlexDirection, (Setter*)YGNodeStyleSetFlexDirection);
+    justify_content_fns = mk_prop_fns((Getter*)YGNodeStyleGetJustifyContent, (Setter*)YGNodeStyleSetJustifyContent);
     
     dsk_define_class(env,module,"Style",styleNew,((napi_property_descriptor[]){
-      PROP_I32(direction,&direction_fns)
+      PROP_I32(direction,&direction_fns),
+      PROP_I32(flexDirection,&flex_direction_fns),
+      PROP_I32(justifyContent,&justify_content_fns),
     }));
 
     return exports;
@@ -85,15 +91,7 @@ napi_value style_init(napi_env env, napi_value exports) {
 
 /*
 
-WIN_EXPORT void YGNodeStyleSetDirection(YGNodeRef node, YGDirection direction);
-WIN_EXPORT YGDirection YGNodeStyleGetDirection(YGNodeConstRef node);
-
-WIN_EXPORT void YGNodeStyleSetFlexDirection(
-    YGNodeRef node,
-    YGFlexDirection flexDirection);
-WIN_EXPORT YGFlexDirection YGNodeStyleGetFlexDirection(YGNodeConstRef node);
-
-WIN_EXPORT void YGNodeStyleSetJustifyContent(
+WIN_EXPORT void (
     YGNodeRef node,
     YGJustify justifyContent);
 WIN_EXPORT YGJustify YGNodeStyleGetJustifyContent(YGNodeConstRef node);
