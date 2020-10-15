@@ -65,7 +65,7 @@ LIBUI_FUNCTION(getPropI32) {
     return make_int32(env, result);                                                    
 }                                                                                      
 
-struct prop_fns direction_fns;
+static struct prop_fns direction_fns;
 
 #define PROP_I32(NAME,FNS) (napi_property_descriptor) {.utf8name = #NAME, .getter = getPropI32, .setter = setPropI32, .data = FNS}                        
 
