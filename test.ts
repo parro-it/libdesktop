@@ -1,3 +1,4 @@
+import './tests/style.ts'
 import test from 'tape-async'
 import {App,Window,Label,Container} from './index'
 
