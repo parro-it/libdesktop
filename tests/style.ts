@@ -1,5 +1,5 @@
 import test from 'tape-async'
-import {Style,YogaDirection,YogaFlexDirection,YogaJustifyContent} from '../index'
+import {Style,YogaDirection,YogaFlexDirection,YogaJustifyContent,YogaAlign} from '../index'
 
 test('Style object creation', async (t:any): Promise<void> => {
     t.equal(typeof Style, "function")
@@ -30,5 +30,30 @@ test('justifyContent', async (t:any): Promise<void> => {
     s.justifyContent = YogaJustifyContent.SpaceAround
     t.equal(s.justifyContent, YogaJustifyContent.SpaceAround)
     t.throws(()=>{(s as any).justifyContent=""},TypeError,/Argument value: A number was expected/)
-    
+})
+
+
+test('alignContent', async (t:any): Promise<void> => {
+    const s = new Style({})
+    t.equal(s.alignContent, YogaAlign.FlexStart)
+    s.alignContent = YogaAlign.Stretch
+    t.equal(s.alignContent, YogaAlign.Stretch)
+    t.throws(()=>{(s as any).alignContent=""},TypeError,/Argument value: A number was expected/)
+})
+
+
+test('alignItems', async (t:any): Promise<void> => {
+    const s = new Style({})
+    t.equal(s.alignItems, YogaAlign.Stretch)
+    s.alignItems = YogaAlign.FlexStart
+    t.equal(s.alignItems, YogaAlign.FlexStart)
+    t.throws(()=>{(s as any).alignItems=""},TypeError,/Argument value: A number was expected/)
+})
+
+test('alignSelf', async (t:any): Promise<void> => {
+    const s = new Style({})
+    t.equal(s.alignSelf, YogaAlign.Auto)
+    s.alignSelf = YogaAlign.FlexStart
+    t.equal(s.alignSelf, YogaAlign.FlexStart)
+    t.throws(()=>{(s as any).alignSelf=""},TypeError,/Argument value: A number was expected/)
 })

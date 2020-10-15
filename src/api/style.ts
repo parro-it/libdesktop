@@ -56,7 +56,11 @@ export interface Style {
      *   * COLUMN REVERSE Align children from bottom to top. If wrapping is enabled then the 
      *     next line will start to the left first item on the bottom of the container.
 	 */
-	flexDirection: YogaFlexDirection;
+    flexDirection: YogaFlexDirection;
+    
+    alignContent: YogaAlign;
+    alignItems: YogaAlign;
+    alignSelf: YogaAlign;
 }
 
 
@@ -241,15 +245,16 @@ export enum YogaJustifyContent {
     SpaceEvenly = JUSTIFY_SPACE_EVENLY,
 }
 
-export type YogaAlign =
-    | typeof ALIGN_AUTO
-    | typeof ALIGN_BASELINE
-    | typeof ALIGN_CENTER
-    | typeof ALIGN_FLEX_END
-    | typeof ALIGN_FLEX_START
-    | typeof ALIGN_SPACE_AROUND
-    | typeof ALIGN_SPACE_BETWEEN
-    | typeof ALIGN_STRETCH;
+export enum YogaAlign {
+    Auto = ALIGN_AUTO,
+    Baseline = ALIGN_BASELINE,
+    Center = ALIGN_CENTER,
+    FlexEnd = ALIGN_FLEX_END,
+    FlexStart = ALIGN_FLEX_START,
+    SpaceAround = ALIGN_SPACE_AROUND,
+    SpaceBetween = ALIGN_SPACE_BETWEEN,
+    Stretch = ALIGN_STRETCH,
+}
 
 export enum YogaFlexDirection {
     Column = FLEX_DIRECTION_COLUMN,
