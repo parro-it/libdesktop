@@ -11,7 +11,7 @@
 
 
 #define INIT_EMPTY_ARGS()                                                                      \
-	napi_value argv[0];                                                                   \
+	napi_value argv[1];                                                                   \
 	napi_value this;																			   \
 	size_t argc = 0;									\
 	napi_get_cb_info(env, info, &argc, argv, &this, NULL);                                         
