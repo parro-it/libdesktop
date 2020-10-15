@@ -18,6 +18,8 @@ function listCPPDir(dir) {
 }
 
 listCPPDir('yoga/yoga');
+listCPPDir('yoga/yoga/event');
+listCPPDir('yoga/yoga/internal');
 listDir('src/platforms/common');
 listDir(`src/platforms/${platform()}`);
 if (process.env.LIBDESKTOP_TARGET === 'test') {
