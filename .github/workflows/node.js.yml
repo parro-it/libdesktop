@@ -41,10 +41,10 @@ jobs:
       shell: bash
     - name: Build
       run:  npm ci
-    - name: Run tests
+    - name: Setup Xvfb 
+      if: matrix.os == 'ubuntu-latest'
       run:  |
-            if [ "$RUNNER_OS" == "Linux" ]; then
-                   export DISPLAY=':99.0'
-                   Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-            fi
-            npm test
+            export DISPLAY=':99.0'
+            Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+    - name: Run tests
+      run:  npm test
