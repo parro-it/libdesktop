@@ -13,8 +13,8 @@ test('direction', async (t:any): Promise<void> => {
     s.direction = YogaDirection.LTR
     t.equal(s.direction, YogaDirection.LTR)
     t.throws(()=>{(s as any).direction=""},TypeError,/Argument value: A number was expected/)
-    
 })
+
 test('flexDirection', async (t:any): Promise<void> => {
     const s = new Style({})
     t.equal(s.flexDirection, YogaFlexDirection.Column)
@@ -32,7 +32,6 @@ test('justifyContent', async (t:any): Promise<void> => {
     t.throws(()=>{(s as any).justifyContent=""},TypeError,/Argument value: A number was expected/)
 })
 
-
 test('alignContent', async (t:any): Promise<void> => {
     const s = new Style({})
     t.equal(s.alignContent, YogaAlign.FlexStart)
@@ -40,7 +39,6 @@ test('alignContent', async (t:any): Promise<void> => {
     t.equal(s.alignContent, YogaAlign.Stretch)
     t.throws(()=>{(s as any).alignContent=""},TypeError,/Argument value: A number was expected/)
 })
-
 
 test('alignItems', async (t:any): Promise<void> => {
     const s = new Style({})
