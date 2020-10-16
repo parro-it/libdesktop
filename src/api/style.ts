@@ -58,9 +58,74 @@ export interface Style {
 	 */
     flexDirection: YogaFlexDirection;
     
+    /**
+     * alignContent defines the distribution of lines along the cross-axis. This only has effect when items are 
+     * wrapped to multiple lines using flex wrap.
+     * 
+     *  * FLEX START (DEFAULT) Align wrapped lines to the start of the container's cross axis.
+     *  * FLEX END Align wrapped lines to the end of the container's cross axis.
+     *  * STRETCH Stretch wrapped lines to match the height of the container's cross axis.
+     *  * CENTER Align wrapped lines in the center of the container's cross axis.
+     *  * SPACE BETWEEN Evenly space wrapped lines across the container's main axis, distributing remaining 
+     *    space between the lines.
+     *  * SPACE AROUND Evenly space wrapped lines across the container's main axis, distributing remaining 
+     *    space around the lines. Compared to space between using space around will result in space being 
+     *    distributed to the begining of the first lines and end of the last line.
+     */
     alignContent: YogaAlign;
+
+    /**
+     * alignItems describes how to align children along the cross axis of their container. alignItems is very
+     * similar to justifyContent but instead of applying to the main axis, alignItems applies to the cross axis.
+     * 
+     *  * STRETCH (DEFAULT) Stretch children of a container to match the height of the container's cross axis.
+     *  * FLEX START Align children of a container to the start of the container's cross axis.
+     *  * FLEX END Align children of a container to the end of the container's cross axis.
+     *  * CENTER Align children of a container in the center of the container's cross axis.
+     *  * BASELINE Align children of a container along a common baseline. Individual children can be set to be 
+     *    the reference baseline for their parents.
+     */
     alignItems: YogaAlign;
+
+    /**
+     * Align self has the same options and effect as align items but instead of affecting 
+     * the children within a container,  you can apply this property to a single child to 
+     * change its alignment within its parent. align self overrides any option set by the 
+     * parent with align items.
+     */
     alignSelf: YogaAlign;
+
+    /**
+     * The position type of an element defines how it is positioned within its parent.
+     * 
+     *   * RELATIVE (DEFAULT) By default an element is positioned relatively. This means an 
+     *     element is positioned according to the normal flow of the layout, and then offset
+     *     relative to that position based on the values of top, right, bottom, and left. The 
+     *     offset does not affect the position of any sibling or parent elements.
+     * 
+     *   * ABSOLUTE When positioned absolutely an element doesn't take part in the normal layout 
+     *     flow. It is instead laid out independent of its siblings. The position is determined based 
+     *     on the top, right, bottom, and left values.
+     * 
+     * The position values top, right, bottom, and left behave differently depending on the position
+     * type of the element. For a relative element they offset the position of the element in the 
+     * direction specified. For absolute element though these properties specify the offset of the 
+     * element's side from the same side on the parent.
+     */
+    positionType: YogaPositionType;
+
+
+
+    /**
+     * The  flex wrap property  is set on containers and controls  what happens when children 
+     * overflow the size of the container along the main axis. By default children are forced 
+     * into a single line (which can shrink elements).
+     * If wrapping is allowed items are wrapped into multiple lines along the main axis if needed. 
+     * wrap reverse behaves the same, but the order of the lines is reversed.
+     * When wrapping lines align content can be used to specify  how the lines are  placed in 
+     * the container.
+     */
+    flexWrap: YogaFlexWrap;
 }
 
 
@@ -270,10 +335,11 @@ export enum YogaDirection {
     RTL = DIRECTION_RTL,
 }
 
-export type YogaFlexWrap =
-    | typeof WRAP_NO_WRAP
-    | typeof WRAP_WRAP
-    | typeof WRAP_WRAP_REVERSE;
+export enum YogaFlexWrap {
+    NoWrap = WRAP_NO_WRAP,
+    Wrap = WRAP_WRAP,
+    WrapReverse = WRAP_WRAP_REVERSE,
+}
 
 export type YogaEdge =
     | typeof EDGE_LEFT
@@ -301,9 +367,10 @@ export type YogaOverflow =
     | typeof OVERFLOW_SCROLL
     | typeof OVERFLOW_VISIBLE;
 
-export type YogaPositionType =
-    | typeof POSITION_TYPE_ABSOLUTE
-    | typeof POSITION_TYPE_RELATIVE;
+export enum YogaPositionType {
+     PositionTypeAbsolute = POSITION_TYPE_ABSOLUTE,
+     PositionTypeRelative = POSITION_TYPE_RELATIVE
+}
 
 export type YogaExperimentalFeature = typeof EXPERIMENTAL_FEATURE_WEB_FLEX_BASIS;
 

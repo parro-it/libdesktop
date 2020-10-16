@@ -68,10 +68,13 @@ LIBUI_FUNCTION(getPropI32) {
 static struct prop_fns direction_fns;
 static struct prop_fns flex_direction_fns;
 static struct prop_fns justify_content_fns;
+static struct prop_fns position_type_fns;
 
 static struct prop_fns align_content_fns;
 static struct prop_fns align_items_fns;
 static struct prop_fns align_self_fns;
+static struct prop_fns flex_wrap_fns;
+
 
 #define PROP_I32(NAME,FNS) (napi_property_descriptor) {.utf8name = #NAME, .getter = getPropI32, .setter = setPropI32, .data = FNS}                        
 
@@ -87,7 +90,8 @@ napi_value style_init(napi_env env, napi_value exports) {
     align_items_fns = mk_prop_fns((Getter*)YGNodeStyleGetAlignItems, (Setter*)YGNodeStyleSetAlignItems);
     align_self_fns = mk_prop_fns((Getter*)YGNodeStyleGetAlignSelf, (Setter*)YGNodeStyleSetAlignSelf);
 
-
+    position_type_fns= mk_prop_fns((Getter*)YGNodeStyleGetPositionType, (Setter*)YGNodeStyleSetPositionType);
+    flex_wrap_fns= mk_prop_fns((Getter*)YGNodeStyleGetFlexWrap, (Setter*)YGNodeStyleSetFlexWrap);
 
     dsk_define_class(env,module,"Style",styleNew,((napi_property_descriptor[]){
       PROP_I32(direction,&direction_fns),
@@ -96,6 +100,9 @@ napi_value style_init(napi_env env, napi_value exports) {
       PROP_I32(alignContent,&align_content_fns),
       PROP_I32(alignItems,&align_items_fns),
       PROP_I32(alignSelf,&align_self_fns),
+      PROP_I32(positionType,&position_type_fns),
+      PROP_I32(flexWrap,&flex_wrap_fns),
+      
     }));
 
     return exports;
@@ -103,15 +110,6 @@ napi_value style_init(napi_env env, napi_value exports) {
 
 
 /*
-
-
-WIN_EXPORT void YGNodeStyleSetPositionType(
-    YGNodeRef node,
-    YGPositionType positionType);
-WIN_EXPORT YGPositionType YGNodeStyleGetPositionType(YGNodeConstRef node);
-
-WIN_EXPORT void YGNodeStyleSetFlexWrap(YGNodeRef node, YGWrap flexWrap);
-WIN_EXPORT YGWrap YGNodeStyleGetFlexWrap(YGNodeConstRef node);
 
 WIN_EXPORT void YGNodeStyleSetOverflow(YGNodeRef node, YGOverflow overflow);
 WIN_EXPORT YGOverflow YGNodeStyleGetOverflow(YGNodeConstRef node);
