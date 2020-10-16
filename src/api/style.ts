@@ -128,8 +128,11 @@ export interface Style {
     flexWrap: YogaFlexWrap;
 
     display: YogaDisplay;
-    
+
     overflow: YogaOverflow;
+
+    flex: number;
+    flexGrow: number;
 }
 
 

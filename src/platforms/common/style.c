@@ -16,16 +16,27 @@ LIBUI_FUNCTION(styleNew) {
 }
 
 
-typedef void Setter(const YGNodeRef node,const int32_t value);
-typedef int32_t Getter(const YGNodeConstRef node);
+typedef void SetterI32(const YGNodeRef node, const int32_t value);
+typedef int32_t GetterI32(const YGNodeConstRef node);
+
+typedef void SetterF32(const YGNodeRef node, const float value);
+typedef float GetterF32(const YGNodeConstRef node);
+
 
 struct prop_fns {
-    Setter* setter;
-    Getter* getter;
+    SetterI32* setterI32;
+    GetterI32* getterI32;
+    SetterF32* setterF32;
+    GetterF32* getterF32;
 };
 
-static struct prop_fns mk_prop_fns(Getter* getter, Setter* setter) {
-   struct prop_fns fns= {.getter=getter,.setter=setter};
+static struct prop_fns mk_prop_fns_i32(GetterI32* getterI32, SetterI32* setterI32) {
+   struct prop_fns fns= {.getterI32=getterI32,.setterI32=setterI32};
+   return fns;
+}
+
+static struct prop_fns mk_prop_fns_f32(GetterF32* getterF32, SetterF32* setterF32) {
+   struct prop_fns fns= {.getterF32=getterF32,.setterF32=setterF32};
    return fns;
 }
 
@@ -43,7 +54,7 @@ LIBUI_FUNCTION(setPropI32) {
     status = napi_get_cb_info(env, info, NULL, NULL, NULL,(void**)&fns); 
     CHECK_STATUS_THROW(status, napi_get_cb_info);                                         
     
-    fns->setter(node, value);                                                                                     
+    fns->setterI32(node, value);                                                                                     
     return NULL;                                                                       
 }                                                                                      
                                                                                        
@@ -60,10 +71,45 @@ LIBUI_FUNCTION(getPropI32) {
     CHECK_STATUS_THROW(status, napi_get_cb_info);                                         
                                                                    
                                                                                        
-    int32_t result = fns->getter(node);
+    int32_t result = fns->getterI32(node);
                                                                                        
     return make_int32(env, result);                                                    
 }                                                                                      
+
+LIBUI_FUNCTION(setPropF32) {                                                           
+    INIT_ARGS(1);                                                                      
+    ARG_DOUBLE(value64, 0);                                                               
+    
+    YGNodeRef node;                                                                 
+    napi_status status = napi_unwrap(env, this, (void**)&node);
+    CHECK_STATUS_THROW(status, napi_unwrap);   
+
+    struct prop_fns* fns; 
+    
+    status = napi_get_cb_info(env, info, NULL, NULL, NULL,(void**)&fns); 
+    CHECK_STATUS_THROW(status, napi_get_cb_info);                                         
+    
+    fns->setterF32(node, (float)value64);                                                                                     
+    return NULL;                                                                       
+}                                                                                      
+                                                                                       
+LIBUI_FUNCTION(getPropF32) {                                                           
+    INIT_EMPTY_ARGS();                                                                 
+    
+    YGNodeRef node;                                                                 
+    napi_status status = napi_unwrap(env, this, (void**)&node);
+    CHECK_STATUS_THROW(status, napi_unwrap);   
+
+    struct prop_fns* fns; 
+    
+    status = napi_get_cb_info(env, info, NULL, NULL, NULL,(void**)&fns); 
+    CHECK_STATUS_THROW(status, napi_get_cb_info);                                         
+                                                                   
+                                                                                       
+    float result = fns->getterF32(node);
+                                                                                       
+    return make_double(env, (double)result);                                                    
+}                   
 
 static struct prop_fns direction_fns;
 static struct prop_fns flex_direction_fns;
@@ -77,25 +123,32 @@ static struct prop_fns flex_wrap_fns;
 static struct prop_fns overflow_fns;
 static struct prop_fns display_fns;
 
-#define PROP_I32(NAME,FNS) (napi_property_descriptor) {.utf8name = #NAME, .getter = getPropI32, .setter = setPropI32, .data = FNS}                        
+static struct prop_fns flex_fns;
+static struct prop_fns flex_grow_fns;
+
+#define PROP_I32(NAME,FNS) (napi_property_descriptor) {.utf8name = #NAME, .getter = getPropI32, .setter = setPropI32, .data = FNS}
+#define PROP_F32(NAME,FNS) (napi_property_descriptor) {.utf8name = #NAME, .getter = getPropF32, .setter = setPropF32, .data = FNS}                        
 
 
 napi_value style_init(napi_env env, napi_value exports) {
     DEFINE_MODULE()
 
-    direction_fns = mk_prop_fns((Getter*)YGNodeStyleGetDirection, (Setter*)YGNodeStyleSetDirection);
-    flex_direction_fns = mk_prop_fns((Getter*)YGNodeStyleGetFlexDirection, (Setter*)YGNodeStyleSetFlexDirection);
-    justify_content_fns = mk_prop_fns((Getter*)YGNodeStyleGetJustifyContent, (Setter*)YGNodeStyleSetJustifyContent);
+    direction_fns = mk_prop_fns_i32((GetterI32*)YGNodeStyleGetDirection, (SetterI32*)YGNodeStyleSetDirection);
+    flex_direction_fns = mk_prop_fns_i32((GetterI32*)YGNodeStyleGetFlexDirection, (SetterI32*)YGNodeStyleSetFlexDirection);
+    justify_content_fns = mk_prop_fns_i32((GetterI32*)YGNodeStyleGetJustifyContent, (SetterI32*)YGNodeStyleSetJustifyContent);
     
-    align_content_fns = mk_prop_fns((Getter*)YGNodeStyleGetAlignContent, (Setter*)YGNodeStyleSetAlignContent);
-    align_items_fns = mk_prop_fns((Getter*)YGNodeStyleGetAlignItems, (Setter*)YGNodeStyleSetAlignItems);
-    align_self_fns = mk_prop_fns((Getter*)YGNodeStyleGetAlignSelf, (Setter*)YGNodeStyleSetAlignSelf);
+    align_content_fns = mk_prop_fns_i32((GetterI32*)YGNodeStyleGetAlignContent, (SetterI32*)YGNodeStyleSetAlignContent);
+    align_items_fns = mk_prop_fns_i32((GetterI32*)YGNodeStyleGetAlignItems, (SetterI32*)YGNodeStyleSetAlignItems);
+    align_self_fns = mk_prop_fns_i32((GetterI32*)YGNodeStyleGetAlignSelf, (SetterI32*)YGNodeStyleSetAlignSelf);
 
-    position_type_fns= mk_prop_fns((Getter*)YGNodeStyleGetPositionType, (Setter*)YGNodeStyleSetPositionType);
-    flex_wrap_fns= mk_prop_fns((Getter*)YGNodeStyleGetFlexWrap, (Setter*)YGNodeStyleSetFlexWrap);
+    position_type_fns= mk_prop_fns_i32((GetterI32*)YGNodeStyleGetPositionType, (SetterI32*)YGNodeStyleSetPositionType);
+    flex_wrap_fns= mk_prop_fns_i32((GetterI32*)YGNodeStyleGetFlexWrap, (SetterI32*)YGNodeStyleSetFlexWrap);
 
-    overflow_fns= mk_prop_fns((Getter*)YGNodeStyleGetOverflow, (Setter*)YGNodeStyleSetOverflow);
-    display_fns= mk_prop_fns((Getter*)YGNodeStyleGetDisplay, (Setter*)YGNodeStyleSetDisplay);
+    overflow_fns= mk_prop_fns_i32((GetterI32*)YGNodeStyleGetOverflow, (SetterI32*)YGNodeStyleSetOverflow);
+    display_fns= mk_prop_fns_i32((GetterI32*)YGNodeStyleGetDisplay, (SetterI32*)YGNodeStyleSetDisplay);
+
+    flex_fns= mk_prop_fns_f32((GetterF32*)YGNodeStyleGetFlex, (SetterF32*)YGNodeStyleSetFlex);
+    flex_grow_fns= mk_prop_fns_f32((GetterF32*)YGNodeStyleGetFlexGrow, (SetterF32*)YGNodeStyleSetFlexGrow);
 
     dsk_define_class(env,module,"Style",styleNew,((napi_property_descriptor[]){
       PROP_I32(direction,&direction_fns),
@@ -106,9 +159,11 @@ napi_value style_init(napi_env env, napi_value exports) {
       PROP_I32(alignSelf,&align_self_fns),
       PROP_I32(positionType,&position_type_fns),
       PROP_I32(flexWrap,&flex_wrap_fns),
-
       PROP_I32(overflow,&overflow_fns),
       PROP_I32(display,&display_fns),
+      
+      PROP_F32(flexGrow,&flex_grow_fns),
+      PROP_F32(flex,&flex_fns),
       
     }));
 

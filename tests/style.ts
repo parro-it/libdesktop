@@ -90,3 +90,19 @@ test('display', async (t:any): Promise<void> => {
     t.equal(s.display, YogaDisplay.None)
     t.throws(()=>{(s as any).display=""},TypeError,/Argument value: A number was expected/)
 })
+
+test('flex', async (t:any): Promise<void> => {
+    const s = new Style({})
+    t.true(isNaN(s.flex))
+    s.flex = 42
+    t.equal(s.flex, 42)
+    t.throws(()=>{(s as any).flex=""},TypeError,/Argument value: A number was expected/)
+})
+
+test('flexGrow', async (t:any): Promise<void> => {
+    const s = new Style({})
+    t.equal(s.flexGrow, 0)
+    s.flexGrow = 41
+    t.equal(s.flexGrow, 41)
+    t.throws(()=>{(s as any).flexGrow=""},TypeError,/Argument value: A number was expected/)
+})
