@@ -74,7 +74,8 @@ static struct prop_fns align_content_fns;
 static struct prop_fns align_items_fns;
 static struct prop_fns align_self_fns;
 static struct prop_fns flex_wrap_fns;
-
+static struct prop_fns overflow_fns;
+static struct prop_fns display_fns;
 
 #define PROP_I32(NAME,FNS) (napi_property_descriptor) {.utf8name = #NAME, .getter = getPropI32, .setter = setPropI32, .data = FNS}                        
 
@@ -93,6 +94,9 @@ napi_value style_init(napi_env env, napi_value exports) {
     position_type_fns= mk_prop_fns((Getter*)YGNodeStyleGetPositionType, (Setter*)YGNodeStyleSetPositionType);
     flex_wrap_fns= mk_prop_fns((Getter*)YGNodeStyleGetFlexWrap, (Setter*)YGNodeStyleSetFlexWrap);
 
+    overflow_fns= mk_prop_fns((Getter*)YGNodeStyleGetOverflow, (Setter*)YGNodeStyleSetOverflow);
+    display_fns= mk_prop_fns((Getter*)YGNodeStyleGetDisplay, (Setter*)YGNodeStyleSetDisplay);
+
     dsk_define_class(env,module,"Style",styleNew,((napi_property_descriptor[]){
       PROP_I32(direction,&direction_fns),
       PROP_I32(flexDirection,&flex_direction_fns),
@@ -102,6 +106,9 @@ napi_value style_init(napi_env env, napi_value exports) {
       PROP_I32(alignSelf,&align_self_fns),
       PROP_I32(positionType,&position_type_fns),
       PROP_I32(flexWrap,&flex_wrap_fns),
+
+      PROP_I32(overflow,&overflow_fns),
+      PROP_I32(display,&display_fns),
       
     }));
 
@@ -111,11 +118,9 @@ napi_value style_init(napi_env env, napi_value exports) {
 
 /*
 
-WIN_EXPORT void YGNodeStyleSetOverflow(YGNodeRef node, YGOverflow overflow);
-WIN_EXPORT YGOverflow YGNodeStyleGetOverflow(YGNodeConstRef node);
 
-WIN_EXPORT void YGNodeStyleSetDisplay(YGNodeRef node, YGDisplay display);
-WIN_EXPORT YGDisplay YGNodeStyleGetDisplay(YGNodeConstRef node);
+
+
 
 WIN_EXPORT void YGNodeStyleSetFlex(YGNodeRef node, float flex);
 WIN_EXPORT float YGNodeStyleGetFlex(YGNodeConstRef node);
@@ -131,6 +136,7 @@ WIN_EXPORT void YGNodeStyleSetFlexBasisPercent(YGNodeRef node, float flexBasis);
 WIN_EXPORT void YGNodeStyleSetFlexBasisAuto(YGNodeRef node);
 WIN_EXPORT YGValue YGNodeStyleGetFlexBasis(YGNodeConstRef node);
 
+
 WIN_EXPORT void YGNodeStyleSetPosition(
     YGNodeRef node,
     YGEdge edge,
@@ -140,6 +146,7 @@ WIN_EXPORT void YGNodeStyleSetPositionPercent(
     YGEdge edge,
     float position);
 WIN_EXPORT YGValue YGNodeStyleGetPosition(YGNodeConstRef node, YGEdge edge);
+
 
 WIN_EXPORT void YGNodeStyleSetMargin(YGNodeRef node, YGEdge edge, float margin);
 WIN_EXPORT void YGNodeStyleSetMarginPercent(
@@ -158,6 +165,7 @@ WIN_EXPORT void YGNodeStyleSetPaddingPercent(
     YGEdge edge,
     float padding);
 WIN_EXPORT YGValue YGNodeStyleGetPadding(YGNodeConstRef node, YGEdge edge);
+
 
 WIN_EXPORT void YGNodeStyleSetBorder(YGNodeRef node, YGEdge edge, float border);
 WIN_EXPORT float YGNodeStyleGetBorder(YGNodeConstRef node, YGEdge edge);

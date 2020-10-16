@@ -1,6 +1,6 @@
 import test from 'tape-async'
 import {Style,YogaDirection,YogaFlexDirection,YogaJustifyContent,YogaAlign} from '../index'
-import { YogaFlexWrap, YogaPositionType } from '../src/api/style'
+import { YogaDisplay, YogaFlexWrap, YogaOverflow, YogaPositionType } from '../src/api/style'
 
 test('Style object creation', async (t:any): Promise<void> => {
     t.equal(typeof Style, "function")
@@ -71,4 +71,22 @@ test('flexWrap', async (t:any): Promise<void> => {
     s.flexWrap = YogaFlexWrap.WrapReverse
     t.equal(s.flexWrap, YogaFlexWrap.WrapReverse)
     t.throws(()=>{(s as any).flexWrap=""},TypeError,/Argument value: A number was expected/)
+})
+
+
+test('overflow', async (t:any): Promise<void> => {
+    const s = new Style({})
+    t.equal(s.overflow, YogaOverflow.Visible)
+    s.overflow = YogaOverflow.Scroll
+    t.equal(s.overflow, YogaOverflow.Scroll)
+    t.throws(()=>{(s as any).overflow=""},TypeError,/Argument value: A number was expected/)
+})
+
+
+test('display', async (t:any): Promise<void> => {
+    const s = new Style({})
+    t.equal(s.display, YogaDisplay.Flex)
+    s.display = YogaDisplay.None
+    t.equal(s.display, YogaDisplay.None)
+    t.throws(()=>{(s as any).display=""},TypeError,/Argument value: A number was expected/)
 })

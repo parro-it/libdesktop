@@ -126,6 +126,10 @@ export interface Style {
      * the container.
      */
     flexWrap: YogaFlexWrap;
+
+    display: YogaDisplay;
+    
+    overflow: YogaOverflow;
 }
 
 
@@ -352,9 +356,10 @@ export type YogaEdge =
     | typeof EDGE_VERTICAL
     | typeof EDGE_ALL;
 
-export type YogaDisplay =
-    | typeof DISPLAY_FLEX
-    | typeof DISPLAY_NONE;
+export enum YogaDisplay {
+    Flex = DISPLAY_FLEX,
+    None = DISPLAY_NONE,
+}
 
 export type YogaUnit =
     | typeof UNIT_AUTO
@@ -362,10 +367,11 @@ export type YogaUnit =
     | typeof UNIT_POINT
     | typeof UNIT_UNDEFINED;
 
-export type YogaOverflow =
-    | typeof OVERFLOW_HIDDEN
-    | typeof OVERFLOW_SCROLL
-    | typeof OVERFLOW_VISIBLE;
+export enum YogaOverflow {
+     Hidden=OVERFLOW_HIDDEN,
+     Scroll=OVERFLOW_SCROLL,
+     Visible=OVERFLOW_VISIBLE,
+}
 
 export enum YogaPositionType {
      PositionTypeAbsolute = POSITION_TYPE_ABSOLUTE,
