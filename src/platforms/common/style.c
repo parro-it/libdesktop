@@ -5,15 +5,6 @@
 
 #define MODULE "style"
 
-LIBUI_FUNCTION(styleNew) {
-    INIT_ARGS(1);
-
-    YGNodeRef node = YGNodeNew();
-    napi_status status = napi_wrap(env, this, node, NULL, NULL, NULL);
-    CHECK_STATUS_THROW(status, napi_wrap);                                          
-
-    return this;
-}
 
 
 typedef void SetterI32(const YGNodeRef node, const int32_t value);
@@ -23,6 +14,8 @@ typedef void SetterF32(const YGNodeRef node, const float value);
 typedef float GetterF32(const YGNodeConstRef node);
 typedef YGValue GetterYGVALUE(const YGNodeConstRef node);
 
+typedef YGValue GetterEdgedYGVALUE(const YGNodeConstRef node, YGEdge edge);
+typedef void SetterEdgedF32(const YGNodeRef node, YGEdge edge, const float value);
 
 struct prop_fns {
     SetterI32* setterI32;
@@ -31,7 +24,16 @@ struct prop_fns {
     GetterF32* getterF32;
     GetterYGVALUE* getterYGValue;
     char* unit;
+    
 };
+
+struct EdgedPropData {
+    GetterEdgedYGVALUE* getter;
+    SetterEdgedF32* setter;
+    YGNodeRef node;
+    YGUnit unit;
+};
+
 
 static struct prop_fns mk_prop_fns_i32(GetterI32* getterI32, SetterI32* setterI32) {
    struct prop_fns fns= {.getterI32=getterI32,.setterI32=setterI32};
@@ -47,6 +49,12 @@ static struct prop_fns mk_prop_fns_ygvalue(char* unit, GetterYGVALUE* getter, Se
    struct prop_fns fns= {.getterYGValue=getter,.setterF32=setter,.unit=unit};
    return fns;
 }
+
+//static LIBUI_FUNCTION( edgedFloatGetter);
+static LIBUI_FUNCTION( edgedFloatSetter);
+static LIBUI_FUNCTION( edgedYgValueGetter);
+
+
 
 
 LIBUI_FUNCTION(setPropI32) {                                                           
@@ -156,6 +164,8 @@ LIBUI_FUNCTION(getPropYGValue) {
     return NULL;
 }  
 
+
+
 static struct prop_fns direction_fns;
 static struct prop_fns flex_direction_fns;
 static struct prop_fns justify_content_fns;
@@ -185,17 +195,8 @@ static struct prop_fns max_width_percent_fns;
 static struct prop_fns max_height_fns;
 static struct prop_fns max_height_percent_fns;
 
-static struct prop_fns position_fns;
+//static struct prop_fns position_fns;
 
-static struct prop_fns left_fns;
-static struct prop_fns top_fns;
-static struct prop_fns right_fns;
-static struct prop_fns bottom_fns;
-static struct prop_fns start_fns;
-static struct prop_fns end_fns;
-static struct prop_fns horizontal_fns;
-static struct prop_fns vertical_fns;
-static struct prop_fns all_fns;
 
 
 #define PROP_I32(NAME,FNS) (napi_property_descriptor) {.utf8name = #NAME, .getter = getPropI32, .setter = setPropI32, .data = FNS}
@@ -203,18 +204,150 @@ static struct prop_fns all_fns;
 #define PROP_YGVALUE_F32(NAME,FNS) (napi_property_descriptor) {.utf8name = #NAME, .getter = getPropYGValue, .setter = setPropF32, .data = FNS}
 
 
-LIBUI_FUNCTION(edgedPropNew) {
-    INIT_ARGS(1);
+napi_ref EdgedPropRef;
 
-    YGNodeRef node;                                                                 
-    napi_status status = napi_unwrap(env, argv[0], (void**)&node);
+napi_value mk_edged_prop(napi_env env, YGNodeRef node, YGUnit unit, GetterEdgedYGVALUE* getter, SetterEdgedF32* setter) {
+    napi_value constructor;
+    napi_status status;
+    napi_value edgedProp;
+
+    status = napi_get_reference_value(env, EdgedPropRef, &constructor);
+    CHECK_STATUS_THROW(status, napi_get_reference_value);                                          
+
+    status = napi_new_instance(env,constructor,0,NULL,&edgedProp);
+    CHECK_STATUS_THROW(status,napi_new_instance);
+
+    struct EdgedPropData* data; 
+    status = napi_unwrap(env, edgedProp, (void**)&data);
     CHECK_STATUS_THROW(status, napi_unwrap);   
 
-    status = napi_wrap(env, this, node, NULL, NULL, NULL);
+    data->getter = getter;
+    data->setter = setter;
+    data->node = node;
+    data->unit = unit;
+
+    return edgedProp;
+}
+
+/*
+
+void YGNodeStyleSetPosition(    YGNodeRef node,    YGEdge edge,    float position);
+void YGNodeStyleSetPositionPercent(    YGNodeRef node,    YGEdge edge,    float position);
+YGValue YGNodeStyleGetPosition(YGNodeConstRef node, YGEdge edge);
+void YGNodeStyleSetBorder(YGNodeRef node, YGEdge edge, float border);
+float YGNodeStyleGetBorder(YGNodeConstRef node, YGEdge edge);
+void YGNodeStyleSetMargin(YGNodeRef node, YGEdge edge, float margin);
+void YGNodeStyleSetMarginPercent(    YGNodeRef node,    YGEdge edge,    float margin);
+void YGNodeStyleSetMarginAuto(YGNodeRef node, YGEdge edge);
+YGValue YGNodeStyleGetMargin(YGNodeConstRef node, YGEdge edge);
+void YGNodeStyleSetPadding(    YGNodeRef node,    YGEdge edge,    float padding);
+void YGNodeStyleSetPaddingPercent(    YGNodeRef node,    YGEdge edge,    float padding);
+YGValue YGNodeStyleGetPadding(YGNodeConstRef node, YGEdge edge);
+
+
+*/
+
+
+LIBUI_FUNCTION(styleNew) {
+    INIT_ARGS(1);
+
+    YGNodeRef node = YGNodeNew();
+    napi_status status = napi_wrap(env, this, node, NULL, NULL, NULL);
+    CHECK_STATUS_THROW(status, napi_wrap);                                          
+
+    napi_set_named_property(env,this,"position", mk_edged_prop(env, node, YGUnitPoint, YGNodeStyleGetPosition, YGNodeStyleSetPosition));
+
+    return this;
+}
+
+
+
+static void finalize_edgedProp(napi_env env, void *finalize_data, void *finalize_hint) {
+    free(finalize_data);
+}
+
+LIBUI_FUNCTION(edgedPropNew) {
+    INIT_EMPTY_ARGS();
+
+    struct EdgedPropData* data = malloc(sizeof (struct EdgedPropData));  
+
+    napi_status status = napi_wrap(env, this, data, finalize_edgedProp, NULL, NULL);
     CHECK_STATUS_THROW(status, napi_wrap);                                          
 
     return this;
 }
+
+
+typedef void SetterF32(const YGNodeRef node, const float value);
+typedef float GetterF32(const YGNodeConstRef node);
+typedef YGValue GetterYGVALUE(const YGNodeConstRef node);
+
+
+/*
+static LIBUI_FUNCTION(edgedFloatGetter) {                    
+    return NULL;
+}
+*/
+
+static LIBUI_FUNCTION(edgedFloatSetter) {                    
+    return NULL;
+}
+
+static LIBUI_FUNCTION(edgedYgValueGetter) {
+    INIT_EMPTY_ARGS();
+    struct EdgedPropData* data; 
+    napi_status status = napi_unwrap(env, this, (void**)&data);
+    CHECK_STATUS_THROW(status, napi_unwrap);   
+
+    YGEdge* edge; 
+    status = napi_get_cb_info(env, info, NULL, NULL, NULL,(void**)&edge); 
+    CHECK_STATUS_THROW(status, napi_get_cb_info); 
+
+
+    YGValue result = data->getter(data->node, *edge);
+    if (data->unit==YGUnitAuto) {
+        return make_bool(env, result.unit==YGUnitAuto);
+    }                                                                                      
+
+    if (data->unit==YGUnitPoint) {
+        if (result.unit!=YGUnitPoint) {
+            return make_double(env,NAN);
+        }
+        return make_double(env, result.value);
+    }  
+
+    if (data->unit==YGUnitPercent) {
+        if (result.unit!=YGUnitPercent) {
+            return make_double(env,NAN);
+        }
+        return make_double(env, result.value);
+    }                                                                                      
+
+    napi_throw_error(env, "EINVAL", "Unknown unit");
+    return NULL;
+}
+
+
+static YGEdge edgeAll = YGEdgeAll;
+static YGEdge edgeLeft = YGEdgeLeft;
+static YGEdge edgeTop = YGEdgeTop;
+static YGEdge edgeRight = YGEdgeRight;
+static YGEdge edgeBottom = YGEdgeBottom;
+static YGEdge edgeStart = YGEdgeStart;
+static YGEdge edgeEnd = YGEdgeEnd;
+static YGEdge edgeHorizontal = YGEdgeHorizontal;
+static YGEdge edgeVertical = YGEdgeVertical;
+
+
+#define EDGED_PROP_YGVALUE(NAME, EDGE) (napi_property_descriptor) {.utf8name = #NAME, .getter = edgedYgValueGetter, .setter = edgedFloatSetter, .data = &EDGE}
+/*
+static LIBUI_FUNCTION(edgedYgValueSetter) {                    
+}
+*/
+
+
+
+
 
 static void set_style_auto(const YGNodeRef node, float _) {
     YGNodeStyleSetFlexBasisAuto(node);
@@ -262,21 +395,29 @@ napi_value style_init(napi_env env, napi_value exports) {
     horizontal_fns      = mk_edged_prop_fns_ygvalue(YGEdgeHorizontal, "POINT");
     vertical_fns      = mk_edged_prop_fns_ygvalue(YGEdgeVertical, "POINT");
     all_fns      = mk_edged_prop_fns_ygvalue(YGEdgeAll, "POINT");
+
+
+static struct prop_fns mk_edged_prop_fns_ygvalue(char* unit, YGEdge edge) {
+   struct prop_fns fns= {.getterYGValue = (GetterYGVALUE*)edgedYgValueGetter,.setterF32 = edgedYgValueSetter,.unit=unit,.edge=edge};
+   return fns
+
+
 */
 
     // ,(GetterYGVALUE*)    YGNodeStyleGetPosition, (SetterF32*)   YGNodeStyleSetPosition  
-    dsk_define_class(env,module,"EdgedProp",edgedPropNew,((napi_property_descriptor[]){
-      PROP_YGVALUE_F32(left, &left_fns),
-      PROP_YGVALUE_F32(top, &top_fns),
-      PROP_YGVALUE_F32(right, &right_fns),
-      PROP_YGVALUE_F32(bottom, &bottom_fns),
-      PROP_YGVALUE_F32(start, &start_fns),
-      PROP_YGVALUE_F32(end, &end_fns),
-      PROP_YGVALUE_F32(horizontal, &horizontal_fns),
-      PROP_YGVALUE_F32(vertical, &vertical_fns),
-      PROP_YGVALUE_F32(all, &all_fns),
-    }));
+    dsk_define_class_ref(env,module,"EdgedProp",edgedPropNew,((napi_property_descriptor[]){
+      EDGED_PROP_YGVALUE(left, edgeLeft),
+      EDGED_PROP_YGVALUE(top, edgeTop),
+      EDGED_PROP_YGVALUE(right, edgeRight),
+      EDGED_PROP_YGVALUE(bottom, edgeBottom),
+      EDGED_PROP_YGVALUE(start, edgeStart),
+      EDGED_PROP_YGVALUE(end, edgeEnd),
+      EDGED_PROP_YGVALUE(horizontal, edgeHorizontal),
+      EDGED_PROP_YGVALUE(vertical, edgeVertical),
+      EDGED_PROP_YGVALUE(all, edgeAll),
+    }), &EdgedPropRef);
 
+    
     dsk_define_class(env,module,"Style",styleNew,((napi_property_descriptor[]){
       PROP_I32(direction,&direction_fns),
       PROP_I32(flexDirection,&flex_direction_fns),
@@ -316,18 +457,6 @@ napi_value style_init(napi_env env, napi_value exports) {
 /*
  
 
-void YGNodeStyleSetPosition(    YGNodeRef node,    YGEdge edge,    float position);
-void YGNodeStyleSetPositionPercent(    YGNodeRef node,    YGEdge edge,    float position);
-YGValue YGNodeStyleGetPosition(YGNodeConstRef node, YGEdge edge);
-void YGNodeStyleSetBorder(YGNodeRef node, YGEdge edge, float border);
-float YGNodeStyleGetBorder(YGNodeConstRef node, YGEdge edge);
-void YGNodeStyleSetMargin(YGNodeRef node, YGEdge edge, float margin);
-void YGNodeStyleSetMarginPercent(    YGNodeRef node,    YGEdge edge,    float margin);
-void YGNodeStyleSetMarginAuto(YGNodeRef node, YGEdge edge);
-YGValue YGNodeStyleGetMargin(YGNodeConstRef node, YGEdge edge);
-void YGNodeStyleSetPadding(    YGNodeRef node,    YGEdge edge,    float padding);
-void YGNodeStyleSetPaddingPercent(    YGNodeRef node,    YGEdge edge,    float padding);
-YGValue YGNodeStyleGetPadding(YGNodeConstRef node, YGEdge edge);
 
 
 // Yoga specific properties, not compatible with flexbox specification Aspect
