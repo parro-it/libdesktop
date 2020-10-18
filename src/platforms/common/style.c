@@ -21,6 +21,7 @@ typedef int32_t GetterI32(const YGNodeConstRef node);
 
 typedef void SetterF32(const YGNodeRef node, const float value);
 typedef float GetterF32(const YGNodeConstRef node);
+typedef YGValue GetterYGVALUE(const YGNodeConstRef node);
 
 
 struct prop_fns {
@@ -28,6 +29,8 @@ struct prop_fns {
     GetterI32* getterI32;
     SetterF32* setterF32;
     GetterF32* getterF32;
+    GetterYGVALUE* getterYGValue;
+    char* unit;
 };
 
 static struct prop_fns mk_prop_fns_i32(GetterI32* getterI32, SetterI32* setterI32) {
@@ -37,6 +40,11 @@ static struct prop_fns mk_prop_fns_i32(GetterI32* getterI32, SetterI32* setterI3
 
 static struct prop_fns mk_prop_fns_f32(GetterF32* getterF32, SetterF32* setterF32) {
    struct prop_fns fns= {.getterF32=getterF32,.setterF32=setterF32};
+   return fns;
+}
+
+static struct prop_fns mk_prop_fns_ygvalue(char* unit, GetterYGVALUE* getter, SetterF32* setter) {
+   struct prop_fns fns= {.getterYGValue=getter,.setterF32=setter,.unit=unit};
    return fns;
 }
 
@@ -109,26 +117,108 @@ LIBUI_FUNCTION(getPropF32) {
     float result = fns->getterF32(node);
                                                                                        
     return make_double(env, (double)result);                                                    
-}                   
+}  
+
+LIBUI_FUNCTION(getPropYGValue) {                                                           
+    INIT_EMPTY_ARGS();                                                                 
+    
+    YGNodeRef node;                                                                 
+    napi_status status = napi_unwrap(env, this, (void**)&node);
+    CHECK_STATUS_THROW(status, napi_unwrap);   
+
+    struct prop_fns* fns; 
+    
+    status = napi_get_cb_info(env, info, NULL, NULL, NULL,(void**)&fns); 
+    CHECK_STATUS_THROW(status, napi_get_cb_info);                                         
+                                                                   
+                                                                                       
+    YGValue result = fns->getterYGValue(node);
+    
+    if (fns->unit=="AUTO") {
+        return make_bool(env, result.unit==YGUnitAuto);
+    }                                                                                      
+
+    if (fns->unit=="POINT") {
+        if (result.unit!=YGUnitPoint) {
+            return make_double(env,NAN);
+        }
+        return make_double(env, result.value);
+    }  
+
+    if (fns->unit=="PERCENT") {
+        if (result.unit!=YGUnitPercent) {
+            return make_double(env,NAN);
+        }
+        return make_double(env, result.value);
+    }                                                                                      
+
+    napi_throw_error(env, "EINVAL", "Unknown unit");
+    return NULL;
+}  
 
 static struct prop_fns direction_fns;
 static struct prop_fns flex_direction_fns;
 static struct prop_fns justify_content_fns;
 static struct prop_fns position_type_fns;
-
 static struct prop_fns align_content_fns;
 static struct prop_fns align_items_fns;
 static struct prop_fns align_self_fns;
 static struct prop_fns flex_wrap_fns;
 static struct prop_fns overflow_fns;
 static struct prop_fns display_fns;
-
 static struct prop_fns flex_fns;
 static struct prop_fns flex_grow_fns;
+static struct prop_fns flex_shrink_fns;
+static struct prop_fns flex_basis_fns;
+static struct prop_fns flex_basis_percent_fns;
+static struct prop_fns flex_basis_auto_fns;
+static struct prop_fns width_fns;
+static struct prop_fns width_percent_fns;
+static struct prop_fns height_fns;
+static struct prop_fns height_percent_fns;
+static struct prop_fns min_width_fns;
+static struct prop_fns min_width_percent_fns;
+static struct prop_fns min_height_fns;
+static struct prop_fns min_height_percent_fns;
+static struct prop_fns max_width_fns;
+static struct prop_fns max_width_percent_fns;
+static struct prop_fns max_height_fns;
+static struct prop_fns max_height_percent_fns;
+
+static struct prop_fns position_fns;
+
+static struct prop_fns left_fns;
+static struct prop_fns top_fns;
+static struct prop_fns right_fns;
+static struct prop_fns bottom_fns;
+static struct prop_fns start_fns;
+static struct prop_fns end_fns;
+static struct prop_fns horizontal_fns;
+static struct prop_fns vertical_fns;
+static struct prop_fns all_fns;
+
 
 #define PROP_I32(NAME,FNS) (napi_property_descriptor) {.utf8name = #NAME, .getter = getPropI32, .setter = setPropI32, .data = FNS}
 #define PROP_F32(NAME,FNS) (napi_property_descriptor) {.utf8name = #NAME, .getter = getPropF32, .setter = setPropF32, .data = FNS}                        
+#define PROP_YGVALUE_F32(NAME,FNS) (napi_property_descriptor) {.utf8name = #NAME, .getter = getPropYGValue, .setter = setPropF32, .data = FNS}
 
+
+LIBUI_FUNCTION(edgedPropNew) {
+    INIT_ARGS(1);
+
+    YGNodeRef node;                                                                 
+    napi_status status = napi_unwrap(env, argv[0], (void**)&node);
+    CHECK_STATUS_THROW(status, napi_unwrap);   
+
+    status = napi_wrap(env, this, node, NULL, NULL, NULL);
+    CHECK_STATUS_THROW(status, napi_wrap);                                          
+
+    return this;
+}
+
+static void set_style_auto(const YGNodeRef node, float _) {
+    YGNodeStyleSetFlexBasisAuto(node);
+}
 
 napi_value style_init(napi_env env, napi_value exports) {
     DEFINE_MODULE()
@@ -136,19 +226,56 @@ napi_value style_init(napi_env env, napi_value exports) {
     direction_fns = mk_prop_fns_i32((GetterI32*)YGNodeStyleGetDirection, (SetterI32*)YGNodeStyleSetDirection);
     flex_direction_fns = mk_prop_fns_i32((GetterI32*)YGNodeStyleGetFlexDirection, (SetterI32*)YGNodeStyleSetFlexDirection);
     justify_content_fns = mk_prop_fns_i32((GetterI32*)YGNodeStyleGetJustifyContent, (SetterI32*)YGNodeStyleSetJustifyContent);
-    
     align_content_fns = mk_prop_fns_i32((GetterI32*)YGNodeStyleGetAlignContent, (SetterI32*)YGNodeStyleSetAlignContent);
     align_items_fns = mk_prop_fns_i32((GetterI32*)YGNodeStyleGetAlignItems, (SetterI32*)YGNodeStyleSetAlignItems);
     align_self_fns = mk_prop_fns_i32((GetterI32*)YGNodeStyleGetAlignSelf, (SetterI32*)YGNodeStyleSetAlignSelf);
-
     position_type_fns= mk_prop_fns_i32((GetterI32*)YGNodeStyleGetPositionType, (SetterI32*)YGNodeStyleSetPositionType);
     flex_wrap_fns= mk_prop_fns_i32((GetterI32*)YGNodeStyleGetFlexWrap, (SetterI32*)YGNodeStyleSetFlexWrap);
-
     overflow_fns= mk_prop_fns_i32((GetterI32*)YGNodeStyleGetOverflow, (SetterI32*)YGNodeStyleSetOverflow);
     display_fns= mk_prop_fns_i32((GetterI32*)YGNodeStyleGetDisplay, (SetterI32*)YGNodeStyleSetDisplay);
-
     flex_fns= mk_prop_fns_f32((GetterF32*)YGNodeStyleGetFlex, (SetterF32*)YGNodeStyleSetFlex);
     flex_grow_fns= mk_prop_fns_f32((GetterF32*)YGNodeStyleGetFlexGrow, (SetterF32*)YGNodeStyleSetFlexGrow);
+    flex_shrink_fns= mk_prop_fns_f32((GetterF32*)YGNodeStyleGetFlexShrink, (SetterF32*)YGNodeStyleSetFlexShrink);
+    flex_basis_fns              = mk_prop_fns_ygvalue("POINT",(GetterYGVALUE*)      YGNodeStyleGetFlexBasis, (SetterF32*)   YGNodeStyleSetFlexBasis         );
+    flex_basis_percent_fns      = mk_prop_fns_ygvalue("PERCENT",(GetterYGVALUE*)    YGNodeStyleGetFlexBasis, (SetterF32*)   YGNodeStyleSetFlexBasisPercent  );
+    flex_basis_auto_fns         = mk_prop_fns_ygvalue("AUTO",(GetterYGVALUE*)       YGNodeStyleGetFlexBasis, (SetterF32*)   set_style_auto     );
+    width_fns              = mk_prop_fns_ygvalue("POINT",(GetterYGVALUE*)      YGNodeStyleGetWidth, (SetterF32*)   YGNodeStyleSetWidth         );
+    width_percent_fns      = mk_prop_fns_ygvalue("PERCENT",(GetterYGVALUE*)    YGNodeStyleGetWidth, (SetterF32*)   YGNodeStyleSetWidthPercent  );
+    height_fns              = mk_prop_fns_ygvalue("POINT",(GetterYGVALUE*)      YGNodeStyleGetHeight, (SetterF32*)   YGNodeStyleSetHeight         );
+    height_percent_fns      = mk_prop_fns_ygvalue("PERCENT",(GetterYGVALUE*)    YGNodeStyleGetHeight, (SetterF32*)   YGNodeStyleSetHeightPercent  );
+    min_width_fns              = mk_prop_fns_ygvalue("POINT",(GetterYGVALUE*)      YGNodeStyleGetMinWidth, (SetterF32*)   YGNodeStyleSetMinWidth         );
+    min_width_percent_fns      = mk_prop_fns_ygvalue("PERCENT",(GetterYGVALUE*)    YGNodeStyleGetMinWidth, (SetterF32*)   YGNodeStyleSetMinWidthPercent  );
+    min_height_fns              = mk_prop_fns_ygvalue("POINT",(GetterYGVALUE*)      YGNodeStyleGetMinHeight, (SetterF32*)   YGNodeStyleSetMinHeight         );
+    min_height_percent_fns      = mk_prop_fns_ygvalue("PERCENT",(GetterYGVALUE*)    YGNodeStyleGetMinHeight, (SetterF32*)   YGNodeStyleSetMinHeightPercent  );
+    max_width_fns              = mk_prop_fns_ygvalue("POINT",(GetterYGVALUE*)      YGNodeStyleGetMaxWidth, (SetterF32*)   YGNodeStyleSetMaxWidth         );
+    max_width_percent_fns      = mk_prop_fns_ygvalue("PERCENT",(GetterYGVALUE*)    YGNodeStyleGetMaxWidth, (SetterF32*)   YGNodeStyleSetMaxWidthPercent  );
+    max_height_fns              = mk_prop_fns_ygvalue("POINT",(GetterYGVALUE*)      YGNodeStyleGetMaxHeight, (SetterF32*)   YGNodeStyleSetMaxHeight         );
+    max_height_percent_fns      = mk_prop_fns_ygvalue("PERCENT",(GetterYGVALUE*)    YGNodeStyleGetMaxHeight, (SetterF32*)   YGNodeStyleSetMaxHeightPercent  );
+
+/*
+    left_fns      = mk_edged_prop_fns_ygvalue(YGEdgeLeft, "POINT");
+    top_fns      = mk_edged_prop_fns_ygvalue(YGEdgeTop, "POINT");
+    right_fns      = mk_edged_prop_fns_ygvalue(YGEdgeRight, "POINT");
+    bottom_fns      = mk_edged_prop_fns_ygvalue(YGEdgeBottom, "POINT");
+    start_fns      = mk_edged_prop_fns_ygvalue(YGEdgeStart, "POINT");
+    end_fns      = mk_edged_prop_fns_ygvalue(YGEdgeEnd, "POINT");
+    horizontal_fns      = mk_edged_prop_fns_ygvalue(YGEdgeHorizontal, "POINT");
+    vertical_fns      = mk_edged_prop_fns_ygvalue(YGEdgeVertical, "POINT");
+    all_fns      = mk_edged_prop_fns_ygvalue(YGEdgeAll, "POINT");
+*/
+
+    // ,(GetterYGVALUE*)    YGNodeStyleGetPosition, (SetterF32*)   YGNodeStyleSetPosition  
+    dsk_define_class(env,module,"EdgedProp",edgedPropNew,((napi_property_descriptor[]){
+      PROP_YGVALUE_F32(left, &left_fns),
+      PROP_YGVALUE_F32(top, &top_fns),
+      PROP_YGVALUE_F32(right, &right_fns),
+      PROP_YGVALUE_F32(bottom, &bottom_fns),
+      PROP_YGVALUE_F32(start, &start_fns),
+      PROP_YGVALUE_F32(end, &end_fns),
+      PROP_YGVALUE_F32(horizontal, &horizontal_fns),
+      PROP_YGVALUE_F32(vertical, &vertical_fns),
+      PROP_YGVALUE_F32(all, &all_fns),
+    }));
 
     dsk_define_class(env,module,"Style",styleNew,((napi_property_descriptor[]){
       PROP_I32(direction,&direction_fns),
@@ -161,10 +288,25 @@ napi_value style_init(napi_env env, napi_value exports) {
       PROP_I32(flexWrap,&flex_wrap_fns),
       PROP_I32(overflow,&overflow_fns),
       PROP_I32(display,&display_fns),
-      
-      PROP_F32(flexGrow,&flex_grow_fns),
       PROP_F32(flex,&flex_fns),
-      
+      PROP_F32(flexGrow,&flex_grow_fns),
+      PROP_F32(flexShrink,&flex_shrink_fns),
+
+      PROP_YGVALUE_F32(flexBasis  ,&flex_basis_fns),
+      PROP_YGVALUE_F32(flexBasisPercent,  &flex_basis_percent_fns),
+      PROP_YGVALUE_F32(flexBasisAuto,  &flex_basis_auto_fns),
+      PROP_YGVALUE_F32(width, &width_fns),
+      PROP_YGVALUE_F32(widthPercent, &width_percent_fns),
+      PROP_YGVALUE_F32(height, &height_fns),
+      PROP_YGVALUE_F32(heightPercent, &height_percent_fns),
+      PROP_YGVALUE_F32(minWidth, &min_width_fns),
+      PROP_YGVALUE_F32(minWidthPercent, &min_width_percent_fns),
+      PROP_YGVALUE_F32(minHeight, &min_height_fns),
+      PROP_YGVALUE_F32(minHeightPercent, &min_height_percent_fns),
+      PROP_YGVALUE_F32(maxWidth, &max_width_fns),
+      PROP_YGVALUE_F32(maxWidthPercent, &max_width_percent_fns),
+      PROP_YGVALUE_F32(maxHeight, &max_height_fns),
+      PROP_YGVALUE_F32(maxHeightPercent, &max_height_percent_fns),
     }));
 
     return exports;
@@ -172,84 +314,21 @@ napi_value style_init(napi_env env, napi_value exports) {
 
 
 /*
+ 
 
+void YGNodeStyleSetPosition(    YGNodeRef node,    YGEdge edge,    float position);
+void YGNodeStyleSetPositionPercent(    YGNodeRef node,    YGEdge edge,    float position);
+YGValue YGNodeStyleGetPosition(YGNodeConstRef node, YGEdge edge);
+void YGNodeStyleSetBorder(YGNodeRef node, YGEdge edge, float border);
+float YGNodeStyleGetBorder(YGNodeConstRef node, YGEdge edge);
+void YGNodeStyleSetMargin(YGNodeRef node, YGEdge edge, float margin);
+void YGNodeStyleSetMarginPercent(    YGNodeRef node,    YGEdge edge,    float margin);
+void YGNodeStyleSetMarginAuto(YGNodeRef node, YGEdge edge);
+YGValue YGNodeStyleGetMargin(YGNodeConstRef node, YGEdge edge);
+void YGNodeStyleSetPadding(    YGNodeRef node,    YGEdge edge,    float padding);
+void YGNodeStyleSetPaddingPercent(    YGNodeRef node,    YGEdge edge,    float padding);
+YGValue YGNodeStyleGetPadding(YGNodeConstRef node, YGEdge edge);
 
-
-
-
-WIN_EXPORT void YGNodeStyleSetFlex(YGNodeRef node, float flex);
-WIN_EXPORT float YGNodeStyleGetFlex(YGNodeConstRef node);
-
-WIN_EXPORT void YGNodeStyleSetFlexGrow(YGNodeRef node, float flexGrow);
-WIN_EXPORT float YGNodeStyleGetFlexGrow(YGNodeConstRef node);
-
-WIN_EXPORT void YGNodeStyleSetFlexShrink(YGNodeRef node, float flexShrink);
-WIN_EXPORT float YGNodeStyleGetFlexShrink(YGNodeConstRef node);
-
-WIN_EXPORT void YGNodeStyleSetFlexBasis(YGNodeRef node, float flexBasis);
-WIN_EXPORT void YGNodeStyleSetFlexBasisPercent(YGNodeRef node, float flexBasis);
-WIN_EXPORT void YGNodeStyleSetFlexBasisAuto(YGNodeRef node);
-WIN_EXPORT YGValue YGNodeStyleGetFlexBasis(YGNodeConstRef node);
-
-
-WIN_EXPORT void YGNodeStyleSetPosition(
-    YGNodeRef node,
-    YGEdge edge,
-    float position);
-WIN_EXPORT void YGNodeStyleSetPositionPercent(
-    YGNodeRef node,
-    YGEdge edge,
-    float position);
-WIN_EXPORT YGValue YGNodeStyleGetPosition(YGNodeConstRef node, YGEdge edge);
-
-
-WIN_EXPORT void YGNodeStyleSetMargin(YGNodeRef node, YGEdge edge, float margin);
-WIN_EXPORT void YGNodeStyleSetMarginPercent(
-    YGNodeRef node,
-    YGEdge edge,
-    float margin);
-WIN_EXPORT void YGNodeStyleSetMarginAuto(YGNodeRef node, YGEdge edge);
-WIN_EXPORT YGValue YGNodeStyleGetMargin(YGNodeConstRef node, YGEdge edge);
-
-WIN_EXPORT void YGNodeStyleSetPadding(
-    YGNodeRef node,
-    YGEdge edge,
-    float padding);
-WIN_EXPORT void YGNodeStyleSetPaddingPercent(
-    YGNodeRef node,
-    YGEdge edge,
-    float padding);
-WIN_EXPORT YGValue YGNodeStyleGetPadding(YGNodeConstRef node, YGEdge edge);
-
-
-WIN_EXPORT void YGNodeStyleSetBorder(YGNodeRef node, YGEdge edge, float border);
-WIN_EXPORT float YGNodeStyleGetBorder(YGNodeConstRef node, YGEdge edge);
-
-WIN_EXPORT void YGNodeStyleSetWidth(YGNodeRef node, float width);
-WIN_EXPORT void YGNodeStyleSetWidthPercent(YGNodeRef node, float width);
-WIN_EXPORT void YGNodeStyleSetWidthAuto(YGNodeRef node);
-WIN_EXPORT YGValue YGNodeStyleGetWidth(YGNodeConstRef node);
-
-WIN_EXPORT void YGNodeStyleSetHeight(YGNodeRef node, float height);
-WIN_EXPORT void YGNodeStyleSetHeightPercent(YGNodeRef node, float height);
-WIN_EXPORT void YGNodeStyleSetHeightAuto(YGNodeRef node);
-WIN_EXPORT YGValue YGNodeStyleGetHeight(YGNodeConstRef node);
-
-WIN_EXPORT void YGNodeStyleSetMinWidth(YGNodeRef node, float minWidth);
-WIN_EXPORT void YGNodeStyleSetMinWidthPercent(YGNodeRef node, float minWidth);
-WIN_EXPORT YGValue YGNodeStyleGetMinWidth(YGNodeConstRef node);
-
-WIN_EXPORT void YGNodeStyleSetMinHeight(YGNodeRef node, float minHeight);
-WIN_EXPORT void YGNodeStyleSetMinHeightPercent(YGNodeRef node, float minHeight);
-WIN_EXPORT YGValue YGNodeStyleGetMinHeight(YGNodeConstRef node);
-
-WIN_EXPORT void YGNodeStyleSetMaxWidth(YGNodeRef node, float maxWidth);
-WIN_EXPORT void YGNodeStyleSetMaxWidthPercent(YGNodeRef node, float maxWidth);
-WIN_EXPORT YGValue YGNodeStyleGetMaxWidth(YGNodeConstRef node);
-
-WIN_EXPORT void YGNodeStyleSetMaxHeight(YGNodeRef node, float maxHeight);
-WIN_EXPORT void YGNodeStyleSetMaxHeightPercent(YGNodeRef node, float maxHeight);
-WIN_EXPORT YGValue YGNodeStyleGetMaxHeight(YGNodeConstRef node);
 
 // Yoga specific properties, not compatible with flexbox specification Aspect
 // ratio control the size of the undefined dimension of a node. Aspect ratio is

@@ -132,7 +132,65 @@ export interface Style {
     overflow: YogaOverflow;
 
     flex: number;
+
+    /**
+     * FLEX GROW describes how any space within a container should be distributed among its children
+     * along the main axis. After laying out its children, a container will distribute any remaining 
+     * space according to the flex grow values specified by its children.
+     * Flex grow accepts any floating point value >= 0, with 0 being the default value. A container 
+     * will distribute any remaining space among its children weighted by the child’s flex grow value.
+     */
     flexGrow: number;
+
+    /**
+     * FLEX SHRINK describes how to shrink children along the main axis in the case that the total 
+     * size of the children overflow the size of the container on the main axis. flex shrink is very 
+     * similar to flex grow and can be thought of in the same way if any overflowing size is considered 
+     * to be negative remaining space. These two properties also work well together by allowing children 
+     * to grow and shrink as needed.
+     * flex shrink accepts any floating point value >= 0, with 1 being the default value. A container will 
+     * shrink its children weighted by the child’s flex shrink value.
+     */
+    flexShrink: number;
+
+    /*
+        FLEX BASIS is an axis-independent way of providing the default size of an item along the main axis. 
+        Setting the flex basis of a child is similar to setting the width of that child if its parent is a 
+        container with flex direction: row or setting the height of a child if its parent is a container with 
+        flex direction: column. The flex basis of an item is the default size of that item, the size of the 
+        item before any flex grow and flex shrink calculations are performed.
+    */
+    flexBasis: number
+    
+    /*
+        Same as flexBasis, but in percentage.
+    */
+    flexBasisPercent: number
+    
+    /*
+        Same as flexBasis, but set the value to Auto.
+    */
+    flexBasisAuto: boolean
+
+    width: number
+    widthPercent: number
+
+    height: number
+    heightPercent: number
+
+    minWidth: number
+    minWidthPercent: number
+
+    minHeight: number
+    minHeightPercent: number
+
+    maxWidth: number
+    maxWidthPercent: number
+
+    maxHeight: number
+    maxHeightPercent: number
+
+
 }
 
 
@@ -147,88 +205,6 @@ export const Style:{
 } = style.Style;
   
 
-/*
-getAlignContent(): YogaAlign;
-getAlignItems(): YogaAlign;
-getAlignSelf(): YogaAlign;
-getAspectRatio(): number;
-getBorder(edge: YogaEdge): number;
-getChild(index: number): YogaNode;
-getChildCount(): number;
-getComputedBorder(edge: YogaEdge): number;
-getComputedBottom(): number;
-getComputedHeight(): number;
-getComputedLayout(): Layout;
-getComputedLeft(): number;
-getComputedMargin(edge: YogaEdge): number;
-getComputedPadding(edge: YogaEdge): number;
-getComputedRight(): number;
-getComputedTop(): number;
-getComputedWidth(): number;
-getDisplay(): YogaDisplay;
-getFlexBasis(): number;
-getFlexDirection(): YogaFlexDirection;
-getFlexGrow(): number;
-getFlexShrink(): number;
-getFlexWrap(): YogaFlexWrap;
-getHeight(): Value;
-getJustifyContent(): YogaJustifyContent;
-getMargin(edge: YogaEdge): Value;
-getMaxHeight(): Value;
-getMaxWidth(): Value;
-getMinHeight(): Value;
-getMinWidth(): Value;
-getOverflow(): YogaOverflow;
-getPadding(edge: YogaEdge): Value;
-getParent(): YogaNode | null;
-getPosition(edge: YogaEdge): Value;
-getPositionType(): YogaPositionType;
-getWidth(): Value;
-insertChild(child: YogaNode, index: number): void;
-isDirty(): boolean;
-markDirty(): void;
-removeChild(child: YogaNode): void;
-reset(): void;
-setAlignContent(alignContent: YogaAlign): void;
-setAlignItems(alignItems: YogaAlign): void;
-setAlignSelf(alignSelf: YogaAlign): void;
-setAspectRatio(aspectRatio: number): void;
-setBorder(edge: YogaEdge, borderWidth: number): void;
-setDisplay(display: YogaDisplay): void;
-setFlex(flex: number): void;
-setFlexBasis(flexBasis: number | string): void;
-setFlexBasisPercent(flexBasis: number): void;
-setFlexDirection(flexDirection: YogaFlexDirection): void;
-setFlexGrow(flexGrow: number): void;
-setFlexShrink(flexShrink: number): void;
-setFlexWrap(flexWrap: YogaFlexWrap): void;
-setHeight(height: number | string): void;
-setHeightAuto(): void;
-setHeightPercent(height: number): void;
-setJustifyContent(justifyContent: YogaJustifyContent): void;
-setMargin(edge: YogaEdge, margin: number | string): void;
-setMarginAuto(edge: YogaEdge): void;
-setMarginPercent(edge: YogaEdge, margin: number): void;
-setMaxHeight(maxHeight: number | string): void;
-setMaxHeightPercent(maxHeight: number): void;
-setMaxWidth(maxWidth: number | string): void;
-setMaxWidthPercent(maxWidth: number): void;
-setMeasureFunc(measureFunc: (width: number, widthMeasureMode: YogaMeasureMode, height: number, heightMeasureMode: YogaMeasureMode) => { width?: number; height?: number } | null): void;
-setMinHeight(minHeight: number | string): void;
-setMinHeightPercent(minHeight: number): void;
-setMinWidth(minWidth: number | string): void;
-setMinWidthPercent(minWidth: number): void;
-setOverflow(overflow: YogaOverflow): void;
-setPadding(edge: YogaEdge, padding: number | string): void;
-setPaddingPercent(edge: YogaEdge, padding: number): void;
-setPosition(edge: YogaEdge, position: number | string): void;
-setPositionPercent(edge: YogaEdge, position: number): void;
-setPositionType(positionType: YogaPositionType): void;
-setWidth(width: number | string): void;
-setWidthAuto(): void;
-setWidthPercent(width: number): void;
-unsetMeasureFunc(): void;
-*/
 const ALIGN_AUTO = 0;
 const ALIGN_COUNT = 8;
 const ALIGN_FLEX_START = 1;
@@ -348,28 +324,28 @@ export enum YogaFlexWrap {
     WrapReverse = WRAP_WRAP_REVERSE,
 }
 
-export type YogaEdge =
-    | typeof EDGE_LEFT
-    | typeof EDGE_TOP
-    | typeof EDGE_RIGHT
-    | typeof EDGE_BOTTOM
-    | typeof EDGE_START
-    | typeof EDGE_END
-    | typeof EDGE_HORIZONTAL
-    | typeof EDGE_VERTICAL
-    | typeof EDGE_ALL;
-
+export enum YogaEdge {
+    Left = EDGE_LEFT,
+    Top = EDGE_TOP,
+    Right = EDGE_RIGHT,
+    Bottom = EDGE_BOTTOM,
+    Start = EDGE_START,
+    End = EDGE_END,
+    Horizontal = EDGE_HORIZONTAL,
+    Vertical = EDGE_VERTICAL,
+    All = EDGE_ALL,
+}
 export enum YogaDisplay {
     Flex = DISPLAY_FLEX,
     None = DISPLAY_NONE,
 }
 
-export type YogaUnit =
-    | typeof UNIT_AUTO
-    | typeof UNIT_PERCENT
-    | typeof UNIT_POINT
-    | typeof UNIT_UNDEFINED;
-
+export enum YogaUnit {
+    Auto = UNIT_AUTO,
+    Percent = UNIT_PERCENT,
+    Point = UNIT_POINT,
+    Undefined = UNIT_UNDEFINED,
+}
 export enum YogaOverflow {
      Hidden=OVERFLOW_HIDDEN,
      Scroll=OVERFLOW_SCROLL,
@@ -380,7 +356,7 @@ export enum YogaPositionType {
      PositionTypeAbsolute = POSITION_TYPE_ABSOLUTE,
      PositionTypeRelative = POSITION_TYPE_RELATIVE
 }
-
+/*
 export type YogaExperimentalFeature = typeof EXPERIMENTAL_FEATURE_WEB_FLEX_BASIS;
 
 export type YogaMeasureMode =
@@ -388,5 +364,5 @@ export type YogaMeasureMode =
     | typeof MEASURE_MODE_UNDEFINED
     | typeof MEASURE_MODE_EXACTLY
     | typeof MEASURE_MODE_AT_MOST;
-
+*/
 

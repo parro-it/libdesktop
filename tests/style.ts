@@ -106,3 +106,11 @@ test('flexGrow', async (t:any): Promise<void> => {
     t.equal(s.flexGrow, 41)
     t.throws(()=>{(s as any).flexGrow=""},TypeError,/Argument value: A number was expected/)
 })
+
+test('flexShrink', async (t:any): Promise<void> => {
+    const s = new Style({})
+    t.equal(s.flexShrink, 0)
+    s.flexShrink = 41
+    t.equal(s.flexShrink, 41)
+    t.throws(()=>{(s as any).flexShrink=""},TypeError,/Argument value: A number was expected/)
+})
