@@ -1,6 +1,6 @@
 import test from 'tape-async'
 import {Style,YogaDirection,YogaFlexDirection,YogaJustifyContent,YogaAlign} from '../index'
-import { YogaDisplay, YogaFlexWrap, YogaOverflow, YogaPositionType } from '../src/api/style'
+import { EdgedProp, YogaDisplay, YogaFlexWrap, YogaOverflow, YogaPositionType } from '../src/api/style'
 
 test('Style object creation', async (t:any): Promise<void> => {
     t.equal(typeof Style, "function")
@@ -113,4 +113,35 @@ test('flexShrink', async (t:any): Promise<void> => {
     s.flexShrink = 41
     t.equal(s.flexShrink, 41)
     t.throws(()=>{(s as any).flexShrink=""},TypeError,/Argument value: A number was expected/)
+})
+
+function checkEdge(t:any, prop: any, edge: string) {
+    t.equal(typeof prop[edge], "number")
+    t.true(isNaN(prop[edge]))
+    
+    prop[edge]=42
+    t.equal(prop[edge], 42)
+    
+    t.throws(()=>{debugger;(prop as any)[edge]=""},/Argument value: A number was expected/)
+    t.equal(prop[edge], 42)
+
+    prop[edge]=41
+    t.equal(prop[edge], 41)
+}
+
+test('position', async (t:any): Promise<void> => {
+    const s = new Style({})
+    t.equal(typeof s.position, "object")
+    t.throws(()=>{(s as any).position=""},/Cannot assign to read only property \'position\' of object \'#<Style>\'/)
+
+    checkEdge(t,s.position,"all");
+    checkEdge(t,s.position,"left");
+    checkEdge(t,s.position,"top");
+    checkEdge(t,s.position,"right");
+    checkEdge(t,s.position,"bottom");
+    checkEdge(t,s.position,"start");
+    checkEdge(t,s.position,"end");
+    checkEdge(t,s.position,"horizontal");
+    checkEdge(t,s.position,"vertical");
+    
 })

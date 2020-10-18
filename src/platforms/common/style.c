@@ -94,7 +94,7 @@ LIBUI_FUNCTION(getPropI32) {
 
 LIBUI_FUNCTION(setPropF32) {                                                           
     INIT_ARGS(1);                                                                      
-    ARG_DOUBLE(value64, 0);                                                               
+    ARG_DOUBLE(value, 0);                                                               
     
     YGNodeRef node;                                                                 
     napi_status status = napi_unwrap(env, this, (void**)&node);
@@ -105,7 +105,7 @@ LIBUI_FUNCTION(setPropF32) {
     status = napi_get_cb_info(env, info, NULL, NULL, NULL,(void**)&fns); 
     CHECK_STATUS_THROW(status, napi_get_cb_info);                                         
     
-    fns->setterF32(node, (float)value64);                                                                                     
+    fns->setterF32(node, (float)value);                                                                                     
     return NULL;                                                                       
 }                                                                                      
                                                                                        
@@ -254,9 +254,12 @@ LIBUI_FUNCTION(styleNew) {
     YGNodeRef node = YGNodeNew();
     napi_status status = napi_wrap(env, this, node, NULL, NULL, NULL);
     CHECK_STATUS_THROW(status, napi_wrap);                                          
-
-    napi_set_named_property(env,this,"position", mk_edged_prop(env, node, YGUnitPoint, YGNodeStyleGetPosition, YGNodeStyleSetPosition));
-
+    
+    napi_define_properties(env,this,1, (napi_property_descriptor[]) {{
+        .utf8name="position",
+        .value=mk_edged_prop(env, node, YGUnitPoint, YGNodeStyleGetPosition, YGNodeStyleSetPosition),
+        .attributes=napi_enumerable, //!napi_configurable !napi_writable
+    }});
     return this;
 }
 
@@ -290,6 +293,19 @@ static LIBUI_FUNCTION(edgedFloatGetter) {
 */
 
 static LIBUI_FUNCTION(edgedFloatSetter) {                    
+    INIT_ARGS(1);                                                                      
+    ARG_DOUBLE(value, 0);                                                               
+    
+    struct EdgedPropData* data; 
+    napi_status status = napi_unwrap(env, this, (void**)&data);
+    CHECK_STATUS_THROW(status, napi_unwrap);   
+
+    YGEdge* edge; 
+    status = napi_get_cb_info(env, info, NULL, NULL, NULL,(void**)&edge); 
+    CHECK_STATUS_THROW(status, napi_get_cb_info); 
+
+    data->setter(data->node, *edge, (float)value);
+    
     return NULL;
 }
 
@@ -385,26 +401,8 @@ napi_value style_init(napi_env env, napi_value exports) {
     max_height_fns              = mk_prop_fns_ygvalue("POINT",(GetterYGVALUE*)      YGNodeStyleGetMaxHeight, (SetterF32*)   YGNodeStyleSetMaxHeight         );
     max_height_percent_fns      = mk_prop_fns_ygvalue("PERCENT",(GetterYGVALUE*)    YGNodeStyleGetMaxHeight, (SetterF32*)   YGNodeStyleSetMaxHeightPercent  );
 
-/*
-    left_fns      = mk_edged_prop_fns_ygvalue(YGEdgeLeft, "POINT");
-    top_fns      = mk_edged_prop_fns_ygvalue(YGEdgeTop, "POINT");
-    right_fns      = mk_edged_prop_fns_ygvalue(YGEdgeRight, "POINT");
-    bottom_fns      = mk_edged_prop_fns_ygvalue(YGEdgeBottom, "POINT");
-    start_fns      = mk_edged_prop_fns_ygvalue(YGEdgeStart, "POINT");
-    end_fns      = mk_edged_prop_fns_ygvalue(YGEdgeEnd, "POINT");
-    horizontal_fns      = mk_edged_prop_fns_ygvalue(YGEdgeHorizontal, "POINT");
-    vertical_fns      = mk_edged_prop_fns_ygvalue(YGEdgeVertical, "POINT");
-    all_fns      = mk_edged_prop_fns_ygvalue(YGEdgeAll, "POINT");
 
 
-static struct prop_fns mk_edged_prop_fns_ygvalue(char* unit, YGEdge edge) {
-   struct prop_fns fns= {.getterYGValue = (GetterYGVALUE*)edgedYgValueGetter,.setterF32 = edgedYgValueSetter,.unit=unit,.edge=edge};
-   return fns
-
-
-*/
-
-    // ,(GetterYGVALUE*)    YGNodeStyleGetPosition, (SetterF32*)   YGNodeStyleSetPosition  
     dsk_define_class_ref(env,module,"EdgedProp",edgedPropNew,((napi_property_descriptor[]){
       EDGED_PROP_YGVALUE(left, edgeLeft),
       EDGED_PROP_YGVALUE(top, edgeTop),

@@ -190,9 +190,22 @@ export interface Style {
     maxHeight: number
     maxHeightPercent: number
 
+    readonly position: EdgedProp
+
 
 }
 
+export interface EdgedProp {
+    left: number
+    top: number
+    right: number
+    bottom: number
+    start: number
+    end: number
+    horizontal: number
+    vertical: number
+    all: number
+}
 
 export const Style:{
 	/**
