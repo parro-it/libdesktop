@@ -15,6 +15,7 @@ typedef float GetterF32(const YGNodeConstRef node);
 typedef YGValue GetterYGVALUE(const YGNodeConstRef node);
 
 typedef YGValue GetterEdgedYGVALUE(const YGNodeConstRef node, YGEdge edge);
+typedef float GetterEdgedF32(const YGNodeConstRef node, YGEdge edge);
 typedef void SetterEdgedF32(const YGNodeRef node, YGEdge edge, const float value);
 
 struct prop_fns {
@@ -30,6 +31,7 @@ struct prop_fns {
 struct EdgedPropData {
     GetterEdgedYGVALUE* getter;
     SetterEdgedF32* setter;
+    GetterEdgedF32* getter_f;
     YGNodeRef node;
     YGUnit unit;
 };
@@ -229,23 +231,49 @@ napi_value mk_edged_prop(napi_env env, YGNodeRef node, YGUnit unit, GetterEdgedY
     return edgedProp;
 }
 
-/*
+napi_value mk_edged_prop_f(napi_env env, YGNodeRef node, YGUnit unit, GetterEdgedF32* getter, SetterEdgedF32* setter) {
+    napi_value constructor;
+    napi_status status;
+    napi_value edgedProp;
 
-void YGNodeStyleSetPosition(    YGNodeRef node,    YGEdge edge,    float position);
-void YGNodeStyleSetPositionPercent(    YGNodeRef node,    YGEdge edge,    float position);
-YGValue YGNodeStyleGetPosition(YGNodeConstRef node, YGEdge edge);
-void YGNodeStyleSetBorder(YGNodeRef node, YGEdge edge, float border);
-float YGNodeStyleGetBorder(YGNodeConstRef node, YGEdge edge);
-void YGNodeStyleSetMargin(YGNodeRef node, YGEdge edge, float margin);
-void YGNodeStyleSetMarginPercent(    YGNodeRef node,    YGEdge edge,    float margin);
-void YGNodeStyleSetMarginAuto(YGNodeRef node, YGEdge edge);
-YGValue YGNodeStyleGetMargin(YGNodeConstRef node, YGEdge edge);
-void YGNodeStyleSetPadding(    YGNodeRef node,    YGEdge edge,    float padding);
-void YGNodeStyleSetPaddingPercent(    YGNodeRef node,    YGEdge edge,    float padding);
-YGValue YGNodeStyleGetPadding(YGNodeConstRef node, YGEdge edge);
+    status = napi_get_reference_value(env, EdgedPropRef, &constructor);
+    CHECK_STATUS_THROW(status, napi_get_reference_value);                                          
 
+    status = napi_new_instance(env,constructor,0,NULL,&edgedProp);
+    CHECK_STATUS_THROW(status,napi_new_instance);
 
-*/
+    struct EdgedPropData* data; 
+    status = napi_unwrap(env, edgedProp, (void**)&data);
+    CHECK_STATUS_THROW(status, napi_unwrap);   
+
+    data->getter_f = getter;
+    data->setter = setter;
+    data->node = node;
+    data->unit = unit;
+
+    return edgedProp;
+}
+
+#define EDGED_PROP(NAME,UNIT,GETTER,SETTER) \
+    napi_define_properties(env,this,1, (napi_property_descriptor[]) {{\
+        .utf8name=#NAME,\
+        .value=mk_edged_prop(env, node, UNIT, GETTER, SETTER),\
+        .attributes=napi_enumerable,  /*!napi_configurable !napi_writable*/ \
+    }})
+
+#define EDGED_PROP_F(NAME,GETTER,SETTER) \
+    napi_define_properties(env,this,1, (napi_property_descriptor[]) {{\
+        .utf8name=#NAME,\
+        .value=mk_edged_prop_f(env, node, 0xbabe, GETTER, SETTER),\
+        .attributes=napi_enumerable,  /*!napi_configurable !napi_writable*/ \
+    }})
+
+static void set_margin_auto(YGNodeRef node, YGEdge edge, float margin) {
+    if (margin == 0.0) {
+        YGNodeStyleSetMargin(node,edge,0.0);    
+    }
+    YGNodeStyleSetMarginAuto(node,edge);
+}
 
 
 LIBUI_FUNCTION(styleNew) {
@@ -255,11 +283,19 @@ LIBUI_FUNCTION(styleNew) {
     napi_status status = napi_wrap(env, this, node, NULL, NULL, NULL);
     CHECK_STATUS_THROW(status, napi_wrap);                                          
     
-    napi_define_properties(env,this,1, (napi_property_descriptor[]) {{
-        .utf8name="position",
-        .value=mk_edged_prop(env, node, YGUnitPoint, YGNodeStyleGetPosition, YGNodeStyleSetPosition),
-        .attributes=napi_enumerable, //!napi_configurable !napi_writable
-    }});
+    EDGED_PROP(position, YGUnitPoint, YGNodeStyleGetPosition, YGNodeStyleSetPosition);
+    EDGED_PROP(positionPercent, YGUnitPercent, YGNodeStyleGetPosition, YGNodeStyleSetPositionPercent);
+   
+    EDGED_PROP_F(border, YGNodeStyleGetBorder, YGNodeStyleSetBorder);
+
+    EDGED_PROP(padding, YGUnitPoint, YGNodeStyleGetPadding, YGNodeStyleSetPadding);
+    EDGED_PROP(paddingPercent, YGUnitPercent, YGNodeStyleGetPadding, YGNodeStyleSetPaddingPercent);
+   
+    EDGED_PROP(margin,        YGUnitPoint,     YGNodeStyleGetMargin, YGNodeStyleSetMargin);
+    EDGED_PROP(marginPercent, YGUnitPercent,   YGNodeStyleGetMargin, YGNodeStyleSetMarginPercent);
+    EDGED_PROP(marginAuto,    YGUnitAuto,      YGNodeStyleGetMargin, set_margin_auto);
+   
+
     return this;
 }
 
@@ -286,11 +322,6 @@ typedef float GetterF32(const YGNodeConstRef node);
 typedef YGValue GetterYGVALUE(const YGNodeConstRef node);
 
 
-/*
-static LIBUI_FUNCTION(edgedFloatGetter) {                    
-    return NULL;
-}
-*/
 
 static LIBUI_FUNCTION(edgedFloatSetter) {                    
     INIT_ARGS(1);                                                                      
@@ -309,6 +340,22 @@ static LIBUI_FUNCTION(edgedFloatSetter) {
     return NULL;
 }
 
+/*
+static LIBUI_FUNCTION(edgedFloatGetter) {                    
+    INIT_EMPTY_ARGS();                                                          
+    
+    struct EdgedPropData* data; 
+    napi_status status = napi_unwrap(env, this, (void**)&data);
+    CHECK_STATUS_THROW(status, napi_unwrap);   
+
+    YGEdge* edge; 
+    status = napi_get_cb_info(env, info, NULL, NULL, NULL,(void**)&edge); 
+    CHECK_STATUS_THROW(status, napi_get_cb_info); 
+
+    float result = data->getter_f(data->node, *edge);
+    return make_double(env,result);
+}
+*/
 static LIBUI_FUNCTION(edgedYgValueGetter) {
     INIT_EMPTY_ARGS();
     struct EdgedPropData* data; 
@@ -319,8 +366,13 @@ static LIBUI_FUNCTION(edgedYgValueGetter) {
     status = napi_get_cb_info(env, info, NULL, NULL, NULL,(void**)&edge); 
     CHECK_STATUS_THROW(status, napi_get_cb_info); 
 
+    if (data->unit==0xbabe) {
+       float result = data->getter_f(data->node, *edge);
+        return make_double(env,result);
+    }                                                                                      
 
     YGValue result = data->getter(data->node, *edge);
+
     if (data->unit==YGUnitAuto) {
         return make_bool(env, result.unit==YGUnitAuto);
     }                                                                                      

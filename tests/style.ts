@@ -129,6 +129,22 @@ function checkEdge(t:any, prop: any, edge: string) {
     t.equal(prop[edge], 41)
 }
 
+function checkEdgeAuto(t:any, prop: any, edge: string) {
+    t.equal(typeof prop[edge], "boolean")
+    t.false(prop[edge])
+    
+    prop[edge]=1
+    t.equal(prop[edge], true)
+    
+    t.throws(()=>{debugger;(prop as any)[edge]=""},/Argument value: A number was expected/)
+    t.equal(prop[edge], true)
+
+    prop[edge]=0
+    t.equal(prop[edge], true)
+    
+
+}
+
 test('position', async (t:any): Promise<void> => {
     const s = new Style({})
     t.equal(typeof s.position, "object")
@@ -143,5 +159,100 @@ test('position', async (t:any): Promise<void> => {
     checkEdge(t,s.position,"end");
     checkEdge(t,s.position,"horizontal");
     checkEdge(t,s.position,"vertical");
-    
+})
+
+
+test('border', async (t:any): Promise<void> => {
+    const s = new Style({})
+    t.equal(typeof s.border, "object")
+    t.throws(()=>{(s as any).border=""},/Cannot assign to read only property \'border\' of object \'#<Style>\'/)
+
+    checkEdge(t,s.border,"all");
+    checkEdge(t,s.border,"left");
+    checkEdge(t,s.border,"top");
+    checkEdge(t,s.border,"right");
+    checkEdge(t,s.border,"bottom");
+    checkEdge(t,s.border,"start");
+    checkEdge(t,s.border,"end");
+    checkEdge(t,s.border,"horizontal");
+    checkEdge(t,s.border,"vertical");
+})
+
+test('padding', async (t:any): Promise<void> => {
+    const s = new Style({})
+    t.equal(typeof s.padding, "object")
+    t.throws(()=>{(s as any).padding=""},/Cannot assign to read only property \'padding\' of object \'#<Style>\'/)
+
+    checkEdge(t,s.padding,"all");
+    checkEdge(t,s.padding,"left");
+    checkEdge(t,s.padding,"top");
+    checkEdge(t,s.padding,"right");
+    checkEdge(t,s.padding,"bottom");
+    checkEdge(t,s.padding,"start");
+    checkEdge(t,s.padding,"end");
+    checkEdge(t,s.padding,"horizontal");
+    checkEdge(t,s.padding,"vertical");
+})
+
+test('paddingPercent', async (t:any): Promise<void> => {
+    const s = new Style({})
+    t.equal(typeof s.paddingPercent, "object")
+    t.throws(()=>{(s as any).paddingPercent=""},/Cannot assign to read only property \'paddingPercent\' of object \'#<Style>\'/)
+
+    checkEdge(t,s.paddingPercent,"all");
+    checkEdge(t,s.paddingPercent,"left");
+    checkEdge(t,s.paddingPercent,"top");
+    checkEdge(t,s.paddingPercent,"right");
+    checkEdge(t,s.paddingPercent,"bottom");
+    checkEdge(t,s.paddingPercent,"start");
+    checkEdge(t,s.paddingPercent,"end");
+    checkEdge(t,s.paddingPercent,"horizontal");
+    checkEdge(t,s.paddingPercent,"vertical");
+})
+
+test('margin', async (t:any): Promise<void> => {
+    const s = new Style({})
+    t.equal(typeof s.margin, "object")
+    t.throws(()=>{(s as any).margin=""},/Cannot assign to read only property \'margin\' of object \'#<Style>\'/)
+
+    checkEdge(t,s.margin,"all");
+    checkEdge(t,s.margin,"left");
+    checkEdge(t,s.margin,"top");
+    checkEdge(t,s.margin,"right");
+    checkEdge(t,s.margin,"bottom");
+    checkEdge(t,s.margin,"start");
+    checkEdge(t,s.margin,"end");
+    checkEdge(t,s.margin,"horizontal");
+    checkEdge(t,s.margin,"vertical");
+})
+test('marginPercent', async (t:any): Promise<void> => {
+    const s = new Style({})
+    t.equal(typeof s.marginPercent, "object")
+    t.throws(()=>{(s as any).marginPercent=""},/Cannot assign to read only property \'marginPercent\' of object \'#<Style>\'/)
+
+    checkEdge(t,s.marginPercent,"all");
+    checkEdge(t,s.marginPercent,"left");
+    checkEdge(t,s.marginPercent,"top");
+    checkEdge(t,s.marginPercent,"right");
+    checkEdge(t,s.marginPercent,"bottom");
+    checkEdge(t,s.marginPercent,"start");
+    checkEdge(t,s.marginPercent,"end");
+    checkEdge(t,s.marginPercent,"horizontal");
+    checkEdge(t,s.marginPercent,"vertical");
+})
+
+test('marginAuto', async (t:any): Promise<void> => {
+    const s = new Style({})
+    t.equal(typeof s.marginAuto, "object")
+    t.throws(()=>{(s as any).marginAuto=""},/Cannot assign to read only property \'marginAuto\' of object \'#<Style>\'/)
+
+    checkEdgeAuto(t,s.marginAuto,"all");
+    checkEdgeAuto(t,s.marginAuto,"left");
+    checkEdgeAuto(t,s.marginAuto,"top");
+    checkEdgeAuto(t,s.marginAuto,"right");
+    checkEdgeAuto(t,s.marginAuto,"bottom");
+    checkEdgeAuto(t,s.marginAuto,"start");
+    checkEdgeAuto(t,s.marginAuto,"end");
+    checkEdgeAuto(t,s.marginAuto,"horizontal");
+    checkEdgeAuto(t,s.marginAuto,"vertical");
 })

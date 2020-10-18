@@ -193,6 +193,15 @@ export interface Style {
     readonly position: EdgedProp
 
 
+    readonly border: EdgedProp
+    readonly padding: EdgedProp
+    readonly paddingPercent: EdgedProp
+    readonly margin: EdgedProp
+    readonly marginPercent: EdgedProp
+    readonly marginAuto: EdgedProp
+   
+
+
 }
 
 export interface EdgedProp {
