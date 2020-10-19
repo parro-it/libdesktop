@@ -13,6 +13,9 @@ static void label_finalize(napi_env env, void *finalize_data, void *finalize_hin
     YGNodeFree(node);
 }
 
+extern napi_ref StyleRef;
+void link_style_to_node(napi_env env, YGNodeRef node, napi_value this);
+
 LIBUI_FUNCTION(labelNew) {
     INIT_ARGS(2);
 
@@ -30,6 +33,18 @@ LIBUI_FUNCTION(labelNew) {
     //gtk_widget_get_preferred_height(child_gtk,&height,NULL);
     YGNodeStyleSetWidth(node,width);
     YGNodeStyleSetHeight(node,height);
+
+
+    napi_value constructor;
+    napi_value style;
+
+    status = napi_get_reference_value(env, StyleRef, &constructor);
+    CHECK_STATUS_THROW(status, napi_get_reference_value);                                          
+
+    status = napi_new_instance(env,constructor,1,(napi_value[]){this},&style);
+    CHECK_STATUS_THROW(status,napi_new_instance);
+
+    napi_set_named_property(env, this, "style", style);
     return this;
 }
 
@@ -41,7 +56,7 @@ napi_value label_init(napi_env env, napi_value exports) {
        DSK_RWPROP_BOOL(visible,"visible"),
        DSK_RWPROP_BOOL(visible,"enabled"),
        DSK_CHILDPROP_I32(left,"x"),
-       DSK_CHILDPROP_I32(top,"y"),
+       DSK_CHILDPROP_I32(top,"y")
     }));
 
     return exports;

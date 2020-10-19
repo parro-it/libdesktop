@@ -207,6 +207,7 @@ static struct prop_fns max_height_percent_fns;
 
 
 napi_ref EdgedPropRef;
+napi_ref StyleRef;
 
 napi_value mk_edged_prop(napi_env env, YGNodeRef node, YGUnit unit, GetterEdgedYGVALUE* getter, SetterEdgedF32* setter) {
     napi_value constructor;
@@ -275,11 +276,7 @@ static void set_margin_auto(YGNodeRef node, YGEdge edge, float margin) {
     YGNodeStyleSetMarginAuto(node,edge);
 }
 
-
-LIBUI_FUNCTION(styleNew) {
-    INIT_ARGS(1);
-
-    YGNodeRef node = YGNodeNew();
+static napi_value link_style_to_node(napi_env env, YGNodeRef node, napi_value this) {
     napi_status status = napi_wrap(env, this, node, NULL, NULL, NULL);
     CHECK_STATUS_THROW(status, napi_wrap);                                          
     
@@ -294,7 +291,27 @@ LIBUI_FUNCTION(styleNew) {
     EDGED_PROP(margin,        YGUnitPoint,     YGNodeStyleGetMargin, YGNodeStyleSetMargin);
     EDGED_PROP(marginPercent, YGUnitPercent,   YGNodeStyleGetMargin, YGNodeStyleSetMarginPercent);
     EDGED_PROP(marginAuto,    YGUnitAuto,      YGNodeStyleGetMargin, set_margin_auto);
-   
+
+    return NULL;
+}
+#include <gtk/gtk.h>
+
+LIBUI_FUNCTION(styleNew) {
+    INIT_ARGS(1);
+
+    napi_valuetype argType;
+    napi_typeof(env, argv[0], &argType);
+    YGNodeRef node;
+    if (argType == napi_null) {
+        node = YGNodeNew();
+    } else {
+        GtkWidget* widget;
+        napi_status status = napi_unwrap(env, argv[0], (void**)&widget);
+        CHECK_STATUS_THROW(status, napi_unwrap);      
+        node = g_object_get_data(G_OBJECT(widget),"yoganode");
+    }
+    
+    link_style_to_node(env, node, this);
 
     return this;
 }
@@ -460,7 +477,7 @@ napi_value style_init(napi_env env, napi_value exports) {
     }), &EdgedPropRef);
 
     
-    dsk_define_class(env,module,"Style",styleNew,((napi_property_descriptor[]){
+    dsk_define_class_ref(env,module,"Style",styleNew,((napi_property_descriptor[]){
       PROP_I32(direction,&direction_fns),
       PROP_I32(flexDirection,&flex_direction_fns),
       PROP_I32(justifyContent,&justify_content_fns),
@@ -490,7 +507,7 @@ napi_value style_init(napi_env env, napi_value exports) {
       PROP_YGVALUE_F32(maxWidthPercent, &max_width_percent_fns),
       PROP_YGVALUE_F32(maxHeight, &max_height_fns),
       PROP_YGVALUE_F32(maxHeightPercent, &max_height_percent_fns),
-    }));
+    }), &StyleRef);
 
     return exports;
 }
