@@ -408,14 +408,6 @@ static YGEdge edgeVertical = YGEdgeVertical;
 
 
 #define EDGED_PROP_YGVALUE(NAME, EDGE) (napi_property_descriptor) {.utf8name = #NAME, .getter = edgedYgValueGetter, .setter = edgedFloatSetter, .data = &EDGE}
-/*
-static LIBUI_FUNCTION(edgedYgValueSetter) {                    
-}
-*/
-
-
-
-
 
 static void set_style_auto(const YGNodeRef node, float _) {
     YGNodeStyleSetFlexBasisAuto(node);
