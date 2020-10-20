@@ -4,12 +4,12 @@ import { EdgedProp, YogaDisplay, YogaFlexWrap, YogaOverflow, YogaPositionType } 
 
 test('Style object creation', async (t:any): Promise<void> => {
     t.equal(typeof Style, "function")
-    const s = new Style({})
+    const s = new Style({},null)
     t.equal(typeof (s as any).otherFiled, "undefined")
 })
 
 test('direction', async (t:any): Promise<void> => {
-    const s = new Style({})
+    const s = new Style({},null)
     t.equal(s.direction, YogaDirection.Inherit)
     s.direction = YogaDirection.LTR
     t.equal(s.direction, YogaDirection.LTR)
@@ -17,7 +17,7 @@ test('direction', async (t:any): Promise<void> => {
 })
 
 test('flexDirection', async (t:any): Promise<void> => {
-    const s = new Style({})
+    const s = new Style({},null)
     t.equal(s.flexDirection, YogaFlexDirection.Column)
     s.flexDirection = YogaFlexDirection.Row
     t.equal(s.flexDirection, YogaFlexDirection.Row)
@@ -26,7 +26,7 @@ test('flexDirection', async (t:any): Promise<void> => {
 })
 
 test('justifyContent', async (t:any): Promise<void> => {
-    const s = new Style({})
+    const s = new Style({},null)
     t.equal(s.justifyContent, YogaJustifyContent.FlexStart)
     s.justifyContent = YogaJustifyContent.SpaceAround
     t.equal(s.justifyContent, YogaJustifyContent.SpaceAround)
@@ -34,7 +34,7 @@ test('justifyContent', async (t:any): Promise<void> => {
 })
 
 test('alignContent', async (t:any): Promise<void> => {
-    const s = new Style({})
+    const s = new Style({},null)
     t.equal(s.alignContent, YogaAlign.FlexStart)
     s.alignContent = YogaAlign.Stretch
     t.equal(s.alignContent, YogaAlign.Stretch)
@@ -42,7 +42,7 @@ test('alignContent', async (t:any): Promise<void> => {
 })
 
 test('alignItems', async (t:any): Promise<void> => {
-    const s = new Style({})
+    const s = new Style({},null)
     t.equal(s.alignItems, YogaAlign.Stretch)
     s.alignItems = YogaAlign.FlexStart
     t.equal(s.alignItems, YogaAlign.FlexStart)
@@ -50,7 +50,7 @@ test('alignItems', async (t:any): Promise<void> => {
 })
 
 test('alignSelf', async (t:any): Promise<void> => {
-    const s = new Style({})
+    const s = new Style({},null)
     t.equal(s.alignSelf, YogaAlign.Auto)
     s.alignSelf = YogaAlign.FlexStart
     t.equal(s.alignSelf, YogaAlign.FlexStart)
@@ -58,7 +58,7 @@ test('alignSelf', async (t:any): Promise<void> => {
 })
 
 test('positionType', async (t:any): Promise<void> => {
-    const s = new Style({})
+    const s = new Style({},null)
     t.equal(s.positionType, YogaPositionType.PositionTypeRelative)
     s.positionType = YogaPositionType.PositionTypeAbsolute
     t.equal(s.positionType, YogaPositionType.PositionTypeAbsolute)
@@ -66,7 +66,7 @@ test('positionType', async (t:any): Promise<void> => {
 })
 
 test('flexWrap', async (t:any): Promise<void> => {
-    const s = new Style({})
+    const s = new Style({},null)
     t.equal(s.flexWrap, YogaFlexWrap.NoWrap)
     s.flexWrap = YogaFlexWrap.WrapReverse
     t.equal(s.flexWrap, YogaFlexWrap.WrapReverse)
@@ -75,7 +75,7 @@ test('flexWrap', async (t:any): Promise<void> => {
 
 
 test('overflow', async (t:any): Promise<void> => {
-    const s = new Style({})
+    const s = new Style({},null)
     t.equal(s.overflow, YogaOverflow.Visible)
     s.overflow = YogaOverflow.Scroll
     t.equal(s.overflow, YogaOverflow.Scroll)
@@ -84,7 +84,7 @@ test('overflow', async (t:any): Promise<void> => {
 
 
 test('display', async (t:any): Promise<void> => {
-    const s = new Style({})
+    const s = new Style({},null)
     t.equal(s.display, YogaDisplay.Flex)
     s.display = YogaDisplay.None
     t.equal(s.display, YogaDisplay.None)
@@ -92,7 +92,7 @@ test('display', async (t:any): Promise<void> => {
 })
 
 test('flex', async (t:any): Promise<void> => {
-    const s = new Style({})
+    const s = new Style({},null)
     t.true(isNaN(s.flex))
     s.flex = 42
     t.equal(s.flex, 42)
@@ -100,7 +100,7 @@ test('flex', async (t:any): Promise<void> => {
 })
 
 test('flexGrow', async (t:any): Promise<void> => {
-    const s = new Style({})
+    const s = new Style({},null)
     t.equal(s.flexGrow, 0)
     s.flexGrow = 41
     t.equal(s.flexGrow, 41)
@@ -108,7 +108,7 @@ test('flexGrow', async (t:any): Promise<void> => {
 })
 
 test('flexShrink', async (t:any): Promise<void> => {
-    const s = new Style({})
+    const s = new Style({},null)
     t.equal(s.flexShrink, 0)
     s.flexShrink = 41
     t.equal(s.flexShrink, 41)
@@ -146,7 +146,7 @@ function checkEdgeAuto(t:any, prop: any, edge: string) {
 }
 
 test('position', async (t:any): Promise<void> => {
-    const s = new Style({})
+    const s = new Style({},null)
     t.equal(typeof s.position, "object")
     t.throws(()=>{(s as any).position=""},/Cannot assign to read only property \'position\' of object \'#<Style>\'/)
 
@@ -163,7 +163,7 @@ test('position', async (t:any): Promise<void> => {
 
 
 test('border', async (t:any): Promise<void> => {
-    const s = new Style({})
+    const s = new Style({},null)
     t.equal(typeof s.border, "object")
     t.throws(()=>{(s as any).border=""},/Cannot assign to read only property \'border\' of object \'#<Style>\'/)
 
@@ -179,7 +179,7 @@ test('border', async (t:any): Promise<void> => {
 })
 
 test('padding', async (t:any): Promise<void> => {
-    const s = new Style({})
+    const s = new Style({},null)
     t.equal(typeof s.padding, "object")
     t.throws(()=>{(s as any).padding=""},/Cannot assign to read only property \'padding\' of object \'#<Style>\'/)
 
@@ -195,7 +195,7 @@ test('padding', async (t:any): Promise<void> => {
 })
 
 test('paddingPercent', async (t:any): Promise<void> => {
-    const s = new Style({})
+    const s = new Style({},null)
     t.equal(typeof s.paddingPercent, "object")
     t.throws(()=>{(s as any).paddingPercent=""},/Cannot assign to read only property \'paddingPercent\' of object \'#<Style>\'/)
 
@@ -211,7 +211,7 @@ test('paddingPercent', async (t:any): Promise<void> => {
 })
 
 test('margin', async (t:any): Promise<void> => {
-    const s = new Style({})
+    const s = new Style({},null)
     t.equal(typeof s.margin, "object")
     t.throws(()=>{(s as any).margin=""},/Cannot assign to read only property \'margin\' of object \'#<Style>\'/)
 
@@ -226,7 +226,7 @@ test('margin', async (t:any): Promise<void> => {
     checkEdge(t,s.margin,"vertical");
 })
 test('marginPercent', async (t:any): Promise<void> => {
-    const s = new Style({})
+    const s = new Style({},null)
     t.equal(typeof s.marginPercent, "object")
     t.throws(()=>{(s as any).marginPercent=""},/Cannot assign to read only property \'marginPercent\' of object \'#<Style>\'/)
 
@@ -242,7 +242,7 @@ test('marginPercent', async (t:any): Promise<void> => {
 })
 
 test('marginAuto', async (t:any): Promise<void> => {
-    const s = new Style({})
+    const s = new Style({},null)
     t.equal(typeof s.marginAuto, "object")
     t.throws(()=>{(s as any).marginAuto=""},/Cannot assign to read only property \'marginAuto\' of object \'#<Style>\'/)
 

@@ -294,25 +294,30 @@ static napi_value link_style_to_node(napi_env env, YGNodeRef node, napi_value th
 
     return NULL;
 }
-#include <gtk/gtk.h>
+
 
 LIBUI_FUNCTION(styleNew) {
-    INIT_ARGS(1);
-
+    INIT_ARGS(2);
     napi_valuetype argType;
-    napi_typeof(env, argv[0], &argType);
+
     YGNodeRef node;
-    if (argType == napi_null) {
+    printf("argc %d\n",argc);
+    if (argc < 2) {
         node = YGNodeNew();
     } else {
-        GtkWidget* widget;
-        napi_status status = napi_unwrap(env, argv[0], (void**)&widget);
-        CHECK_STATUS_THROW(status, napi_unwrap);      
-        node = g_object_get_data(G_OBJECT(widget),"yoganode");
+        napi_typeof(env, argv[1], &argType);
+        if (argType == napi_null) {
+            printf("napi_null\n");
+            node = YGNodeNew();
+        } else {
+            printf("get node\n");
+            node = dsg_widget_get_node(env, argv[1]);
+        }
     }
+
+
     
     link_style_to_node(env, node, this);
-
     return this;
 }
 

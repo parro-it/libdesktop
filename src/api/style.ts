@@ -223,7 +223,7 @@ export const Style:{
 	 * @param props - property of the label to create.
 	 * @param children - ignored
 	 */
-	new(props: any): Style
+	new(props: any, widget: any): Style
 } = style.Style;
   
 
