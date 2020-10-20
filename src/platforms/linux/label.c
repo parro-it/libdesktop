@@ -1,21 +1,14 @@
 #include "napi_utils.h"
 #include "widget.h"
+#include "control.h"
 #include <gtk/gtk.h>
 
 #include <yoga/Yoga.h>
 
 #define MODULE "label"
 
-
-static void label_finalize(napi_env env, void *finalize_data, void *finalize_hint) {
-    GtkWidget* widget = finalize_data;
-    YGNodeRef node = g_object_get_data(G_OBJECT( widget),"yoganode");
-    YGNodeFree(node);
-}
-
-extern napi_ref StyleRef;
-void link_style_to_node(napi_env env, YGNodeRef node, napi_value this);
-
+//extern napi_ref StyleRef;
+//void link_style_to_node(napi_env env, YGNodeRef node, napi_value this);
 
 
 
@@ -26,12 +19,6 @@ LIBUI_FUNCTION(labelNew) {
    	GtkWidget* widget = gtk_label_new("Hello guys & gals.");
     
     dsk_wrap_widget(env,widget,this);
-    
-    //printf("LABEL 222\n");
-    //int32_t width=150;
-    //int32_t height=50;
-    //YGNodeStyleSetWidth(node,width);
-    //YGNodeStyleSetHeight(node,height);
 
     return this;
 }

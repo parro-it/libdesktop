@@ -1,5 +1,6 @@
 #include "napi_utils.h"
 #include "widget.h"
+#include "control.h"
 #include <gtk/gtk.h>
 
 #define MODULE "win"
@@ -9,23 +10,32 @@ static void window_finalize(napi_env env, void *finalize_data, void *finalize_hi
 
 }
 
-GtkWidget* container_new_gtk();
-void append_all_children_gtk(napi_env env,GtkWidget* widget,napi_value children);
-void calculate_layout_gtk(GtkWidget* container);
+extern napi_ref ContainerRef;
 
 LIBUI_FUNCTION(windowNew) {
     INIT_ARGS(2);
 
-    printf("WIDNWOS NEW\n");
+    printf("WINDOWS NEW\n");
    	GtkWindow* window =(GtkWindow*) gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    napi_status status = napi_wrap(env, this, window, window_finalize, NULL, NULL);
-    CHECK_STATUS_THROW(status, napi_wrap);                                          
+    dsk_wrap_widget(env, window, this);
 
-    GtkWidget* child_gtk = container_new_gtk();
-    append_all_children_gtk(env, child_gtk, argv[1]);
-    gtk_container_add(GTK_CONTAINER( window), child_gtk);
-    calculate_layout_gtk(child_gtk);
 
+    napi_value Container;
+    napi_value container;
+    napi_value null;
+
+    napi_get_reference_value(env, ContainerRef, &Container);
+    napi_get_null(env,&null);
+    napi_new_instance(env, Container,2,(napi_value[]){null,argv[1]},&container);
+    napi_set_named_property(env, this, "container", container);
+
+    GtkWidget* child_gtk;
+    napi_unwrap(env,container,(void**)&child_gtk);
+    gtk_container_add(GTK_CONTAINER(window), child_gtk);
+
+    YGNodeRef root = dsk_widget_get_node(env, container);
+    dsk_calculate_layout(env, child_gtk, root);
+    
     gtk_widget_show_all(GTK_WIDGET(window));
     return this;
 }

@@ -38,6 +38,6 @@ napi_value _dsk_define_class(napi_env env, napi_value exports, const char* name,
 #define dsk_define_class_ref(env, exports,  name,  constructor, properties, ref) \
     _dsk_define_class(env,exports,name,constructor,(properties), sizeof((properties))/sizeof(napi_property_descriptor), ref) \
 
-YGNodeRef dsg_widget_get_node(napi_env env, napi_value widget);
+YGNodeRef dsk_widget_get_node(napi_env env, napi_value widget);
 
 #endif

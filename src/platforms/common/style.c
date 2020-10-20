@@ -301,7 +301,7 @@ LIBUI_FUNCTION(styleNew) {
     napi_valuetype argType;
 
     YGNodeRef node;
-    printf("argc %d\n",argc);
+    printf("argc %ld\n",argc);
     if (argc < 2) {
         node = YGNodeNew();
     } else {
@@ -311,7 +311,7 @@ LIBUI_FUNCTION(styleNew) {
             node = YGNodeNew();
         } else {
             printf("get node\n");
-            node = dsg_widget_get_node(env, argv[1]);
+            node = dsk_widget_get_node(env, argv[1]);
         }
     }
 
