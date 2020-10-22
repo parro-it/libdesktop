@@ -11,7 +11,6 @@ LIBUI_FUNCTION(widgetSetPropS) {
     NSObject* widget; 
     DSK_UNWRAP_WIDGET();
     LOAD_PROP_NAME();
-    printf("SET %s to  %s\n",propname,value);
     [widget setValue:[NSString stringWithUTF8String:value]
               forKey:[NSString stringWithUTF8String:propname]];
 

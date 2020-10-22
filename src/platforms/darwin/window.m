@@ -1,5 +1,6 @@
 #include "napi_utils.h"
 #include "widget.h"
+#include "control.h"
 #import <Cocoa/Cocoa.h>
 
 #define MODULE "win"
@@ -10,22 +11,47 @@ static void window_finalize(napi_env env, void *finalize_data, void *finalize_hi
 
 }
 
+extern napi_ref ContainerRef;
 
 
 
+@interface DskWindow : NSWindow 
+	@property (nonatomic, readwrite) napi_value wrapper;
+    @property (nonatomic, readwrite) YGNodeRef yoganode;
+@end
+
+@implementation DskWindow
+@end
 
 LIBUI_FUNCTION(windowNew) {
     INIT_ARGS(2);
 
     printf("WINDOWS NEW\n");
    	
-    NSWindow* win =[[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, (CGFloat) 800, (CGFloat) 600)
+    DskWindow* win =[[DskWindow alloc] initWithContentRect:NSMakeRect(0, 0, (CGFloat) 800, (CGFloat) 600)
 		styleMask:NSWindowStyleMaskTitled
 		backing:NSBackingStoreBuffered
 		defer:0];
+    dsk_wrap_widget(env, win, this);
+
+
+    napi_value Container;
+    napi_value container;
+    napi_value null;
+
+    napi_get_reference_value(env, ContainerRef, &Container);
+    napi_get_null(env,&null);
+    napi_new_instance(env, Container,2,(napi_value[]){null,argv[1]},&container);
+    napi_set_named_property(env, this, "container", container);
+
+    NSView* child_gtk;
+    napi_unwrap(env,container,(void**)&child_gtk);
+    win.contentView = child_gtk;
+
+    YGNodeRef root = dsk_widget_get_node(env, container);
+    dsk_calculate_layout(env, child_gtk, root);
+    
     void* winhnd = win;
-    napi_status status = napi_wrap(env, this, winhnd, window_finalize, NULL, NULL);
-    CHECK_STATUS_THROW(status, napi_wrap);                                          
     [win makeKeyAndOrderFront:win];
 
     return this;
