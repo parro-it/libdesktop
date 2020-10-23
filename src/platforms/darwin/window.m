@@ -43,8 +43,8 @@ LIBUI_FUNCTION(windowNew) {
 	[widget3 setStringValue: @"ciao cioa"];
 
     [widget1 setFrame:NSMakeRect(20,20,100,50)];
-    [widget2 setFrame:NSMakeRect(20,80,100,50)];
-    [widget3 setFrame:NSMakeRect(20,140,100,50)];
+    [widget2 setFrame:NSMakeRect(40,80,120,50)];
+    [widget3 setFrame:NSMakeRect(60,140,140,50)];
     
     [win.contentView addSubview: widget1];
     [win.contentView addSubview: widget2];
