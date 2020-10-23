@@ -25,7 +25,7 @@ extern napi_ref ContainerRef;
 
 LIBUI_FUNCTION(windowNew) {
     INIT_ARGS(2);
-    DskWindow* win =[[DskWindow alloc] initWithContentRect:NSMakeRect(0, 0, (CGFloat) 800, (CGFloat) 600)
+    /*DskWindow* win =[[DskWindow alloc] initWithContentRect:NSMakeRect(0, 0, (CGFloat) 800, (CGFloat) 600)
 		styleMask:NSWindowStyleMaskTitled
 		backing:NSBackingStoreBuffered
 		defer:0];
@@ -46,15 +46,19 @@ LIBUI_FUNCTION(windowNew) {
     [widget2 setFrame:NSMakeRect(40,80,120,50)];
     [widget3 setFrame:NSMakeRect(60,140,140,50)];
     
-    [win.contentView addSubview: widget1];
-    [win.contentView addSubview: widget2];
-    [win.contentView addSubview: widget3];
-    [win setStyleMask: (NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask)];
+    NSView* cnt = [[NSView alloc] init];
+    //cnt.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
+
+    [cnt setFrame:NSMakeRect(0,0,800,600)];
+    [cnt addSubview: widget1];
+    [cnt addSubview: widget2];
+    [cnt addSubview: widget3];
+
+    [win.contentView addSubview: cnt];
+    
     [win makeKeyAndOrderFront:win];
+*/
 
-
-    /*
-    printf("WINDOWS NEW\n");
    	
     DskWindow* win =[[DskWindow alloc] initWithContentRect:NSMakeRect(0, 0, (CGFloat) 800, (CGFloat) 600)
 		styleMask:NSWindowStyleMaskTitled
@@ -79,9 +83,11 @@ LIBUI_FUNCTION(windowNew) {
     YGNodeRef root = dsk_widget_get_node(env, container);
     dsk_calculate_layout(env, child_gtk, root);
     
+    [win setStyleMask: (NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask)];
+
     void* winhnd = win;
     [win makeKeyAndOrderFront:win];
-    */
+    
     return this;
 }
 
