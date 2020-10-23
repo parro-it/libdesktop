@@ -53,7 +53,7 @@ test('Window', async (t:any): Promise<void> => {
         ]),
     ])
 
-    console.log({win})
+/*    console.log({win})
     console.log(win.title)
     win.title = "Prova";
     win.width=640
@@ -61,5 +61,6 @@ test('Window', async (t:any): Promise<void> => {
     win.visible = true;
     
     console.log(win.title)
+*/
     app.start()
 })

@@ -25,7 +25,35 @@ extern napi_ref ContainerRef;
 
 LIBUI_FUNCTION(windowNew) {
     INIT_ARGS(2);
+    DskWindow* win =[[DskWindow alloc] initWithContentRect:NSMakeRect(0, 0, (CGFloat) 800, (CGFloat) 600)
+		styleMask:NSWindowStyleMaskTitled
+		backing:NSBackingStoreBuffered
+		defer:0];
+    
+    NSTextField *widget1;
+	widget1 = [[NSTextField alloc] initWithFrame:NSZeroRect];
+	[widget1 setStringValue: @"ciao mac"];
 
+    NSTextField *widget2;
+	widget2 = [[NSTextField alloc] initWithFrame:NSZeroRect];
+	[widget2 setStringValue: @"2222 label"];
+
+    NSTextField *widget3;
+	widget3 = [[NSTextField alloc] initWithFrame:NSZeroRect];
+	[widget3 setStringValue: @"ciao cioa"];
+
+    [widget1 setFrame:NSMakeRect(20,20,100,50)];
+    [widget2 setFrame:NSMakeRect(20,80,100,50)];
+    [widget3 setFrame:NSMakeRect(20,140,100,50)];
+    
+    [win.contentView addSubview: widget1];
+    [win.contentView addSubview: widget2];
+    [win.contentView addSubview: widget3];
+    [win setStyleMask: (NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask)];
+    [win makeKeyAndOrderFront:win];
+
+
+    /*
     printf("WINDOWS NEW\n");
    	
     DskWindow* win =[[DskWindow alloc] initWithContentRect:NSMakeRect(0, 0, (CGFloat) 800, (CGFloat) 600)
@@ -53,7 +81,7 @@ LIBUI_FUNCTION(windowNew) {
     
     void* winhnd = win;
     [win makeKeyAndOrderFront:win];
-
+    */
     return this;
 }
 

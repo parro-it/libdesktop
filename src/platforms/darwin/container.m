@@ -25,6 +25,7 @@ void dsk_widget_move(napi_env env, UIHandle container, UIHandle widget, float xc
 void dsk_platform_container_add_child(UIHandle parent, UIHandle child) {
     NSView* cnt = parent;
     printf("\n\nCHILD: %p\n\n");
+
     [cnt addSubview:(NSView*)child];
 }
 
@@ -32,7 +33,10 @@ LIBUI_FUNCTION(containerNew) {
     INIT_ARGS(2);
 
     DskContainer* widget = [DskContainer alloc];
-   	[widget setHidden:NO];
+   	widget.translatesAutoresizingMaskIntoConstraints = true;
+    widget.frame = NSMakeRect(0,0,400,400);
+
+    [widget setHidden:NO];
     dsk_wrap_widget(env, widget, this);
         
     dsk_append_all_children(env, widget, argv[1]);

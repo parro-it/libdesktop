@@ -26,6 +26,9 @@ LIBUI_FUNCTION(labelNew) {
 	[widget setSelectable:NO];
 	[widget setDrawsBackground:NO];
     [widget setHidden:NO];
+   	widget.translatesAutoresizingMaskIntoConstraints = true;
+    widget.frame = NSMakeRect(0,0,100,40);
+
     
     dsk_wrap_widget(env, widget, this);
 
