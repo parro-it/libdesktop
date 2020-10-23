@@ -15,7 +15,7 @@
 LIBUI_FUNCTION(labelNew) {
     INIT_ARGS(2);
 
-    printf("LABEL NEW\n");
+    // printf("LABEL NEW\n");
    	GtkWidget* widget = gtk_label_new("Hello guys & gals.");
     
     dsk_wrap_widget(env,widget,this);

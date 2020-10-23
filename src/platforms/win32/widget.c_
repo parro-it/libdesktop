@@ -19,10 +19,10 @@ LIBUI_FUNCTION(widgetGetPropS) {
     GtkWidget* widget; 
     DSK_UNWRAP_WIDGET();                                                                               
     LOAD_PROP_NAME();                                        
-    printf("w:%p\n",widget);
+    // printf("w:%p\n",widget);
     char* result;
     g_object_get(widget, propname, &result, NULL);
-    printf("result:%s\n",result);
+    // printf("result:%s\n",result);
     if (result == NULL) {
         napi_value null;
         napi_status status = napi_get_null(env,&null);
@@ -38,7 +38,7 @@ LIBUI_FUNCTION(widgetSetPropI32) {
     GtkWidget* widget; 
     DSK_UNWRAP_WIDGET();
     LOAD_PROP_NAME();
-    printf("SET %s %d",propname,value);
+    // printf("SET %s %d",propname,value);
 
     g_object_set(widget, propname, value, NULL);
 
@@ -61,7 +61,7 @@ LIBUI_FUNCTION(widgetSetPropBool) {
     ARG_BOOL(value, 0);
     DSK_UNWRAP_WIDGET();
     LOAD_PROP_NAME();
-    printf("SET %s %d",propname,value);
+    // printf("SET %s %d",propname,value);
     g_object_set(widget, propname, value, NULL);
 
     return NULL;

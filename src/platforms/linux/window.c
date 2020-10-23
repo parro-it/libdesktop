@@ -15,7 +15,7 @@ extern napi_ref ContainerRef;
 LIBUI_FUNCTION(windowNew) {
     INIT_ARGS(2);
 
-    printf("WINDOWS NEW\n");
+    // printf("WINDOWS NEW\n");
    	GtkWindow* window =(GtkWindow*) gtk_window_new(GTK_WINDOW_TOPLEVEL);
     dsk_wrap_widget(env, window, this);
 

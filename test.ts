@@ -1,6 +1,8 @@
 //import './tests/style.ts'
 import test from 'tape-async'
+console.log("PPPP")
 import {App,Window,Label,Container} from './index'
+console.log("DDD")
 const app = App.create()
 test('run on multiple platforms', async (t:any): Promise<void> => {
     t.equal(app.arch, process.platform)
@@ -39,9 +41,12 @@ test('Window', async (t:any): Promise<void> => {
         new Label({},[])
     ]
     
-    const win = new Window({},[
-        new Container({},[l1,l2,l3]),
-        new Container({},[
+    const win = new Window({},[   
+         new Label({},[]),
+    new Label({},[]),
+    new Label({},[])
+        //new Container({},[l1,l2,l3]),
+        /*new Container({},[
             new Label({},[]),
             new Label({},[]),
             new Label({},[])
@@ -50,7 +55,7 @@ test('Window', async (t:any): Promise<void> => {
             new Label({},[]),
             new Label({},[]),
             new Label({},[])
-        ]),
+        ]),*/
     ])
 
 /*    console.log({win})

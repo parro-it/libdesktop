@@ -301,16 +301,16 @@ LIBUI_FUNCTION(styleNew) {
     napi_valuetype argType;
 
     YGNodeRef node;
-    printf("argc %ld\n",argc);
+    // printf("argc %zd\n",argc);
     if (argc < 2) {
         node = YGNodeNew();
     } else {
         napi_typeof(env, argv[1], &argType);
         if (argType == napi_null) {
-            printf("napi_null\n");
+            // printf("napi_null\n");
             node = YGNodeNew();
         } else {
-            printf("get node\n");
+            // printf("get node\n");
             node = dsk_widget_get_node(env, argv[1]);
         }
     }

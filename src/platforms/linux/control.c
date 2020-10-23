@@ -1,20 +1,20 @@
-#include "yoga/Yoga.h"
+#include "yoga.h"
 #include "gtk/gtk.h"
 #include "napi_utils.h"
 #include "control.h"
 
 YGNodeRef dsk_widget_get_node(napi_env env, napi_value widget) {
-    printf("unwrap %p\n", widget);
+    // printf("unwrap %p\n", widget);
     GObject* widgetG;
     napi_status status = napi_unwrap(env, widget, (void**)&widgetG);
     if (status != napi_ok) {
-        printf("non ok \n");
+        // printf("non ok \n");
         const napi_extended_error_info *result;                                                    
 		napi_get_last_error_info(env, &result);                                                    
-		printf("napi_unwrap failed with code %d: %s\n", result->engine_error_code, result->error_message);
+		// printf("napi_unwrap failed with code %d: %s\n", result->engine_error_code, result->error_message);
         return NULL;
     }
-    printf("widgetG %p\n",widgetG);
+    // printf("widgetG %p\n",widgetG);
     YGNodeRef node = g_object_get_data(widgetG,"yoganode");
     return node;
 }
@@ -39,7 +39,7 @@ napi_value dsk_widget_wrapper(napi_env env, UIHandle widget) {
     if (ref == NULL) {
         return NULL;
     }
-    printf("ref is %p\n",ref);
+    // printf("ref is %p\n",ref);
     napi_value node;
     napi_get_reference_value(env,ref,&node);
     return node;

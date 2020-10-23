@@ -2,7 +2,7 @@
 #define MODULE "app"
 
 LIBUI_FUNCTION(appArch) {
-    //printf("appArch\n");
+    //// printf("appArch\n");
     
     return make_utf8_string(env,"darwin");
 }

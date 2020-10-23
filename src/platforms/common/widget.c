@@ -5,7 +5,7 @@ napi_value _dsk_define_class(napi_env env, napi_value exports, const char* name,
 
     napi_status status;
     napi_value Class;
-    printf("PROPERTIES %ld\n",propertiesCount);
+    // printf("PROPERTIES %s %zd\n",name, propertiesCount);
     status = napi_define_class(env, name, NAPI_AUTO_LENGTH, constructor, NULL, propertiesCount, properties, &Class);
     CHECK_STATUS_THROW(status, napi_define_class);                                          
 	

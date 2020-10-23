@@ -1,8 +1,10 @@
 #include "napi_utils.h"
 #include <windows.h>
+#include "control.h"
 #define MODULE "win"
 
 static napi_ref WindowRef;
+extern napi_ref ContainerRef;
 
 static void window_finalize(napi_env env, void *finalize_data, void *finalize_hint) {
 
@@ -89,8 +91,8 @@ HINSTANCE hInstance = GetModuleHandle(NULL);
 LIBUI_FUNCTION(windowNew) {
     INIT_ARGS(2);
     HINSTANCE hInstance = GetModuleHandle(NULL);
-    printf("WIDNWOS NEW\n");
-    HWND widget = CreateWindowExW(0,
+    // printf("WIDNWOS NEW\n");
+    HWND win = CreateWindowExW(0,
 		windowClass, L"prova",
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT,
@@ -99,18 +101,46 @@ LIBUI_FUNCTION(windowNew) {
 		// even if it doesn't, we're adjusting it later
 		800, 600,
 		NULL, NULL, hInstance, NULL);
-	ShowWindow(widget, SW_SHOW);
 
-    napi_status status = napi_wrap(env, this, widget, window_finalize, NULL, NULL);
-    CHECK_STATUS_THROW(status, napi_wrap);                                          
+  	dsk_wrap_widget(env, win, this);
+
+
+    napi_value Container;
+    napi_value container;
+    napi_value null;
+
+    napi_get_reference_value(env, ContainerRef, &Container);
+    napi_get_null(env,&null);
+    napi_new_instance(env, Container,2,(napi_value[]){null,argv[1]},&container);
+    napi_set_named_property(env, this, "container", container);
+
+    HWND child_gtk;
+    napi_unwrap(env,container,(void**)&child_gtk);
+    SetParent(child_gtk, win);
+
+    YGNodeRef root = dsk_widget_get_node(env, container);
+    dsk_calculate_layout(env, child_gtk, root);
+	
+	ShowWindow(win, SW_SHOW);
 
     return this;
 }
 
+HWND dummy;
 
 napi_value win_init(napi_env env, napi_value exports) {
     DEFINE_MODULE()
-    
+
+    HINSTANCE hInstance = GetModuleHandle(NULL);
+	dummy = CreateWindowExW(0,
+		windowClass, L"",
+		WS_OVERLAPPEDWINDOW,
+		CW_USEDEFAULT, CW_USEDEFAULT,
+		0, 0,
+		NULL, NULL, hInstance, NULL);
+
+
+    registerWindowClass(NULL,NULL);
     const napi_property_descriptor properties[1];// = {
         //DSK_RWPROP_S(title),
         //DSK_RWPROP_I32(width,"default-width"),

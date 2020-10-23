@@ -1,59 +1,59 @@
 #include "napi_utils.h"
 #include "widget.h"
 #include <windows.h>
-#include <winuser.h>
-
+#include "control.h"
 #include <yoga/Yoga.h>
 
 #define MODULE "container"
 
 void dsk_widget_move(napi_env env, UIHandle container, UIHandle widget, float xcoord, float ycoord) {
-    NSView* view = (NSView*) widget;
-    printf("MOVE %f %f\n",xcoord,ycoord);
-    [view setFrame: NSMakeRect(xcoord,ycoord, 150, 60)];
+    printf("SET POS %p TO %d, %d\n", widget,(int)xcoord,(int)ycoord);
+    bool ret = SetWindowPos((HWND)widget,HWND_TOP,(int)xcoord,(int)ycoord,0,0 ,SWP_NOSIZE|SWP_NOZORDER);
+	if (!ret) {
+		printf("ERROR\n");
+	}
 }
 
 void dsk_platform_container_add_child(UIHandle parent, UIHandle child) {
-    HWND cnt = parent;
-    printf("\n\nCHILD: %p\n\n");
-    SetParent()
-    [cnt addSubview:(NSView*)child];
+    SetParent((HWND)child,(HWND)parent);
+
 }
+extern HWND dummy;
 
 LIBUI_FUNCTION(containerNew) {
     INIT_ARGS(2);
 
     HINSTANCE hInstance = GetModuleHandle(NULL);
-    HWND widget = CreateWindowExW(0,
-		containerClass, L"",
-		WS_EX_CONTROLPARENT,
+    HWND widget = CreateWindowExW(WS_EX_CONTROLPARENT,
+		L"DSKcontainerClass", L"",
+		WS_CHILD ,
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		// use the raw width and height for now
 		// this will get CW_USEDEFAULT (hopefully) predicting well
 		// even if it doesn't, we're adjusting it later
 		800, 600,
-		NULL, NULL, hInstance, NULL);
+		dummy, NULL, hInstance, NULL);
 
-  
-//    widget.frame = NSMakeRect(0,0,800,600);
+	// printf("CREATED container\n");
   
     dsk_wrap_widget(env, widget, this);
         
     dsk_append_all_children(env, widget, argv[1]);
 
-    
+    SetWindowPos(widget, 0, 0, 0, 0, 0, 
+  	SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+
     return this;
 }
 
 napi_ref ContainerRef;
+ATOM initContainer();
 
 napi_value container_init(napi_env env, napi_value exports) {
     DEFINE_MODULE()
-
-    dsk_define_class_ref(env,module,"Container",containerNew,((napi_property_descriptor[]){
-       //DSK_RWPROP_BOOL(visible,"visible"),
-       //DSK_RWPROP_BOOL(enabled,"enabled"),
-    }), &ContainerRef);
+    initContainer();
+    //napi_property_descriptor empty[0];
+    dsk_define_class_ref(env,module,"Container",containerNew,NULL, &ContainerRef);
 
     return exports;
 }
@@ -119,16 +119,15 @@ static LRESULT CALLBACK containerWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
 	return DefWindowProcW(hwnd, uMsg, wParam, lParam);
 }
 
-ATOM initContainer(HICON hDefaultIcon, HCURSOR hDefaultCursor)
-{
+ATOM initContainer() {
 	WNDCLASSW wc;
 
 	ZeroMemory(&wc, sizeof (WNDCLASSW));
-	wc.lpszClassName = containerClass;
+	wc.lpszClassName = L"DSKcontainerClass";
 	wc.lpfnWndProc = containerWndProc;
-	wc.hInstance = hInstance;
-	wc.hIcon = hDefaultIcon;
-	wc.hCursor = hDefaultCursor;
+	//wc.hInstance = hInstance;
+	//wc.hIcon = hDefaultIcon;
+	//wc.hCursor = hDefaultCursor;
 	wc.hbrBackground = (HBRUSH) (COLOR_BTNFACE + 1);
 	wc.cbWndExtra = sizeof (void *);
 	return RegisterClassW(&wc);
@@ -136,21 +135,6 @@ ATOM initContainer(HICON hDefaultIcon, HCURSOR hDefaultCursor)
 
 void uninitContainer(void)
 {
-	if (UnregisterClassW(containerClass, hInstance) == 0)
-		logLastError(L"error unregistering container window class");
+	//if (UnregisterClassW(L"DSKcontainerClass", NULL) == 0)
+		//logLastError(L"error unregistering container window class");
 }
-/*
-HWND uiWindowsMakeContainer(uiWindowsControl *c, void (*onResize)(uiWindowsControl *))
-{
-	struct containerInit init;
-
-	// TODO onResize cannot be NULL
-	init.c = c;
-	init.onResize = onResize;
-	return uiWindowsEnsureCreateControlHWND(WS_EX_CONTROLPARENT,
-		containerClass, L"",
-		0,
-		hInstance, (LPVOID) (&init),
-		FALSE);
-}
-*/
