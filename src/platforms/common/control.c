@@ -18,9 +18,8 @@ void dsk_wrap_widget(napi_env env, UIHandle widget, napi_value this) {
     assert(status == napi_ok);
     // printf("2\n");
     YGNodeRef node = YGNodeNew();
-    // printf("3\n");
-    YGNodeStyleSetWidth(node,50);
-    YGNodeStyleSetHeight(node,50);
+    
+    
     // printf("4 node %p\n", node);
     dsk_widget_set_node(env, this, node);
     // printf("5\n");

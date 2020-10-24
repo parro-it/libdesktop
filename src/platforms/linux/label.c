@@ -73,6 +73,14 @@ LIBUI_FUNCTION(labelNew) {
         return NULL;
     }
 
+    int minwidth,natwidth;
+    gtk_widget_get_preferred_width(widget, &minwidth, &natwidth);
+    printf("LABLE min %d nat %d\n", minwidth,natwidth);
+
+    YGNodeRef node =dsk_widget_get_node(env,this);
+    YGNodeStyleSetWidth(node,50);
+    YGNodeStyleSetHeight(node,50);
+
     
     return this;
 }
