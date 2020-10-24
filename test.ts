@@ -1,8 +1,6 @@
 //import './tests/style.ts'
 import test from 'tape-async'
-console.log("PPPP")
 import {App,Window,Label,Container} from './index'
-console.log("DDD")
 const app = App.create()
 test('run on multiple platforms', async (t:any): Promise<void> => {
     t.equal(app.arch, process.platform)
@@ -36,15 +34,23 @@ test('Window', async (t:any): Promise<void> => {
     t.equal(typeof Window, "function")
     const app = App.create()
     const [l1,l2,l3] = [
-        new Label({},[]),
-        new Label({},[]),
-        new Label({},[])
-    ]
-    
+        new Label({label:"plutone",visible:false},[]),
+        new Label({
+            label:"lunabadula",
+            enabled:false,
+            style: {
+                margin: {right: 50,vertical:30},
+                padding: {left: 50},
+                minHeight: 350,
+                height: 350,
+            }
+        },[]),
+        new Label({label:"terra mondo tondo"},[]),
+        
+    ];
+    //(l3 as any).setLabel("SALVE");
     const win = new Window({},[   
-         new Label({},[]),
-    new Label({},[]),
-    new Label({},[])
+        l1,l2,l3
         //new Container({},[l1,l2,l3]),
         /*new Container({},[
             new Label({},[]),

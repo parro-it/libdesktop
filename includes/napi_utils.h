@@ -10,21 +10,31 @@
 #define DSK_UNUSED(ARG) ;
 
 
-#define INIT_EMPTY_ARGS()                                                                      \
-	napi_value argv[1];                                                                   \
-	napi_value this;																			   \
-	size_t argc = 0;									\
-	napi_get_cb_info(env, info, &argc, argv, &this, NULL);                                         
+#define INIT_EMPTY_ARGS()                                                                      		\
+	napi_value argv[1];                                                                   			\
+	napi_value this;																			   	\
+	size_t argc = 0;																				\
+	napi_get_cb_info(env, info, &argc, argv, &this, NULL);                                         	\
+	goto dsk_continue;																				\
+	goto dsk_error;																					\
+	dsk_error:																						\
+		return NULL;																				\
+	dsk_continue:																					\
 
-#define INIT_ARGS(ARGS_COUNT)                                                                      \
-	napi_value argv[ARGS_COUNT];                                                                   \
-	napi_value this;																			   \
-	size_t argc = ARGS_COUNT;                                                                      \
-	napi_get_cb_info(env, info, &argc, argv, &this, NULL);                                         \
-	if (argc < ARGS_COUNT) {                                                                       \
-		napi_throw_error(env, "EINVAL", "Too few arguments");                                      \
-		return NULL;                                                                               \
-	}
+#define INIT_ARGS(ARGS_COUNT)                                                       				\
+	napi_value argv[ARGS_COUNT];                                                    				\
+	napi_value this;																				\
+	size_t argc = ARGS_COUNT;                                                       				\
+	napi_get_cb_info(env, info, &argc, argv, &this, NULL);                          				\
+	if (argc < ARGS_COUNT) {                                                        				\
+		napi_throw_error(env, "EINVAL", "Too few arguments");                       				\
+		return NULL;                                                                				\
+	}																								\
+	goto dsk_continue;																				\
+	goto dsk_error;																					\
+	dsk_error:																						\
+		return NULL;																				\
+	dsk_continue:																					\
 
 #define ARG_INT32(ARG_NAME, ARG_IDX)                                                               \
 	int32_t ARG_NAME;                                                                              \

@@ -22,7 +22,7 @@
     }
 @end
 
-void dsk_widget_move(napi_env env, UIHandle container, UIHandle widget, float xcoord, float ycoord) {
+void dsk_widget_reposition(napi_env env, UIHandle container, UIHandle widget, float xcoord, float ycoord) {
     NSView* view = (NSView*) widget;
     // printf("MOVE %f %f\n",xcoord,ycoord);
     [view setFrame: NSMakeRect(xcoord,ycoord, 150, 60)];

@@ -307,15 +307,13 @@ LIBUI_FUNCTION(styleNew) {
     } else {
         napi_typeof(env, argv[1], &argType);
         if (argType == napi_null) {
-            // printf("napi_null\n");
+            printf("napi_null\n");
             node = YGNodeNew();
         } else {
-            // printf("get node\n");
             node = dsk_widget_get_node(env, argv[1]);
+            printf("get node %p\n", node);
         }
     }
-
-
     
     link_style_to_node(env, node, this);
     return this;
@@ -356,7 +354,7 @@ static LIBUI_FUNCTION(edgedFloatSetter) {
     YGEdge* edge; 
     status = napi_get_cb_info(env, info, NULL, NULL, NULL,(void**)&edge); 
     CHECK_STATUS_THROW(status, napi_get_cb_info); 
-
+printf("EDGE = %d %f\n", *edge, value);
     data->setter(data->node, *edge, (float)value);
     
     return NULL;

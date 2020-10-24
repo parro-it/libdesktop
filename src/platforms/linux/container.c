@@ -18,7 +18,7 @@ LIBUI_FUNCTION(containerAppend) {
     return this;
 }
 
-void dsk_widget_move(napi_env env, UIHandle container, UIHandle widget, float xcoord, float ycoord) {
+void dsk_widget_reposition(napi_env env, UIHandle container, UIHandle widget, float xcoord, float ycoord, float width, float height) {
         GValue x = G_VALUE_INIT;
         g_value_init(&x,G_TYPE_INT);
         g_value_set_int(&x,xcoord);
@@ -28,6 +28,7 @@ void dsk_widget_move(napi_env env, UIHandle container, UIHandle widget, float xc
         
         gtk_container_child_set_property(container, widget, "x", &x);
         gtk_container_child_set_property(container, widget, "y", &y);
+        gtk_widget_set_size_request(widget, (int)width,(int)height);
 }
 
 void dsk_platform_container_add_child(UIHandle parent, UIHandle child) {

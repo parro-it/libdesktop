@@ -6,8 +6,8 @@
 
 #define MODULE "container"
 
-void dsk_widget_move(napi_env env, UIHandle container, UIHandle widget, float xcoord, float ycoord) {
-    printf("SET POS %p TO %d, %d\n", widget,(int)xcoord,(int)ycoord);
+void dsk_widget_reposition(napi_env env, UIHandle container, UIHandle widget, float xcoord, float ycoord) {
+    //printf("SET POS %p TO %d, %d\n", widget,(int)xcoord,(int)ycoord);
     bool ret = SetWindowPos((HWND)widget,HWND_TOP,(int)xcoord,(int)ycoord,0,0 ,SWP_NOSIZE|SWP_NOZORDER);
 	if (!ret) {
 		printf("ERROR\n");

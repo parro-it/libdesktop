@@ -65,7 +65,7 @@ LIBUI_FUNCTION(labelNew) {
 		// even if it doesn't, we're adjusting it later
 		100, 20,
 		dummy, NULL, hInstance, NULL);
-	printf("CREATED LABEL %p\n",widget );
+	//printf("CREATED LABEL %p\n",widget );
 	if (widget==NULL) {
 		ErrorExit("CreateWindow");
 	}

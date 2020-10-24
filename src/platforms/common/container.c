@@ -2,15 +2,22 @@
 #include "napi_utils.h"
 
 void dsk_calculate_layout(napi_env env, UIHandle container, YGNodeRef root) {
-    
+    YGNodePrint(root,YGPrintOptionsChildren | YGPrintOptionsStyle  );
     YGNodeCalculateLayout(root,800,600,YGDirectionInherit);
     uint32_t childrenCount = YGNodeGetChildCount(root);
     
     for (uint32_t i=0; i < childrenCount; i++) {
         YGNodeRef childNode = YGNodeGetChild(root,i);
         UIHandle childHandle = YGNodeGetContext(childNode);
-        dsk_widget_move(env, container, childHandle, YGNodeLayoutGetLeft(childNode), YGNodeLayoutGetTop(childNode));
+        dsk_widget_reposition(
+            env, container, childHandle, 
+            YGNodeLayoutGetLeft(childNode), 
+            YGNodeLayoutGetTop(childNode),
+            YGNodeLayoutGetWidth(childNode), 
+            YGNodeLayoutGetHeight(childNode)
+        );
     }
+    YGNodePrint(root,YGPrintOptionsChildren | YGPrintOptionsLayout);
 }
 
 void dsk_add_child(napi_env env, UIHandle parentHandle, UIHandle childHandle) {

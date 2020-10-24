@@ -1,4 +1,4 @@
-
+import {Style} from "./style";
 /**
  * Base class of all controls except UiWindow
  */
@@ -17,10 +17,11 @@ export interface Control {
 	toplevel: boolean;
 	
 
-	left: number
-	top: number
+	left: number;
+	top: number;
+	
 	/**
 	 * Create a new UiControl object.
 	 */
-	//constructor(handle: any);
+	readonly style:Style;
 }

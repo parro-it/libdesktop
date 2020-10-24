@@ -16,7 +16,7 @@ void dsk_append_all_children(napi_env env, UIHandle widget,napi_value children);
 void widget_finalize(napi_env env, void *finalize_data, void *finalize_hint);
 
 void dsk_wrap_widget(napi_env env, UIHandle widget, napi_value this);
-void dsk_widget_move(napi_env env, UIHandle container, UIHandle widget, float x, float y);
+void dsk_widget_reposition(napi_env env, UIHandle container, UIHandle widget, float x, float y, float width, float height);
 //UIHandle dsk_unwrap_widget(napi_env env, napi_value this);
 napi_value dsk_widget_wrapper(napi_env env, UIHandle widget);
 void dsk_calculate_layout(napi_env env, UIHandle container, YGNodeRef root);
