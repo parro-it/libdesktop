@@ -15,9 +15,11 @@
 	napi_value this;																			   	\
 	size_t argc = 0;																				\
 	napi_get_cb_info(env, info, &argc, argv, &this, NULL);                                         	\
+	char* dsk_error_msg;																			\
 	goto dsk_continue;																				\
 	goto dsk_error;																					\
 	dsk_error:																						\
+		napi_throw_error(env, NULL, dsk_error_msg);          									\
 		return NULL;																				\
 	dsk_continue:																					\
 		;
@@ -31,9 +33,11 @@
 		napi_throw_error(env, "EINVAL", "Too few arguments");                       				\
 		return NULL;                                                                				\
 	}																								\
+	char* dsk_error_msg;																						\
 	goto dsk_continue;																				\
 	goto dsk_error;																					\
 	dsk_error:																						\
+		napi_throw_error(env, NULL, dsk_error_msg);          									\
 		return NULL;																				\
 	dsk_continue:																					\
 

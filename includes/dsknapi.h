@@ -6,7 +6,7 @@
     if (status != napi_ok) {                                      \
         const napi_extended_error_info *err;                      \
         napi_get_last_error_info(env, &err);                      \
-        napi_throw_error(env, NULL, err->error_message);          \
+        dsk_error_msg = (char*)err->error_message;                       \
         goto dsk_error;                                           \
     }                                                             \
 } while(0)

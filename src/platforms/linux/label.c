@@ -20,7 +20,7 @@ LIBUI_FUNCTION(labelNew) {
     //gdk_rgba_parse (&color, "rgba(100,90,80,1)");
     //gtk_widget_override_background_color(widget,GTK_STATE_FLAG_NORMAL, &color);
     dsk_wrap_widget(env,widget,this);
-
+    gtk_label_set_xalign(GTK_LABEL(widget),GTK_ALIGN_END);
     if (dsk_set_properties(env, argv[0], this)) {
         napi_throw_error(env,NULL,"Error while setting widget properties.\n");
         return NULL;

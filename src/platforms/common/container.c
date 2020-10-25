@@ -17,11 +17,11 @@ static void widget_reposition(napi_env env, UIHandle container, YGNodeRef root) 
     }
 }
 
-void dsk_calculate_layout(napi_env env, UIHandle container, YGNodeRef root) {
-    YGNodePrint(root,YGPrintOptionsChildren | YGPrintOptionsStyle  );
-    YGNodeCalculateLayout(root,YGUndefined,YGUndefined,YGDirectionInherit);
+void dsk_calculate_layout(napi_env env, UIHandle container, YGNodeRef root,float availableWidth,float availableHeight) {
+    //YGNodePrint(root,YGPrintOptionsChildren | YGPrintOptionsStyle  );
+    YGNodeCalculateLayout(root,availableWidth,availableHeight,YGDirectionInherit);
     widget_reposition(env,container,root);
-    YGNodePrint(root,YGPrintOptionsChildren | YGPrintOptionsLayout);
+    //YGNodePrint(root,YGPrintOptionsChildren | YGPrintOptionsLayout);
 }
 
 void dsk_add_child(napi_env env, UIHandle parentHandle, UIHandle childHandle) {

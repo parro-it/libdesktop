@@ -81,7 +81,7 @@ LIBUI_FUNCTION(windowNew) {
     win.contentView = child_gtk;
 
     YGNodeRef root = dsk_widget_get_node(env, container);
-    dsk_calculate_layout(env, child_gtk, root);
+    dsk_calculate_layout(env, child_gtk, root, YGUndefined, YGUndefined);
     
     [win setStyleMask: (NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask)];
 

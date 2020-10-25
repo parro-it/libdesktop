@@ -144,18 +144,18 @@ LIBUI_FUNCTION(getPropYGValue) {
                                                                                        
     YGValue result = fns->getterYGValue(node);
     
-    if (fns->unit=="AUTO") {
+    if (strcmp(fns->unit,"AUTO")) {
         return make_bool(env, result.unit==YGUnitAuto);
     }                                                                                      
 
-    if (fns->unit=="POINT") {
+    if (strcmp(fns->unit,"POINT")) {
         if (result.unit!=YGUnitPoint) {
             return make_double(env,NAN);
         }
         return make_double(env, result.value);
     }  
 
-    if (fns->unit=="PERCENT") {
+    if (strcmp(fns->unit,"PERCENT")) {
         if (result.unit!=YGUnitPercent) {
             return make_double(env,NAN);
         }

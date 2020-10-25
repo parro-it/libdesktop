@@ -48,6 +48,7 @@ void dsk_wrap_widget(napi_env env, UIHandle widget, napi_value this) {
 
 
 bool dsk_set_properties(napi_env env, napi_value props, napi_value target) {
+    char* dsk_error_msg = NULL;
     // printf("dsk_set_properties 1 %p %p\n", props, target);
     napi_value names;
     DSK_NAPI_CALL(napi_get_property_names(env, props, &names));
@@ -96,17 +97,19 @@ bool dsk_set_properties(napi_env env, napi_value props, napi_value target) {
     // printf("dsk_set_properties 1000\n");
     return false;
     dsk_error:
+        printf("dsk_set_properties: %s\n",dsk_error_msg);
         return true;
 
 }
 
 
 void dsk_set_children_preferred_sizes(YGNodeRef node, UIHandle widget) {
-    int childrenCount = YGNodeGetChildCount(node);
+    uint32_t childrenCount = YGNodeGetChildCount(node);
     
     if (childrenCount==0) {
         int width, height;
         dsk_get_preferred_sizes(widget,&width,&height);
+        
         YGNodeStyleSetWidth(node, width);
         YGNodeStyleSetHeight(node, height);
     } else {

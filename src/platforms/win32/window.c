@@ -119,7 +119,7 @@ LIBUI_FUNCTION(windowNew) {
     SetParent(child_gtk, win);
 
     YGNodeRef root = dsk_widget_get_node(env, container);
-    dsk_calculate_layout(env, child_gtk, root);
+    dsk_calculate_layout(env, child_gtk, root, YGUndefined, YGUndefined);
 	
 	ShowWindow(win, SW_SHOW);
 
