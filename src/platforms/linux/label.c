@@ -21,6 +21,14 @@ LIBUI_FUNCTION(labelNew) {
     //gtk_widget_override_background_color(widget,GTK_STATE_FLAG_NORMAL, &color);
     dsk_wrap_widget(env,widget,this);
     gtk_label_set_xalign(GTK_LABEL(widget),GTK_ALIGN_END);
+    
+    napi_value events;
+    DSK_NAPI_CALL(napi_create_object(env,&events));
+    DSK_NAPI_CALL(napi_set_named_property(env,this,"events",events));
+    
+    napi_value click = dsk_event_new_for_widget(env, "click", this);
+    DSK_NAPI_CALL(napi_set_named_property(env,events,"click",click));
+    
     if (dsk_set_properties(env, argv[0], this)) {
         napi_throw_error(env,NULL,"Error while setting widget properties.\n");
         return NULL;
@@ -41,6 +49,10 @@ napi_value label_init(napi_env env, napi_value exports) {
        DSK_CHILDPROP_I32(left,"x"),
        DSK_CHILDPROP_I32(top,"y"),
     }));
+
+
+    
+
 
     return exports;
 }

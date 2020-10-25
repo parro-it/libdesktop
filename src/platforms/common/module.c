@@ -7,22 +7,17 @@ napi_value label_init(napi_env env, napi_value exports);
 napi_value container_init(napi_env env, napi_value exports);
 napi_value style_init(napi_env env, napi_value exports);
 napi_value textfield_init(napi_env env, napi_value exports);
+napi_value event_init(napi_env env, napi_value exports);
 
 static napi_value init_all(napi_env env, napi_value exports) {
-	//printf("11\n");
 	app_init_core(env, exports);
-	//printf("22\n");
 	_libui_init_event_loop(env, exports);
-	//printf("33\n");
 	label_init(env, exports);
-	//printf("44\n");
 	win_init(env, exports);
-	//printf("55\n");
 	container_init(env, exports);
-	//printf("66\n");
 	style_init(env, exports);
 	textfield_init(env, exports);
-	//printf("77\n");
+	event_init(env, exports);
 	return exports;
 }
 

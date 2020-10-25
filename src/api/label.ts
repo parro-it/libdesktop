@@ -1,5 +1,6 @@
-import {Control} from './control'
-const {label} = require("../../build/Release/desktop.node")
+import {Control} from './control';
+const {label} = require("../../build/Release/desktop.node");
+import {Event} from "./event";
 
 /**
  * A static text label.
@@ -9,6 +10,10 @@ export interface Label extends Control {
 	 *  The text of the label.
 	 */
 	text: string;
+
+	events: {
+		click: Event;
+	};
 }
 
 

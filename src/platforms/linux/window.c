@@ -69,6 +69,8 @@ LIBUI_FUNCTION(windowNew) {
         &err
     );
 
+    gtk_widget_add_events(GTK_WIDGET(window),GDK_BUTTON_PRESS_MASK);
+
     gtk_window_set_resizable(window,true);
 
     if (err != NULL) {
