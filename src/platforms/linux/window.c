@@ -64,18 +64,17 @@ LIBUI_FUNCTION(windowNew) {
     // printf("WINDOWS NEW\n");
    	GtkWindow* window =(GtkWindow*) gtk_window_new(GTK_WINDOW_TOPLEVEL);
     GError* err=NULL;
-    //gtk_window_set_icon_from_file(
-    //    window, "/home/parroit/Desktop/parro-it/libdesktop/example/icon.png", 
-    //    &err
-    //);
+    gtk_window_set_icon_from_file(
+        window, "/home/parroit/Desktop/parro-it/libdesktop/example/icon.png", 
+        &err
+    );
 
-    //gtk_window_set_resizable(window,true);
-    //gtk_window_set_has_resize_grip(window,true);
+    gtk_window_set_resizable(window,true);
 
     if (err != NULL) {
         printf("ERROR %p %s\n",err,"err->message");
-        //napi_throw_error(env,NULL,err->message);
-        //return NULL;
+        napi_throw_error(env,NULL,err->message);
+        return NULL;
     }
 
     dsk_wrap_widget(env, window, this);
