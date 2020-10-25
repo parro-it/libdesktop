@@ -1,4 +1,4 @@
-import './tests/style.ts'
+//import './tests/style.ts'
 import test from 'tape-async'
 import {App,Window,Label,Container,YogaFlexDirection} from './index'
 const app = App.create()
@@ -28,6 +28,7 @@ test('start stop', async (t:any): Promise<void> => {
         )),
     ])
 })
+*/
 
 test('Window', async (t:any): Promise<void> => {
     t.equal(typeof Window, "function")
@@ -72,6 +73,5 @@ test('Window', async (t:any): Promise<void> => {
 
     app.start();
 
-    (l1 as any).print();
+    //(l1 as any).print();
 })
-*/

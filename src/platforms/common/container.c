@@ -19,7 +19,7 @@ static void widget_reposition(napi_env env, UIHandle container, YGNodeRef root) 
 
 void dsk_calculate_layout(napi_env env, UIHandle container, YGNodeRef root) {
     //YGNodePrint(root,YGPrintOptionsChildren | YGPrintOptionsStyle  );
-    YGNodeCalculateLayout(root,800,600,YGDirectionInherit);
+    YGNodeCalculateLayout(root,YGUndefined,YGUndefined,YGDirectionInherit);
     widget_reposition(env,container,root);
     //YGNodePrint(root,YGPrintOptionsChildren | YGPrintOptionsLayout);
 }

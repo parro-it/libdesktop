@@ -4,6 +4,7 @@
   "description": "node desktop gui library",
   "scripts": {
     "test": "ts-node test.ts",
+    "start": "ts-node example/form.ts",
     "build": "node-gyp configure build",
     "clear": "rm -rf build node_modules"
   },

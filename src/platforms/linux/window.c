@@ -39,6 +39,8 @@ LIBUI_FUNCTION(windowNew) {
     GtkWidget* child_gtk;
     napi_unwrap(env,container,(void**)&child_gtk);
     gtk_container_add(GTK_CONTAINER(window), child_gtk);
+
+    gtk_window_set_position(window,GTK_WIN_POS_CENTER);
     gtk_widget_show_all(GTK_WIDGET(window));
 
     YGNodeRef root = dsk_widget_get_node(env, container);
