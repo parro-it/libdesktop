@@ -142,7 +142,7 @@ napi_value win_init(napi_env env, napi_value exports) {
     DEFINE_MODULE()
     
     dsk_define_class(env, module,"Window",windowNew,((napi_property_descriptor[]) {
-        DSK_RWPROP_S(title),
+        DSK_RWPROP_S(title,"title"),
         DSK_RWPROP_I32(width,"default-width"),
         DSK_RWPROP_I32(height,"default-height"),
         DSK_RWPROP_BOOL(visible,"visible"),

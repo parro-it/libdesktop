@@ -39,7 +39,7 @@ napi_value textfield_init(napi_env env, napi_value exports) {
     dsk_define_class(env,module,"Textfield",textfieldNew,((napi_property_descriptor[]){
        DSK_RWPROP_BOOL(visible,"visible"),
        //DSK_RWPROP_BOOL(visible,"enabled"),
-       DSK_RWPROP_S(text),
+       DSK_RWPROP_S(text,"text"),
        DSK_CHILDPROP_I32(left,"x"),
        DSK_CHILDPROP_I32(top,"y"),
     }));

@@ -7,8 +7,6 @@
 
 #define MODULE "container"
 
-
-
 LIBUI_FUNCTION(containerAppend) {
     INIT_ARGS(1);
 

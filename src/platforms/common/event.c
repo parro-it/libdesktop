@@ -9,16 +9,11 @@
 
 napi_ref EventRef;
 
-#include <gtk/gtk.h>
+//#include <gtk/gtk.h>
 
-struct event_args {
-    napi_env env;
-    napi_ref sender;
-    napi_ref event;
-};
 
-static void on_event(GtkWidget *window, gpointer data) {
-    struct event_args* args = data;
+void on_event(UIHandle *uihandle, void* data) {
+    struct dsk_event_args* args = data;
     napi_env env=args->env;
     char* dsk_error_msg;
     
@@ -69,6 +64,8 @@ static void on_event(GtkWidget *window, gpointer data) {
         return ;
 }
 
+
+
 static LIBUI_FUNCTION(event_listen) {
     INIT_ARGS(1);
     napi_value listener = argv[0];
@@ -97,13 +94,13 @@ static LIBUI_FUNCTION(event_listen) {
             char eventname_s[100];
             DSK_NAPI_CALL(napi_get_value_string_utf8(env,eventname,eventname_s,100,NULL));
 
-            struct event_args* args = malloc(sizeof(struct event_args));
+            struct dsk_event_args* args = malloc(sizeof(struct dsk_event_args));
             
             DSK_NAPI_CALL(napi_create_reference(env,this,1,&args->event));
             DSK_NAPI_CALL(napi_create_reference(env,sender,1,&args->sender));
             
             args->env=env;
-            g_signal_connect(G_OBJECT(widget), eventname_s, G_CALLBACK(on_event), args);
+            dsk_connect_event(widget, eventname_s, args);   
         }
     }
 

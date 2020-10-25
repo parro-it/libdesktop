@@ -16,7 +16,7 @@
     CHECK_STATUS_THROW(status, napi_get_cb_info);                                           \
     }
 
-#define DSK_RWPROP_S(N)  (napi_property_descriptor) {.utf8name = #N, .getter = widgetGetPropS, .setter = widgetSetPropS, .data = #N}
+#define DSK_RWPROP_S(NAME,UI_NAME)  (napi_property_descriptor) {.utf8name = #NAME, .getter = widgetGetPropS, .setter = widgetSetPropS, .data = #UI_NAME}
 #define DSK_RWPROP_I32(NAME, UI_NAME)  (napi_property_descriptor) {.utf8name = #NAME, .getter = widgetGetPropI32, .setter = widgetSetPropI32, .data = UI_NAME}
 #define DSK_CHILDPROP_I32(NAME, UI_NAME)  (napi_property_descriptor) {.utf8name = #NAME, .getter = widgetGetChildPropI32, .setter = widgetSetChildPropI32, .data = UI_NAME}
 #define DSK_RWPROP_BOOL(NAME, UI_NAME)  (napi_property_descriptor) {.utf8name = #NAME, .getter = widgetGetPropBool, .setter = widgetSetPropBool, .data = UI_NAME}

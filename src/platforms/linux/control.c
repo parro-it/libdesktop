@@ -58,3 +58,7 @@ void dsk_get_preferred_sizes(UIHandle widget, int* width, int* height) {
     *width = natwidth;
     *height = natheight;
 }
+
+void dsk_connect_event(UIHandle widget, char* eventname, struct dsk_event_args* args) {
+    g_signal_connect(G_OBJECT(widget), eventname, G_CALLBACK(on_event), args);
+}

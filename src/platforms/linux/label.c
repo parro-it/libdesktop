@@ -44,7 +44,7 @@ napi_value label_init(napi_env env, napi_value exports) {
     dsk_define_class(env,module,"Label",labelNew,((napi_property_descriptor[]){
        DSK_RWPROP_BOOL(visible,"visible"),
        //DSK_RWPROP_BOOL(visible,"enabled"),
-       DSK_RWPROP_S(label),
+       DSK_RWPROP_S(text,"label"),
        (napi_property_descriptor){.utf8name="setLabel", .method=widgetSetPropS,.data="label"},
        DSK_CHILDPROP_I32(left,"x"),
        DSK_CHILDPROP_I32(top,"y"),

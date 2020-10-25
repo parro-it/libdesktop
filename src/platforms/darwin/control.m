@@ -5,7 +5,7 @@
 #include "control.h"
 
 @interface DskControl : NSView
-	@property napi_value wrapper;
+	@property napi_ref wrapper;
     @property YGNodeRef yoganode;
 @end
 
@@ -56,4 +56,21 @@ napi_value dsk_widget_wrapper(napi_env env, UIHandle widget) {
     napi_value node;
     napi_get_reference_value(env,ref,&node);
     return node;
+}
+
+
+
+void dsk_get_preferred_sizes(UIHandle widget, int* width, int* height) {
+    NSView* view = widget;
+    NSSize sz = [view fittingSize];
+    
+    *width = sz.width;
+    if (*width < 130) {
+        *width = 130;
+    }
+    *height = sz.height;
+}
+
+void dsk_connect_event(UIHandle widget, char* eventname, struct dsk_event_args* args) {
+    
 }

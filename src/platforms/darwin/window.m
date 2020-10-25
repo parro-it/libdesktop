@@ -1,79 +1,61 @@
 #include "napi_utils.h"
 #include "widget.h"
 #include "control.h"
+#include "libdesktop.h"
 #import <Cocoa/Cocoa.h>
 
 #define MODULE "win"
 
 static napi_ref DSK_WindowRef;
 
-static void window_finalize(napi_env env, void *finalize_data, void *finalize_hint) {
-
-}
-
 extern napi_ref ContainerRef;
 
 
 
-@interface DskWindow : NSWindow 
-	@property (nonatomic, readwrite) napi_value wrapper;
+@interface DskWindow : NSWindow
+	@property (nonatomic, readwrite) napi_ref wrapper;
     @property (nonatomic, readwrite) YGNodeRef yoganode;
 @end
 
 @implementation DskWindow
+    - (BOOL)acceptsFirstResponder
+    {
+        return YES;
+    }
 @end
 
 LIBUI_FUNCTION(windowNew) {
     INIT_ARGS(2);
-    /*DskWindow* win =[[DskWindow alloc] initWithContentRect:NSMakeRect(0, 0, (CGFloat) 800, (CGFloat) 600)
-		styleMask:NSWindowStyleMaskTitled
-		backing:NSBackingStoreBuffered
-		defer:0];
-    
-    NSTextField *widget1;
-	widget1 = [[NSTextField alloc] initWithFrame:NSZeroRect];
-	[widget1 setStringValue: @"ciao mac"];
-
-    NSTextField *widget2;
-	widget2 = [[NSTextField alloc] initWithFrame:NSZeroRect];
-	[widget2 setStringValue: @"2222 label"];
-
-    NSTextField *widget3;
-	widget3 = [[NSTextField alloc] initWithFrame:NSZeroRect];
-	[widget3 setStringValue: @"ciao cioa"];
-
-    [widget1 setFrame:NSMakeRect(20,20,100,50)];
-    [widget2 setFrame:NSMakeRect(40,80,120,50)];
-    [widget3 setFrame:NSMakeRect(60,140,140,50)];
-    
-    NSView* cnt = [[NSView alloc] init];
-    //cnt.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
-
-    [cnt setFrame:NSMakeRect(0,0,800,600)];
-    [cnt addSubview: widget1];
-    [cnt addSubview: widget2];
-    [cnt addSubview: widget3];
-
-    [win.contentView addSubview: cnt];
-    
-    [win makeKeyAndOrderFront:win];
-*/
-
    	
-    DskWindow* win =[[DskWindow alloc] initWithContentRect:NSMakeRect(0, 0, (CGFloat) 800, (CGFloat) 600)
-		styleMask:NSWindowStyleMaskTitled
+    DskWindow* win =[[DskWindow alloc] initWithContentRect:NSMakeRect(0, 0, (CGFloat) 10, (CGFloat) 10)
+		styleMask:    NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskResizable
 		backing:NSBackingStoreBuffered
-		defer:0];
+		defer:NO];
     dsk_wrap_widget(env, win, this);
 
+    if (dsk_set_properties(env, argv[0], this)) {
+        napi_throw_error(env,NULL,"Error while setting widget properties.\n");
+        return NULL;
+    }
 
     napi_value Container;
     napi_value container;
-    napi_value null;
+    napi_value props;
 
+    napi_create_object(env,&props);
     napi_get_reference_value(env, ContainerRef, &Container);
-    napi_get_null(env,&null);
-    napi_new_instance(env, Container,2,(napi_value[]){null,argv[1]},&container);
+
+    bool hasStyle;
+    DSK_NAPI_CALL(napi_has_named_property(env,argv[0],"style",&hasStyle));
+    if (hasStyle) {
+        napi_value containerStyle;
+        DSK_NAPI_CALL(napi_get_named_property(env,argv[0],"style",&containerStyle));
+        DSK_NAPI_CALL(napi_set_named_property(env,props,"style",containerStyle));
+    }
+
+    
+    
+    napi_new_instance(env, Container,2,(napi_value[]){props,argv[1]},&container);
     napi_set_named_property(env, this, "container", container);
 
     NSView* child_gtk;
@@ -81,22 +63,69 @@ LIBUI_FUNCTION(windowNew) {
     win.contentView = child_gtk;
 
     YGNodeRef root = dsk_widget_get_node(env, container);
+    dsk_set_children_preferred_sizes(root,child_gtk);
     dsk_calculate_layout(env, child_gtk, root, YGUndefined, YGUndefined);
     
-    [win setStyleMask: (NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask)];
+    //[win setStyleMask: (NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskResizable)];
 
-    void* winhnd = win;
-    [win makeKeyAndOrderFront:win];
+    float w = YGNodeLayoutGetWidth(root);
+    float h = YGNodeLayoutGetHeight(root);
+    float pd = YGNodeLayoutGetPadding(root,YGEdgeRight);
+
+    int uw = win.frame.size.width;
+    int uh = win.frame.size.height;
     
+
+    printf("window: %dx%d layout:%.0fx%.0f\n",uw,uh, w,h);
+    
+    
+    [win setContentSize: NSMakeSize(w,h)];
+    [win center];
+    
+    
+    //[win makeKeyAndOrderFront:win];
+    //[win setInitialResponder:win];
+
+    [win performSelector:@selector(makeKeyAndOrderFront:)
+                          withObject:nil
+                          afterDelay:0];
+
     return this;
 }
 
 
+LIBUI_FUNCTION(setTitle) {
+    INIT_ARGS(1);
+    ARG_STRING(val,0)
+
+    NSWindow* widget;
+    DSK_NAPI_CALL(napi_unwrap(env,this,(void**)&widget));
+
+    widget.title = [NSString stringWithUTF8String:val];
+
+    return NULL;
+}
+
+LIBUI_FUNCTION(getTitle) {
+    INIT_EMPTY_ARGS();
+    NSWindow* widget;
+    DSK_NAPI_CALL(napi_unwrap(env,this,(void**)&widget));
+
+    NSString *str =widget.title;
+    napi_value res;
+    DSK_NAPI_CALL(napi_create_string_utf8(env, [str cStringUsingEncoding:NSUTF8StringEncoding], NAPI_AUTO_LENGTH, &res));
+    return res;
+}
+
+#include <ApplicationServices/ApplicationServices.h>
+
 napi_value win_init(napi_env env, napi_value exports) {
     DEFINE_MODULE()
-    
+    ProcessSerialNumber psn = {0, kCurrentProcess};
+        TransformProcessType(&psn, kProcessTransformToForegroundApplication);
+
     const napi_property_descriptor properties[] = {
-        DSK_RWPROP_S(title),
+        {.utf8name = "title", .getter = getTitle, .setter = setTitle},
         /*DSK_RWPROP_I32(width,"default-width"),
         DSK_RWPROP_I32(height,"default-height"),
         DSK_RWPROP_BOOL(visible,"visible"),*/
