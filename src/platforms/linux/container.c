@@ -45,7 +45,7 @@ LIBUI_FUNCTION(containerNew) {
         napi_throw_error(env,NULL,"Error while setting widget properties.\n");
         return NULL;
     }
-
+    
     dsk_append_all_children(env, widget, argv[1]);
 
     return this;

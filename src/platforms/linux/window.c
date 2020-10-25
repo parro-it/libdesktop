@@ -1,6 +1,7 @@
 #include "napi_utils.h"
 #include "widget.h"
 #include "control.h"
+#include "libdesktop.h"
 #include <gtk/gtk.h>
 
 #define MODULE "win"
@@ -32,24 +33,43 @@ LIBUI_FUNCTION(windowNew) {
 
     napi_create_object(env,&props);
     napi_get_reference_value(env, ContainerRef, &Container);
-    //napi_get_null(env,&null);
+    
+    bool hasStyle;
+    DSK_NAPI_CALL(napi_has_named_property(env,argv[0],"style",&hasStyle));
+    printf("napi_has_named_property style: %d",hasStyle);
+    if (hasStyle) {
+        napi_value containerStyle;
+        DSK_NAPI_CALL(napi_get_named_property(env,argv[0],"style",&containerStyle));
+        DSK_NAPI_CALL(napi_set_named_property(env,props,"style",containerStyle));
+    }
+
     napi_new_instance(env, Container,2,(napi_value[]){props,argv[1]},&container);
     napi_set_named_property(env, this, "container", container);
 
-    GtkWidget* child_gtk;
-    napi_unwrap(env,container,(void**)&child_gtk);
-    gtk_container_add(GTK_CONTAINER(window), child_gtk);
+    GtkWidget* cntr_gtk;
+    napi_unwrap(env,container,(void**)&cntr_gtk);
+    gtk_container_add(GTK_CONTAINER(window), cntr_gtk);
 
     gtk_window_set_position(window,GTK_WIN_POS_CENTER);
     gtk_widget_show_all(GTK_WIDGET(window));
 
     YGNodeRef root = dsk_widget_get_node(env, container);
     
-    dsk_set_children_preferred_sizes(root,child_gtk);
+    dsk_set_children_preferred_sizes(root,cntr_gtk);
     
-    dsk_calculate_layout(env, child_gtk, root);
+    dsk_calculate_layout(env, cntr_gtk, root);
 
+    float w = YGNodeLayoutGetWidth(root);
+    float h = YGNodeLayoutGetHeight(root);
+
+    int uw;
+    int uh;
+    gtk_window_get_size(window,&uw,&uh);
+
+    printf("window: %dx%d layout:%.0fx%.0f\n", w,h,uw,uh);
     
+    gtk_window_resize(window,(int)w,(int)h);
+
     return this;
 }
 

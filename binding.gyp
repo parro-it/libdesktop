@@ -1,6 +1,8 @@
 {
 	"targets": [{
 		"target_name": "desktop",
+		"defines": [ "DEBUG" ],
+
 		"include_dirs": ["<(module_root_dir)/includes","yoga"],
 		"sources": [
 			'<!@(node tools/list-sources.js)'
