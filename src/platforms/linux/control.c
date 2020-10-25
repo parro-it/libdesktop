@@ -44,3 +44,13 @@ napi_value dsk_widget_wrapper(napi_env env, UIHandle widget) {
     napi_get_reference_value(env,ref,&node);
     return node;
 }
+
+
+void dsk_get_preferred_sizes(UIHandle widget, int* width, int* height) {
+    GtkRequisition minwidth,natwidth;
+    gtk_widget_get_preferred_size(widget, &minwidth, &natwidth);
+    // printf("width min %d nat %d\n", minwidth.width, natwidth.width);
+    // printf("height min %d nat %d\n", minwidth.height, natwidth.height);
+    *width = natwidth.width;
+    *height = natwidth.height;
+}

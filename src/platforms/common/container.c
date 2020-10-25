@@ -1,11 +1,8 @@
 #include "control.h"
 #include "napi_utils.h"
 
-void dsk_calculate_layout(napi_env env, UIHandle container, YGNodeRef root) {
-    YGNodePrint(root,YGPrintOptionsChildren | YGPrintOptionsStyle  );
-    YGNodeCalculateLayout(root,800,600,YGDirectionInherit);
+static void widget_reposition(napi_env env, UIHandle container, YGNodeRef root) {
     uint32_t childrenCount = YGNodeGetChildCount(root);
-    
     for (uint32_t i=0; i < childrenCount; i++) {
         YGNodeRef childNode = YGNodeGetChild(root,i);
         UIHandle childHandle = YGNodeGetContext(childNode);
@@ -16,8 +13,15 @@ void dsk_calculate_layout(napi_env env, UIHandle container, YGNodeRef root) {
             YGNodeLayoutGetWidth(childNode), 
             YGNodeLayoutGetHeight(childNode)
         );
+        widget_reposition(env,childHandle, childNode);
     }
-    YGNodePrint(root,YGPrintOptionsChildren | YGPrintOptionsLayout);
+}
+
+void dsk_calculate_layout(napi_env env, UIHandle container, YGNodeRef root) {
+    //YGNodePrint(root,YGPrintOptionsChildren | YGPrintOptionsStyle  );
+    YGNodeCalculateLayout(root,800,600,YGDirectionInherit);
+    widget_reposition(env,container,root);
+    //YGNodePrint(root,YGPrintOptionsChildren | YGPrintOptionsLayout);
 }
 
 void dsk_add_child(napi_env env, UIHandle parentHandle, UIHandle childHandle) {
@@ -26,7 +30,7 @@ void dsk_add_child(napi_env env, UIHandle parentHandle, UIHandle childHandle) {
     // printf("handles: %p->%p   values: %p->%p\n",childHandle,parentHandle,child,parent);
     // printf("dsk_platform_container_add_child 1\n");
     dsk_platform_container_add_child(parentHandle, childHandle);
-    // printf("dsk_platform_container_add_child 2 %p %p\n",parent,child);
+    
 
     YGNodeRef node = dsk_widget_get_node(env, parent);
     // printf("node %p\n",node);

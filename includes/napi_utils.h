@@ -20,7 +20,8 @@
 	dsk_error:																						\
 		return NULL;																				\
 	dsk_continue:																					\
-
+		;
+		
 #define INIT_ARGS(ARGS_COUNT)                                                       				\
 	napi_value argv[ARGS_COUNT];                                                    				\
 	napi_value this;																				\
