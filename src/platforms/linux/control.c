@@ -45,6 +45,7 @@ napi_value dsk_widget_wrapper(napi_env env, UIHandle widget) {
     return node;
 }
 
+void on_event(UIHandle *uihandle, void* data);
 
 void dsk_get_preferred_sizes(UIHandle widget, int* width, int* height) {
     int minwidth,natwidth;
