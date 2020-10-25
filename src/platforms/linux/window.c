@@ -118,6 +118,7 @@ LIBUI_FUNCTION(windowNew) {
 
     float w = YGNodeLayoutGetWidth(root);
     float h = YGNodeLayoutGetHeight(root);
+    float pd = YGNodeLayoutGetPadding(root,YGEdgeRight);
 
     int uw;
     int uh;
@@ -125,7 +126,7 @@ LIBUI_FUNCTION(windowNew) {
 
     printf("window: %dx%d layout:%.0fx%.0f\n",uw,uh, w,h);
     
-    gtk_window_resize(window,(int)w,(int)h);
+    gtk_window_resize(window,(int)w+pd,(int)h);
 
     struct on_resize_args* args = malloc(sizeof(struct on_resize_args));
     args->env=env;
