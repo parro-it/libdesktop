@@ -8,6 +8,7 @@ napi_value container_init(napi_env env, napi_value exports);
 napi_value style_init(napi_env env, napi_value exports);
 napi_value textfield_init(napi_env env, napi_value exports);
 napi_value event_init(napi_env env, napi_value exports);
+napi_value init_fixture_module(napi_env env, napi_value exports);
 
 static napi_value init_all(napi_env env, napi_value exports) {
 	app_init_core(env, exports);
@@ -18,6 +19,7 @@ static napi_value init_all(napi_env env, napi_value exports) {
 	style_init(env, exports);
 	textfield_init(env, exports);
 	event_init(env, exports);
+	init_fixture_module(env, exports);
 	return exports;
 }
 
