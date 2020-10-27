@@ -66,10 +66,10 @@ bool dsk_set_properties(napi_env env, napi_value props, napi_value target) {
         DSK_NAPI_CALL(napi_create_uint32(env,i,&idx));
         DSK_NAPI_CALL(napi_get_property(env,names,idx,&propName));
 
-        size_t len;
-        DSK_NAPI_CALL(napi_get_value_string_utf8(env,propName,NULL,0,&len));
-        char propName_s[len+1];
-        DSK_NAPI_CALL(napi_get_value_string_utf8(env,propName,propName_s,len+1,NULL));
+        //size_t len;
+        //DSK_NAPI_CALL(napi_get_value_string_utf8(env,propName,NULL,0,&len));
+        //char propName_s[len+1];
+        //DSK_NAPI_CALL(napi_get_value_string_utf8(env,propName,propName_s,len+1,NULL));
 
         DSK_NAPI_CALL(napi_has_property(env,target, propName, &hasProp));
         if (hasProp) {
