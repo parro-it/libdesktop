@@ -134,7 +134,7 @@ static LIBUI_FUNCTION(event_invoke) {
         napi_value listener;
         DSK_NAPI_CALL(napi_create_uint32(env,i,&idx));
         DSK_NAPI_CALL(napi_get_property(env,listeners,idx,&listener));
-        DSK_NAPI_CALL(napi_call_function(env, null, listener, 0,(napi_value[]){}, &result));
+        DSK_NAPI_CALL(napi_call_function(env, null, listener, 0, NULL, &result));
     }
     return NULL;
 }
