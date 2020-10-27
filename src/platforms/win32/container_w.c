@@ -6,7 +6,7 @@
 
 #define MODULE "container"
 
-void dsk_widget_reposition(napi_env env, UIHandle container, UIHandle widget, float xcoord, float ycoord) {
+void dsk_widget_reposition(napi_env env, UIHandle container, UIHandle widget, float xcoord, float ycoord, float x, float y, float width, float height) {
     //printf("SET POS %p TO %d, %d\n", widget,(int)xcoord,(int)ycoord);
     bool ret = SetWindowPos((HWND)widget,HWND_TOP,(int)xcoord,(int)ycoord,0,0 ,SWP_NOSIZE|SWP_NOZORDER);
 	if (!ret) {
@@ -138,3 +138,19 @@ void uninitContainer(void)
 	//if (UnregisterClassW(L"DSKcontainerClass", NULL) == 0)
 		//logLastError(L"error unregistering container window class");
 }
+
+
+
+void dsk_get_preferred_sizes(UIHandle widget, int* width, int* height) {
+    /*NSView* view = widget;
+    NSSize sz = [view fittingSize];
+    
+    *width = sz.width;
+    if (*width < 130) {
+        *width = 130;
+    }
+    *height = sz.height;*/
+}
+
+
+textfield_init
