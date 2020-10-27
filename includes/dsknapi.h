@@ -2,7 +2,11 @@
 #define DSK_NAPI_H 1 
 /**
  * 
- * # dsknapi.h
+ * @file dsknapi.h
+ * 
+ * @brief NAPI functions and macros helpers
+ * 
+ * @descr
  * 
  * This header file includes functions prototypes and macros that
  * helps working with Node.js NAPI framework.
@@ -12,7 +16,10 @@
 #include <node_api.h>
 
 /**
- * ### DSK_NAPI_CALL
+ * @name DSK_NAPI_CALL
+ * @brief wraps its FN argument with code to check that a NAPI call succeded.
+ * 
+ * @descr
  * 
  * DSK_NAPI_CALL macro wraps its FN argument
  * with code to check that a napi call succeded.
@@ -37,6 +44,9 @@
  * in the scope all variables needed by DSK_NAPI_CALL. Otherwise, it is 
  * caller responsibility to appropriately prepare the scope before 
  * the call to DSK_NAPI_CALL.
+ * 
+ * @arg FN - an expression that evaluates to `napi_status`, usually 
+ * 		a NAPI function call.
  */
 #define DSK_NAPI_CALL(FN) do {                                    \
     napi_status status = (FN);                                    \
@@ -50,7 +60,7 @@
 
 
 /**
- * ### DSK_JS_FUNC
+ * @name DSK_JS_FUNC
  * 
  * DSK_JS_FUNC declares a js callback function prototype given the name.
  * It can be used to declare a function in a header file:
@@ -82,10 +92,10 @@
 #define DSK_MODINIT_FUNC(FN_NAME) napi_value FN_NAME(napi_env env, napi_value exports)
 
 /**
- * ### DSK_JS_FUNC_INIT
+ * @name DSK_JS_FUNC_INIT
+ * @brief initialize a scope with the following variables:
  * 
- * `DSK_JS_FUNC_INIT` initialize a scope with the following variables:
- * 
+ * @descr
  * The macro does these assumptions on the calling scope:
  *  * an `env` variable is defined of type `napi_env` that contains the current
  *    NAPI environment to use.
@@ -110,13 +120,15 @@
  *    arguments, use `DSK_JS_FUNC_INIT_WITH_ARGS` macro to specify a greater number.
  *  * a `this` variable, of type napi_value, that contains the receiver of the call (the JS `this` value);
  *  * an `argc` variable of type size_t containing actual number of arguments received in the call.
- * 
+ *  
  */
 #define DSK_JS_FUNC_INIT() DSK_JS_FUNC_INIT_WITH_ARGS(10)  		
 
 /**
- * 	### DSK_ONERROR_THROW_RET
- * 
+ * 	@name DSK_ONERROR_THROW_RET
+ *  @brief defines an error handler that throw a JavaScript error.
+ *  
+ *  @descr
  * 	This macro defines following variables in current scope:
  * 
  *  * a `dsk_error_msg` variable of type char* that is compiled by DSK_NAPI_CALL in 
@@ -124,6 +136,7 @@
  *  * a `dsk_error` label to which execution will jump in case of error. It contains
  *    code to throw a JS error with the message contained in `dsk_error_msg` variable, 
  *    and return `WHAT` argument afterward;  
+ *  @arg WHAT - an expression to return that signal the caller that an error occurred.
  */
 #define DSK_ONERROR_THROW_RET(WHAT)                                                                 \
     /* error handler */                                                                             \
@@ -136,7 +149,9 @@
 	dsk_continue:	                                                                                \
 
 /**
- * 	### DSK_ONERROR_FATAL_RET
+ * 	@name DSK_ONERROR_FATAL_RET
+ *  @brief defines an error handler that throw a JavaScript error.
+ *  @descr
  * 
  * 	This macro defines following variables in current scope:
  * 
@@ -146,6 +161,7 @@
  *    code to call `napi_fatal_error` with the message contained in `dsk_error_msg` variable, 
  *    and return `WHAT` argument afterward. The call to `napi_fatal_error` causes the node process
  * 	  to immediately exit.
+ *  @arg WHAT - an expression to return that signal the caller that an error occurred.
  */
 #define DSK_ONERROR_FATAL_RET(WHAT)                                                                 \
     /* error handler */                                                                             \
@@ -158,8 +174,9 @@
 	dsk_continue:	
 
 /**
- * 	### DSK_ONERROR_FATAL_RET
- * 
+ * 	@name DSK_ONERROR_FATAL_RET
+ *  
+ *  @descr
  * 	This macro defines following variables in current scope:
  * 
  *  * a `dsk_error_msg` variable of type char* that is compiled by DSK_NAPI_CALL in 
@@ -188,6 +205,8 @@
  * @name DSK_JS_FUNC_INIT_WITH_ARGS
  * @brief initialize a function scope with a set of standard variables
  * 
+ * @descr
+ * 
  * You can use this function when you have to accepts more than 10 arguments in your 
  * callback. Use `DSK_JS_FUNC_INIT` when <= 10 arguments are required. 
  * 
@@ -201,9 +220,13 @@
     DSK_NAPI_CALL(napi_get_cb_info(env, info, &argc, argv, &this, NULL));                           \
 
 /**
- * \brief Throw a "EINVAL" errors if the callback is not called with at least N arguments.
+ * @name DSK_AT_LEAST_NARGS
+ * @brief Throw a "EINVAL" errors if the callback is not called with at least N arguments.
  * 
- * the calling scope must contains `env`, `argc` and `dsk_error_msg` variables, and a `dsk_error` label.
+ * @descr
+ * 
+ * The calling scope must contains `env`, `argc` and `dsk_error_msg` variables, and a `dsk_error` label.
+ * 
  **/
 #define DSK_AT_LEAST_NARGS(N)                                                               \
 	if (argc < (N)) {                                                        				        \
@@ -212,9 +235,12 @@
 	}				
     
 /**
- * \brief Throw a "EINVAL" errors if the callback is not called with exactly N arguments.
+ * @name DSK_EXACTLY_NARGS
+ * @brief Throw a "EINVAL" errors if the callback is not called with exactly N arguments.
  * 
- * the calling scope must contains `env`, `argc` and `dsk_error_msg` variables, and a `dsk_error` label.
+ * @descr
+ * 
+ * The calling scope must contains `env`, `argc` and `dsk_error_msg` variables, and a `dsk_error` label.
  **/
 #define DSK_EXACTLY_NARGS(N)                                                               \
 	if (argc != (N)) {                                                        				        \

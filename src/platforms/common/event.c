@@ -12,7 +12,7 @@ napi_ref EventRef;
 //#include <gtk/gtk.h>
 
 
-void on_event(UIHandle *uihandle, void* data) {
+void dsk_on_event(UIHandle *uihandle, void* data) {
     struct dsk_event_args* args = data;
     napi_env env=args->env;
     char* dsk_error_msg;
@@ -53,7 +53,7 @@ void on_event(UIHandle *uihandle, void* data) {
 	
 	DSK_NAPI_CALL(napi_close_handle_scope(env, handle_scope));
 
-    return ;
+    return;
     dsk_error:
         ;
         napi_value uncErr;
@@ -179,7 +179,7 @@ napi_value dsk_event_new_for_widget(napi_env env, const char* eventname, napi_va
 }
 
 
-napi_value event_init(napi_env env, napi_value exports) {
+napi_value dsk_event_init(napi_env env, napi_value exports) {
     DEFINE_MODULE()
 
     dsk_define_class_ref(
