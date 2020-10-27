@@ -150,5 +150,3 @@ void dsk_get_preferred_sizes(UIHandle widget, int* width, int* height) {
     *height = sz.height;*/
 }
 
-
-textfield_init
