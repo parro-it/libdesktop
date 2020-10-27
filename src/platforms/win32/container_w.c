@@ -5,8 +5,7 @@
 #include <yoga/Yoga.h>
 
 #define MODULE "container"
-
-void dsk_widget_reposition(napi_env env, UIHandle container, UIHandle widget, float xcoord, float ycoord, float x, float y, float width, float height) {
+void dsk_widget_reposition(napi_env env, UIHandle container, UIHandle widget, float x, float y, float width, float height) {
     //printf("SET POS %p TO %d, %d\n", widget,(int)xcoord,(int)ycoord);
     bool ret = SetWindowPos((HWND)widget,HWND_TOP,(int)xcoord,(int)ycoord,0,0 ,SWP_NOSIZE|SWP_NOZORDER);
 	if (!ret) {

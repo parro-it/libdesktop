@@ -59,5 +59,5 @@ napi_value dsk_widget_wrapper(napi_env env, UIHandle widget) {
 
 
 void dsk_connect_event(UIHandle widget, char* eventname, struct dsk_event_args* args) {
-    g_signal_connect(G_OBJECT(widget), eventname, G_CALLBACK(on_event), args);
+    //g_signal_connect(G_OBJECT(widget), eventname, G_CALLBACK(on_event), args);
 }
