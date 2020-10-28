@@ -37,6 +37,13 @@ LIBUI_FUNCTION(labelNew) {
     return this;
 }
 
+
+
+
+
+
+//napi_value dsk_define_class(napi_env env, const char* name, napi_callback constructor,const napi_property_descriptor properties[], size_t propertiesCount,napi_ref* ref);
+
 napi_value label_init(napi_env env, napi_value exports) {
     DEFINE_MODULE()
     

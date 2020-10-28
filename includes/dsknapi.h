@@ -1,13 +1,13 @@
 #ifndef DSK_NAPI_H
-#define DSK_NAPI_H 1 
+#define DSK_NAPI_H 1
 /**
- * 
+ *
  * @file dsknapi.h
- * 
+ *
  * @brief NAPI functions and macros helpers
- * 
+ *
  * @descr
- * 
+ *
  * This header file includes functions prototypes and macros that
  * helps working with Node.js NAPI framework.
  *
@@ -18,242 +18,431 @@
 /**
  * @name DSK_NAPI_CALL
  * @brief wraps its FN argument with code to check that a NAPI call succeded.
- * 
+ *
  * @descr
- * 
+ *
  * DSK_NAPI_CALL macro wraps its FN argument
  * with code to check that a napi call succeded.
  * FN argument must be an expression that evaluates
  * to an object of `napi_status` type.
- * 
+ *
  * The entire macro is wrapped in a do {} while, so it
  * doesn't pollute the calling stack with variables.
- * 
+ *
  * The macro does these assumptions on the calling scope:
- * 
+ *
  *  * an `dsk_env` variable is defined of type `napi_env` that contains the current
  *    NAPI environment to use.
  *  * a `dsk_error_msg` variable is declared of type char*.
  *    This variable will contain the error message in case an error
- *    occurs during the call.  
+ *    occurs during the call.
  *  * a `dsk_error` label is defined. Execution will jump to that label
  *    after appropriately setting the dsk_error_msg variable.
- *  
+ *
  * If you are using the DSK_NAPI_CALL macro in a function that calls
  * the DSK_JS_FUNC_INIT* macro, that macro already appropriately defines
- * in the scope all variables needed by DSK_NAPI_CALL. Otherwise, it is 
- * caller responsibility to appropriately prepare the scope before 
+ * in the scope all variables needed by DSK_NAPI_CALL. Otherwise, it is
+ * caller responsibility to appropriately prepare the scope before
  * the call to DSK_NAPI_CALL.
- * 
- * @arg FN - an expression that evaluates to `napi_status`, usually 
+ *
+ * @arg FN - an expression that evaluates to `napi_status`, usually
  * 		a NAPI function call.
- * 
+ *
  */
-#define DSK_NAPI_CALL(FN) do {                                    \
-    napi_status status = (FN);                                    \
-    if (status != napi_ok) {                                      \
-        const napi_extended_error_info *err;                      \
-        napi_get_last_error_info(env, &err);                      \
-        dsk_error_msg = (char*)err->error_message;                \
-        goto dsk_error;                                           \
-    }                                                             \
-} while(0)
-
+#define DSK_NAPI_CALL(FN)                                                                          \
+	do {                                                                                           \
+		napi_status status = (FN);                                                                 \
+		if (status != napi_ok) {                                                                   \
+			const napi_extended_error_info *err;                                                   \
+			napi_get_last_error_info(env, &err);                                                   \
+			dsk_error_msg = (char *)err->error_message;                                            \
+			goto dsk_error;                                                                        \
+		}                                                                                          \
+	} while (0)
 
 /**
  * @name DSK_JS_FUNC
  * @brief declares a js callback function prototype
- * 
+ *
  * @descr
  * DSK_JS_FUNC declares a js callback function prototype given the name.
  * It can be used to declare a function in a header file:
- * 
+ *
  * ```c
- * 
+ *
  *  DSK_JS_FUNC(external_function);
- * 
+ *
  * ```
- * 
+ *
  * or otherwise to define a function in a source file:
- * 
+ *
  * ```c
- * 
+ *
  * DSK_JS_FUNC(external_function) {
- * 
+ *
  *  // do something interesting here...
- * 
+ *
  *  // and return something useful.
  *  return NULL;
  * }
- * 
+ *
  * ```
- * 
+ *
  */
 #define DSK_JS_FUNC(FN_NAME) napi_value FN_NAME(napi_env env, napi_callback_info info)
-
 
 #define DSK_MODINIT_FUNC(FN_NAME) napi_value FN_NAME(napi_env env, napi_value exports)
 
 /**
  * @name DSK_JS_FUNC_INIT
  * @brief initialize a scope with the following variables:
- * 
+ *
  * @descr
  * The macro does these assumptions on the calling scope:
  *  * an `env` variable is defined of type `napi_env` that contains the current
  *    NAPI environment to use.
  *  * an `info` variable is declared of type napi_callback_info.
  *    This variable will contain the error message in case an error
- *    occurs during the call. 
- * This two requirement are already satisfied by the protype required by callback 
+ *    occurs during the call.
+ * This two requirement are already satisfied by the protype required by callback
  * functions.
- * 
- * The macro uses `env` and `info` to extract arguments of the call, and defines 
+ *
+ * The macro uses `env` and `info` to extract arguments of the call, and defines
  * in current scope the following additional variables:
- *  
- *  * a `dsk_error_msg` variable of type char* that is compiled by NAPI_CALL in case of errors. 
+ *
+ *  * a `dsk_error_msg` variable of type char* that is compiled by NAPI_CALL in case of errors.
  *  * a `dsk_error` label to which execution will jump in case of error. It contains code to
- *    throw a JS error with the message contained in `dsk_error_msg` variable, and return NULL afterward;  
- *  * an `argc` variable of type size_t that contains the actual number of argument 
- *    passed to the function by the caller.  
- *  * an `argv` array of type napi_value[] that contains the actual number of argument 
- *    passed to the function by the caller. If the function is given more than 10 arguments, the remaining
- *    one are ignored. If it's given less than 10 arguments, than argv elements from
- *    `argc` to 10 are filled witth `napi_undefined`. If you have to use accepts more than 10 
- *    arguments, use `DSK_JS_FUNC_INIT_WITH_ARGS` macro to specify a greater number.
- *  * a `this` variable, of type napi_value, that contains the receiver of the call (the JS `this` value);
+ *    throw a JS error with the message contained in `dsk_error_msg` variable, and return NULL
+ * afterward;
+ *  * an `argc` variable of type size_t that contains the actual number of argument
+ *    passed to the function by the caller.
+ *  * an `argv` array of type napi_value[] that contains the actual number of argument
+ *    passed to the function by the caller. If the function is given more than 10 arguments, the
+ * remaining one are ignored. If it's given less than 10 arguments, than argv elements from `argc`
+ * to 10 are filled witth `napi_undefined`. If you have to use accepts more than 10 arguments, use
+ * `DSK_JS_FUNC_INIT_WITH_ARGS` macro to specify a greater number.
+ *  * a `this` variable, of type napi_value, that contains the receiver of the call (the JS `this`
+ * value);
  *  * an `argc` variable of type size_t containing actual number of arguments received in the call.
- *  
+ *
  */
-#define DSK_JS_FUNC_INIT() DSK_JS_FUNC_INIT_WITH_ARGS(10)  		
+#define DSK_JS_FUNC_INIT() DSK_JS_FUNC_INIT_WITH_ARGS(10)
 
 /**
  * 	@name DSK_ONERROR_THROW_RET
  *  @brief defines an error handler that throw a JavaScript error.
- *  
+ *
  *  @descr
  * 	This macro defines following variables in current scope:
- * 
- *  * a `dsk_error_msg` variable of type char* that is compiled by DSK_NAPI_CALL in 
- *    case of errors. 
+ *
+ *  * a `dsk_error_msg` variable of type char* that is compiled by DSK_NAPI_CALL in
+ *    case of errors.
  *  * a `dsk_error` label to which execution will jump in case of error. It contains
- *    code to throw a JS error with the message contained in `dsk_error_msg` variable, 
- *    and return `WHAT` argument afterward;  
+ *    code to throw a JS error with the message contained in `dsk_error_msg` variable,
+ *    and return `WHAT` argument afterward;
  *  @arg WHAT - an expression to return that signal the caller that an error occurred.
- * 
+ *
  */
-#define DSK_ONERROR_THROW_RET(WHAT)                                                                 \
-    /* error handler */                                                                             \
-	char* dsk_error_msg;																			\
-	goto dsk_continue;																				\
-	goto dsk_error;																					\
-	dsk_error:																						\
-		napi_throw_error(env, NULL, dsk_error_msg);          									    \
-		return WHAT;																				\
-	dsk_continue:	                                                                                \
+#define DSK_ONERROR_THROW_RET(WHAT)                                                                \
+	/* error handler */                                                                            \
+	char *dsk_error_msg;                                                                           \
+	goto dsk_continue;                                                                             \
+	goto dsk_error;                                                                                \
+	dsk_error:                                                                                     \
+	napi_throw_error(env, NULL, dsk_error_msg);                                                    \
+	return WHAT;                                                                                   \
+	dsk_continue:
 
 /**
  * 	@name DSK_ONERROR_FATAL_RET
  *  @brief defines an error handler that bort the process
  *  @descr
- * 
+ *
  * 	This macro defines following variables in current scope:
- * 
- *  * a `dsk_error_msg` variable of type char* that is compiled by DSK_NAPI_CALL in 
- *    case of errors. 
+ *
+ *  * a `dsk_error_msg` variable of type char* that is compiled by DSK_NAPI_CALL in
+ *    case of errors.
  *  * a `dsk_error` label to which execution will jump in case of error. It contains
- *    code to call `napi_fatal_error` with the message contained in `dsk_error_msg` variable, 
+ *    code to call `napi_fatal_error` with the message contained in `dsk_error_msg` variable,
  *    and return `WHAT` argument afterward. The call to `napi_fatal_error` causes the node process
  * 	  to immediately exit.
  *  @arg WHAT - an expression to return that signal the caller that an error occurred.
- * 
+ *
  */
-#define DSK_ONERROR_FATAL_RET(WHAT)                                                                 \
-    /* error handler */                                                                             \
-	char* dsk_error_msg;																			\
-	goto dsk_continue;																				\
-	goto dsk_error;																					\
-	dsk_error:																						\
-		napi_fatal_error(NULL, 0, dsk_error_msg, NAPI_AUTO_LENGTH);          					    \
-		return WHAT;																				\
-	dsk_continue:	
+#define DSK_ONERROR_FATAL_RET(WHAT)                                                                \
+	/* error handler */                                                                            \
+	char *dsk_error_msg;                                                                           \
+	goto dsk_continue;                                                                             \
+	goto dsk_error;                                                                                \
+	dsk_error:                                                                                     \
+	napi_fatal_error(NULL, 0, dsk_error_msg, NAPI_AUTO_LENGTH);                                    \
+	return WHAT;                                                                                   \
+	dsk_continue:
 
 /**
  * 	@name DSK_ONERROR_UNCAUGHT_RET
  *  @brief defines an error handler that throw an uncaught JavaScript error.
  *  @descr
  * 	This macro defines following variables in current scope:
- * 
- *  * a `dsk_error_msg` variable of type char* that is compiled by DSK_NAPI_CALL in 
- *    case of errors. 
+ *
+ *  * a `dsk_error_msg` variable of type char* that is compiled by DSK_NAPI_CALL in
+ *    case of errors.
  *  * a `dsk_error` label to which execution will jump in case of error. It contains
- *    code to throw an uncaught Javascript exception with the message contained in `dsk_error_msg` 
- *    variable, and return `WHAT` argument afterward. 
- * 
+ *    code to throw an uncaught Javascript exception with the message contained in `dsk_error_msg`
+ *    variable, and return `WHAT` argument afterward.
+ *
  */
-#define DSK_ONERROR_UNCAUGHT_RET(WHAT)                          \
-    /* error handler */                                         \
-	char* dsk_error_msg;										\
-	goto dsk_continue;											\
-	goto dsk_error;												\
-	dsk_error: {												\
-		napi_value err, errmsg;									\
-		napi_create_string_utf8(env, dsk_error_msg, &errmsg);	\
-		napi_create_error(env, NULL, errmsg, &err);				\
-		napi_fatal_exception(env, err);          				\
-		return WHAT;											\
-	}															\
-	dsk_continue:	                                            \
-
+#define DSK_ONERROR_UNCAUGHT_RET(WHAT)                                                             \
+	/* error handler */                                                                            \
+	char *dsk_error_msg;                                                                           \
+	goto dsk_continue;                                                                             \
+	goto dsk_error;                                                                                \
+	dsk_error : {                                                                                  \
+		napi_value err, errmsg;                                                                    \
+		napi_create_string_utf8(env, dsk_error_msg, &errmsg);                                      \
+		napi_create_error(env, NULL, errmsg, &err);                                                \
+		napi_fatal_exception(env, err);                                                            \
+		return WHAT;                                                                               \
+	}                                                                                              \
+	dsk_continue:
 
 /**
  * @name DSK_JS_FUNC_INIT_WITH_ARGS
  * @brief initialize a function scope with a set of standard variables
- * 
+ *
  * @descr
- * 
- * You can use this function when you have to accepts more than 10 arguments in your 
- * callback. Use `DSK_JS_FUNC_INIT` when <= 10 arguments are required. 
- * 
+ *
+ * You can use this function when you have to accepts more than 10 arguments in your
+ * callback. Use `DSK_JS_FUNC_INIT` when <= 10 arguments are required.
+ *
  * @see `DSK_JS_FUNC_INIT`
- * 
+ *
  */
-#define DSK_JS_FUNC_INIT_WITH_ARGS(ARGS_COUNT)                                                      \
-    DSK_ONERROR_THROW_RET(NULL);                                                                     \
-    napi_value argv[(ARGS_COUNT)];                                                    				\
-	napi_value this;																				\
-	size_t argc = (ARGS_COUNT);                                                       				\
-    DSK_NAPI_CALL(napi_get_cb_info(env, info, &argc, argv, &this, NULL));                           \
+#define DSK_JS_FUNC_INIT_WITH_ARGS(ARGS_COUNT)                                                     \
+	DSK_ONERROR_THROW_RET(NULL);                                                                   \
+	napi_value argv[(ARGS_COUNT)];                                                                 \
+	napi_value this;                                                                               \
+	size_t argc = (ARGS_COUNT);                                                                    \
+	DSK_NAPI_CALL(napi_get_cb_info(env, info, &argc, argv, &this, NULL));
 
 /**
  * @name DSK_AT_LEAST_NARGS
  * @brief Throw a "EINVAL" errors if the callback is not called with at least N arguments.
- * 
+ *
  * @descr
- * 
- * The calling scope must contains `env`, `argc` and `dsk_error_msg` variables, and a `dsk_error` label.
- * 
+ *
+ * The calling scope must contains `env`, `argc` and `dsk_error_msg` variables, and a `dsk_error`
+ * label.
+ *
  */
-#define DSK_AT_LEAST_NARGS(N)                                                               \
-	if (argc < (N)) {                                                        				        \
-		dsk_error_msg = "Too few arguments. At least " #N " required.";                       				\
-		goto dsk_error;                                                                				\
-	}				
-    
+#define DSK_AT_LEAST_NARGS(N)                                                                      \
+	if (argc < (N)) {                                                                              \
+		dsk_error_msg = "Too few arguments. At least " #N " required.";                            \
+		goto dsk_error;                                                                            \
+	}
+
 /**
  * @name DSK_EXACTLY_NARGS
  * @brief Throw a "EINVAL" errors if the callback is not called with exactly N arguments.
- * 
+ *
  * @descr
- * 
- * The calling scope must contains `env`, `argc` and `dsk_error_msg` variables, and a `dsk_error` label.
- * 
+ *
+ * The calling scope must contains `env`, `argc` and `dsk_error_msg` variables, and a `dsk_error`
+ * label.
+ *
  */
-#define DSK_EXACTLY_NARGS(N)                                                               \
-	if (argc != (N)) {                                                        				        \
-		dsk_error_msg = "Wrong number of arguments. " #N " required.";                       				\
-		goto dsk_error;                                                                				\
-	}				
-    																				\
-	
+#define DSK_EXACTLY_NARGS(N)                                                                       \
+	if (argc != (N)) {                                                                             \
+		dsk_error_msg = "Wrong number of arguments. " #N " required.";                             \
+		goto dsk_error;                                                                            \
+	}
+
 #endif
+
+/**
+ * @name Function and macro to exports function, objects, or classes.
+ *
+ */
+
+// specifies if an export def is a class, object or method.
+typedef enum dsk_def_type {
+	dsk_def_type_object,
+	dsk_def_type_class,
+	dsk_def_type_function,
+	dsk_def_type_exec,
+} dsk_def_type;
+
+// contains all infos needed to create a class or function
+typedef struct dsk_export_def {
+	dsk_def_type type;
+	// const char *name;
+	// napi_callback constructor;
+	size_t properties_count;
+	napi_property_descriptor *properties;
+} dsk_export_def;
+
+// contains all infos needed to create all exported members
+// of a module.
+typedef struct dsk_modexports_def {
+	size_t members_count;
+	/* this is a dsk_export_def** because it's an array of pointers
+	to static dsk_export_def defined in module c file.	*/
+	dsk_export_def **members;
+} dsk_modexports_def;
+
+void dsk_modexports_def_free(dsk_modexports_def *exports);
+void dsk_modexports_def_register_member(dsk_modexports_def *exports, dsk_export_def *member);
+void dsk_export_def_register_member(dsk_export_def *group, napi_property_descriptor member);
+
+#include <assert.h>
+
+napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_def *exports_def);
+
+#define _DSK_MOD_EXPORTS(MODNAME) MODNAME##_exports
+#define _DSK_CLASS_DEFS(MODNAME, CLASSNAME) MODNAME##_##CLASSNAME##_def
+#define _DSK_FUNC_DEFS(MODNAME, FUNCNAME) MODNAME##_##FUNCNAME##_def
+
+#define DSK_USE_MODULE(MODNAME) dsk_modexports_def _DSK_MOD_EXPORTS(MODNAME)
+
+#define DSK_USE_MODULE_INITIALIZER(MODNAME)                                                        \
+	napi_value dsk_init_##MODNAME(napi_env env, napi_value exports)
+
+#define DSK_DEFINE_MODULE(MODNAME)                                                                 \
+	DSK_USE_MODULE(MODNAME);                                                                       \
+                                                                                                   \
+	DSK_USE_MODULE_INITIALIZER(MODNAME) {                                                          \
+		return dsk_init_module_def(env, exports, &_DSK_MOD_EXPORTS(MODNAME));                      \
+	}
+
+#define DSK_EXTEND_MODULE(MODNAME) extern DSK_USE_MODULE(MODNAME)
+
+#define DSK_DEFINE_CLASS(MODNAME, CLASSNAME)                                                       \
+	/* class constructor C prototype (predeclared because it's used in the initialezer below) */   \
+	DSK_JS_FUNC(MODNAME##_##CLASSNAME);                                                            \
+	/* reference of constructor function napi_value */                                             \
+	DSK_USE_CLASS(MODNAME, CLASSNAME);                                                             \
+	/* static dsk_export_def instance that could be used to enhance the class with */              \
+	/* further methods and properties */                                                           \
+	dsk_export_def _DSK_CLASS_DEFS(MODNAME, CLASSNAME) =                                           \
+		/**/ {.type = dsk_def_type_class,                                                          \
+			  .properties_count = 1,                                                               \
+			  .properties = (napi_property_descriptor[]){{                                         \
+				  .method = MODNAME##_##CLASSNAME,                                                 \
+				  .utf8name = #CLASSNAME,                                                          \
+				  .data = &MODNAME##_##CLASSNAME##_ref,                                            \
+			  }}};                                                                                 \
+                                                                                                   \
+	/* this is an initializer function that register the class and add it to the property */       \
+	/* definitions of the module. */                                                               \
+	NAPI_C_CTOR(_dsk_register_class##MODNAME##_##CLASSNAME) {                                      \
+		dsk_modexports_def *exports = &_DSK_MOD_EXPORTS(MODNAME);                                  \
+		dsk_modexports_def_register_member(exports, &_DSK_CLASS_DEFS(MODNAME, CLASSNAME));         \
+	}                                                                                              \
+	/* begin of implementation of class constructor function. caller is required to */             \
+	/* provide the body of the function after the DSK_DEFINE_CLASS call */                         \
+	DSK_JS_FUNC(MODNAME##_##CLASSNAME)
+
+#define DSK_EXTEND_CLASS(MODNAME, CLASSNAME) extern DSK_USE_CLASS(MODNAME, CLASSNAME)
+
+#define DSK_USE_CLASS(MODNAME, CLASSNAME)                                                          \
+	/* reference to class constructor function napi_value */                                       \
+	napi_ref MODNAME##_##CLASSNAME##_ref
+
+#define DSK_DEFINE_FUNCTION(MODNAME, FUNCNAME)                                                     \
+	/* function C prototype (predeclared because it's used in the initialezer below) */            \
+	DSK_JS_FUNC(MODNAME##_##FUNCNAME);                                                             \
+	/* static dsk_export_def instance */                                                           \
+	dsk_export_def _DSK_FUNC_DEFS(MODNAME, FUNCNAME) =                                             \
+		/**/ {.type = dsk_def_type_function,                                                       \
+			  .properties_count = 1,                                                               \
+			  .properties = (napi_property_descriptor[]){                                          \
+				  {.method = MODNAME##_##FUNCNAME, .utf8name = #FUNCNAME}}};                       \
+                                                                                                   \
+	/* this is an initializer function that add the property */                                    \
+	/* definition to the module. */                                                                \
+	NAPI_C_CTOR(_dsk_register_function_##MODNAME##_##FUNCNAME) {                                   \
+		dsk_modexports_def *exports = &_DSK_MOD_EXPORTS(MODNAME);                                  \
+		dsk_modexports_def_register_member(exports, &_DSK_FUNC_DEFS(MODNAME, FUNCNAME));           \
+	}                                                                                              \
+	/* begin of implementation of function. caller is required to provide the body */              \
+	/* of the function after the DSK_DEFINE_FUNCTION macro call */                                 \
+	DSK_JS_FUNC(MODNAME##_##FUNCNAME)
+
+#define DSK_DEFINE_METHOD(MODNAME, CLASSNAME, FUNCNAME)
+
+#define DSK_DEFINE_PROPERTY(MODNAME, CLASSNAME, GETTER, SETTER, DATA)
+
+#define DSK_DEFINE_STATIC_METHOD(MODNAME, CLASSNAME, FUNCNAME)
+
+#define DSK_DEFINE_STATIC_PROPERTY(MODNAME, CLASSNAME, GETTER, SETTER, DATA)
+
+// IMPLEMENTATION
+
+#include <assert.h>
+
+napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_def *exports_def) {
+	// Since this function is normally run during the process init,
+	// the safes thing to do is to crash the process.
+	DSK_ONERROR_FATAL_RET(NULL);
+
+	napi_property_descriptor properties[exports_def->members_count];
+
+	for (uint32_t i = 0; i < exports_def->members_count; i++) {
+		dsk_export_def *def = exports_def->members[i];
+		if (def->type == dsk_def_type_function) {
+			assert(def->properties_count == 1);
+			assert(def->properties != NULL);
+			// first property is the function itself
+			properties[i] = def->properties[0];
+			continue;
+		}
+
+		if (def->type == dsk_def_type_class) {
+			assert(def->properties_count >= 1);
+			assert(def->properties != NULL);
+
+			// first property contains name and constructor of the function
+			napi_property_descriptor classDef = def->properties[0];
+
+			// other ones contains members of the class (both static and instance members)
+			napi_property_descriptor *classProperties = def->properties + 1;
+
+			napi_value Class;
+
+			DSK_NAPI_CALL(napi_define_class(env, classDef.utf8name, NAPI_AUTO_LENGTH,
+											classDef.method, NULL, def->properties_count - 1,
+											classProperties, &Class));
+			napi_ref ignored_ref;
+			napi_ref *ClassRef;
+			if (classDef.data == NULL) {
+				ClassRef = &ignored_ref;
+			} else {
+				ClassRef = classDef.data;
+			}
+
+			DSK_NAPI_CALL(napi_create_reference(env, Class, 1, ClassRef));
+
+			properties[i] = (napi_property_descriptor){
+				.value = Class,
+				.utf8name = classDef.utf8name,
+			};
+			continue;
+		}
+
+		if (def->type == dsk_def_type_object) {
+			// data contains property of a singleton, that could contains
+			// function, other objects or classes.
+			assert("dsk_def_type_object NOT IMPLEMENTED" == NULL);
+		}
+
+		if (def->type == dsk_def_type_exec) {
+			// data is a function to run at init time
+			// that returns an array of props-defs to register on exports
+			assert("dsk_def_type_exec NOT IMPLEMENTED" == NULL);
+		}
+	}
+
+	DSK_NAPI_CALL(napi_define_properties(env, exports, exports_def->members_count, properties));
+
+	return exports;
+}
