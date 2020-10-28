@@ -9,8 +9,8 @@ helps working with Node.js NAPI framework.
 * [DSK_JS_FUNC](#DSK_JS_FUNC) - declares a js callback function prototype
 * [DSK_JS_FUNC_INIT](#DSK_JS_FUNC_INIT) - initialize a scope with the following variables:
 * [DSK_ONERROR_THROW_RET](#DSK_ONERROR_THROW_RET) - defines an error handler that throw a JavaScript error.
-* [DSK_ONERROR_FATAL_RET](#DSK_ONERROR_FATAL_RET) - defines an error handler that throw a JavaScript error.
-* [DSK_ONERROR_UNCAUGHT_RET](#DSK_ONERROR_UNCAUGHT_RET) - 
+* [DSK_ONERROR_FATAL_RET](#DSK_ONERROR_FATAL_RET) - defines an error handler that bort the process
+* [DSK_ONERROR_UNCAUGHT_RET](#DSK_ONERROR_UNCAUGHT_RET) - defines an error handler that throw an uncaught JavaScript error.
 * [DSK_JS_FUNC_INIT_WITH_ARGS](#DSK_JS_FUNC_INIT_WITH_ARGS) - initialize a function scope with a set of standard variables
 * [DSK_AT_LEAST_NARGS](#DSK_AT_LEAST_NARGS) - Throw a "EINVAL" errors if the callback is not called with at least N arguments.
 * [DSK_EXACTLY_NARGS](#DSK_EXACTLY_NARGS) - Throw a "EINVAL" errors if the callback is not called with exactly N arguments.
@@ -121,7 +121,7 @@ This macro defines following variables in current scope:
 
 ### DSK_ONERROR_FATAL_RET
 
-> defines an error handler that throw a JavaScript error.
+> defines an error handler that bort the process
 
 This macro defines following variables in current scope:
 
@@ -136,7 +136,7 @@ This macro defines following variables in current scope:
 
 ### DSK_ONERROR_UNCAUGHT_RET
 
-> 
+> defines an error handler that throw an uncaught JavaScript error.
 
 This macro defines following variables in current scope:
 
@@ -144,9 +144,7 @@ This macro defines following variables in current scope:
    case of errors. 
  * a `dsk_error` label to which execution will jump in case of error. It contains
    code to throw an uncaught Javascript exception with the message contained in `dsk_error_msg` 
-   variable, and return `WHAT` argument afterward. 
-
-/
+   variable, and return `WHAT` argument afterward.
 
 ---
 

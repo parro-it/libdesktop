@@ -154,7 +154,7 @@
 
 /**
  * 	@name DSK_ONERROR_FATAL_RET
- *  @brief defines an error handler that throw a JavaScript error.
+ *  @brief defines an error handler that bort the process
  *  @descr
  * 
  * 	This macro defines following variables in current scope:
@@ -180,7 +180,7 @@
 
 /**
  * 	@name DSK_ONERROR_UNCAUGHT_RET
- *  
+ *  @brief defines an error handler that throw an uncaught JavaScript error.
  *  @descr
  * 	This macro defines following variables in current scope:
  * 
@@ -190,7 +190,7 @@
  *    code to throw an uncaught Javascript exception with the message contained in `dsk_error_msg` 
  *    variable, and return `WHAT` argument afterward. 
  * 
- */	
+ */
 #define DSK_ONERROR_UNCAUGHT_RET(WHAT)                          \
     /* error handler */                                         \
 	char* dsk_error_msg;										\
