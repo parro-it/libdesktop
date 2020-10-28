@@ -262,7 +262,15 @@
  *
  */
 
-// specifies if an export def is a class, object or method.
+/**
+ * @name dsk_def_type
+ * @brief An enum used to specify the type of a dsk_export_def.
+ *
+ * @descr
+ *
+ * specifies if an export def is a class, object or method.
+ *
+ */
 typedef enum dsk_def_type {
 	dsk_def_type_object,
 	dsk_def_type_class,
@@ -270,7 +278,34 @@ typedef enum dsk_def_type {
 	dsk_def_type_exec,
 } dsk_def_type;
 
-// contains all infos needed to create a class or function
+//
+
+/**
+ * @name dsk_export_def
+ * @brief contains all infos needed to create a class or function
+ * @descr
+ *
+ * dsk_export_def contains all napi_property_descriptor that defines
+ * an export of the module.
+ *
+ * type member contains the kind of export to define.
+ *
+ * * when equal to dsk_def_type_function, the properties member
+ *   is array of exactly 1 member, that contain the napi_property_descriptor for the
+ *   function
+ *
+ * * when equal to dsk_def_type_object, the properties member contains the definition
+ * 	 of all properties of the object.
+ *
+ * * when equal to dsk_def_type_class, the first property contains:
+ *
+ * 		1) the constructor in method field.
+ * 		2) an optional addres to a napi_ref where to save a reference to the class, in data field.
+ *   	3) the name of the class in utf8name field.
+ *
+ *   All other properties specify the properties to define in the class prototype.
+ *
+ */
 typedef struct dsk_export_def {
 	dsk_def_type type;
 	// const char *name;
@@ -279,8 +314,11 @@ typedef struct dsk_export_def {
 	napi_property_descriptor *properties;
 } dsk_export_def;
 
-// contains all infos needed to create all exported members
-// of a module.
+/**
+ * @name dsk_modexports_def
+ * @brief contains all infos needed to create all exported members of a module
+ *
+ */
 typedef struct dsk_modexports_def {
 	size_t members_count;
 	/* this is a dsk_export_def** because it's an array of pointers
@@ -290,6 +328,7 @@ typedef struct dsk_modexports_def {
 
 // register a new member in the exports of a module.
 void dsk_modexports_def_register_member(dsk_modexports_def *exports, dsk_export_def *member);
+
 // register a new member of a class or object.
 void dsk_export_def_register_member(dsk_export_def *group, napi_property_descriptor member);
 
@@ -302,8 +341,7 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 #define _DSK_MOD_EXPORTS(MODNAME) MODNAME##_exports
 #define _DSK_CLASS_DEFS(MODNAME, CLASSNAME) MODNAME##_##CLASSNAME##_def
 #define _DSK_FUNC_DEFS(MODNAME, FUNCNAME) MODNAME##_##FUNCNAME##_def
-
-#define DSK_USE_MODULE(MODNAME) dsk_modexports_def _DSK_MOD_EXPORTS(MODNAME)
+#define _DSK_USE_MODULE(MODNAME) dsk_modexports_def _DSK_MOD_EXPORTS(MODNAME)
 
 #define DSK_USE_MODULE_INITIALIZER(MODNAME)                                                        \
 	napi_value dsk_init_##MODNAME /**/ (napi_env env, napi_value exports)
@@ -314,19 +352,26 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 // the whole module exports using the static structures
 // filled during C files initialization stage.
 #define DSK_DEFINE_MODULE(MODNAME)                                                                 \
-	DSK_USE_MODULE(MODNAME);                                                                       \
+	_DSK_USE_MODULE(MODNAME);                                                                      \
                                                                                                    \
 	DSK_MODULE_INITIALIZER(MODNAME) {                                                              \
 		return dsk_init_module_def(env, exports, &_DSK_MOD_EXPORTS(MODNAME));                      \
 	}
 
-#define DSK_EXTEND_MODULE(MODNAME) extern DSK_USE_MODULE(MODNAME)
+// used in a C file to extend the definition of a module defined in anoth file.
+// the extern module can be extended using DSK_DEFINE_FUNCTION or DSK_DEFINE_CLASS macro,
+// or otherwise by directly using dsk_modexports_def_register_member function.
+#define DSK_EXTEND_MODULE(MODNAME) extern _DSK_USE_MODULE(MODNAME)
 
+// define a new class constructor for a class named CLASSNAME.
+// automatically register the class in the MODNAME module exports.
+// the extern class or object definition can be extended using any of the DSK_DEFINE_*,
+// or otherwise by directly using dsk_export_def_register_member function.
 #define DSK_DEFINE_CLASS(MODNAME, CLASSNAME)                                                       \
 	/* class constructor C prototype (predeclared because it's used in the initialezer below) */   \
 	DSK_JS_FUNC(MODNAME##_##CLASSNAME);                                                            \
 	/* reference of constructor function napi_value */                                             \
-	DSK_USE_CLASS(MODNAME, CLASSNAME);                                                             \
+	_DSK_USE_CLASS(MODNAME, CLASSNAME);                                                            \
 	/* static dsk_export_def instance that could be used to enhance the class with */              \
 	/* further methods and properties */                                                           \
 	dsk_export_def _DSK_CLASS_DEFS(MODNAME, CLASSNAME) =                                           \
@@ -348,9 +393,12 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 	/* provide the body of the function after the DSK_DEFINE_CLASS call */                         \
 	DSK_JS_FUNC(MODNAME##_##CLASSNAME)
 
-#define DSK_EXTEND_CLASS(MODNAME, CLASSNAME) extern DSK_USE_CLASS(MODNAME, CLASSNAME)
+// used in a C file to extend the definition of a class or object defined in another file.
+// the extern class or object definition can be extended using any of the DSK_DEFINE_*,
+// or otherwise by directly using dsk_export_def_register_member function.
+#define DSK_EXTEND_CLASS(MODNAME, CLASSNAME) extern _DSK_USE_CLASS(MODNAME, CLASSNAME)
 
-#define DSK_USE_CLASS(MODNAME, CLASSNAME)                                                          \
+#define _DSK_USE_CLASS(MODNAME, CLASSNAME)                                                         \
 	/* reference to class constructor function napi_value */                                       \
 	napi_ref MODNAME##_##CLASSNAME##_ref
 
@@ -374,12 +422,20 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 	/* of the function after the DSK_DEFINE_FUNCTION macro call */                                 \
 	DSK_JS_FUNC(MODNAME##_##FUNCNAME)
 
+// define a method of a class or object in a module
 #define DSK_DEFINE_METHOD(MODNAME, CLASSNAME, FUNCNAME)
 
+// define a property of a class or object in a module
+// the property will be readonly if setter is not provider.
+// calling modules will probably provides shortcuts by
+// implement further macros with default values for GETTER, SETTER
+// and other macros to build values for DATA
 #define DSK_DEFINE_PROPERTY(MODNAME, CLASSNAME, GETTER, SETTER, DATA)
 
+// define a static method of a class in a module
 #define DSK_DEFINE_STATIC_METHOD(MODNAME, CLASSNAME, FUNCNAME)
 
+// define a static property of a class in a module
 #define DSK_DEFINE_STATIC_PROPERTY(MODNAME, CLASSNAME, GETTER, SETTER, DATA)
 
 #endif

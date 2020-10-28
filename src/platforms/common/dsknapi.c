@@ -38,7 +38,7 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 	// the safes thing to do is to crash the process.
 	DSK_ONERROR_FATAL_RET(NULL);
 
-	napi_property_descriptor properties[exports_def->members_count];
+	napi_property_descriptor* properties = malloc(sizeof(napi_property_descriptor) * exports_def->members_count);
 
 	for (uint32_t i = 0; i < exports_def->members_count; i++) {
 		dsk_export_def *def = exports_def->members[i];
@@ -99,5 +99,6 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 
     // free the napi_properties data structures that are no more needed.
     dsk_modexports_def_free(exports_def);
+	free(properties);
 	return exports;
 }
