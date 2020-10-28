@@ -179,7 +179,7 @@
 	dsk_continue:	
 
 /**
- * 	@name DSK_ONERROR_FATAL_RET
+ * 	@name DSK_ONERROR_UNCAUGHT_RET
  *  
  *  @descr
  * 	This macro defines following variables in current scope:

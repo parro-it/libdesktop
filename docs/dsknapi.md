@@ -10,7 +10,7 @@ helps working with Node.js NAPI framework.
 * [DSK_JS_FUNC_INIT](#DSK_JS_FUNC_INIT) - initialize a scope with the following variables:
 * [DSK_ONERROR_THROW_RET](#DSK_ONERROR_THROW_RET) - defines an error handler that throw a JavaScript error.
 * [DSK_ONERROR_FATAL_RET](#DSK_ONERROR_FATAL_RET) - defines an error handler that throw a JavaScript error.
-* [DSK_ONERROR_FATAL_RET](#DSK_ONERROR_FATAL_RET) - 
+* [DSK_ONERROR_UNCAUGHT_RET](#DSK_ONERROR_UNCAUGHT_RET) - 
 * [DSK_JS_FUNC_INIT_WITH_ARGS](#DSK_JS_FUNC_INIT_WITH_ARGS) - initialize a function scope with a set of standard variables
 * [DSK_AT_LEAST_NARGS](#DSK_AT_LEAST_NARGS) - Throw a "EINVAL" errors if the callback is not called with at least N arguments.
 * [DSK_EXACTLY_NARGS](#DSK_EXACTLY_NARGS) - Throw a "EINVAL" errors if the callback is not called with exactly N arguments.
@@ -134,7 +134,7 @@ This macro defines following variables in current scope:
 
 ---
 
-### DSK_ONERROR_FATAL_RET
+### DSK_ONERROR_UNCAUGHT_RET
 
 > 
 
