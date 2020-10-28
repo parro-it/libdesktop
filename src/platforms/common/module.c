@@ -10,7 +10,7 @@ napi_value style_init(napi_env env, napi_value exports);
 napi_value textfield_init(napi_env env, napi_value exports);
 napi_value dsk_event_init(napi_env env, napi_value exports);
 
-DSK_USE_MODULE_INITIALIZER(fixture);
+DSK_USE_MODULE_INITIALIZER(libdesktop);
 
 static napi_value init_all(napi_env env, napi_value exports) {
 	app_init_core(env, exports);
@@ -21,7 +21,9 @@ static napi_value init_all(napi_env env, napi_value exports) {
 	style_init(env, exports);
 	textfield_init(env, exports);
 	dsk_event_init(env, exports);
-	dsk_init_fixture(env, exports);
+	printf("dsk_init_libdesktop\n");
+	dsk_init_libdesktop(env, exports);
+	printf("dsk_init_libdesktop DONE\n");
 	return exports;
 }
 

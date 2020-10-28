@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "node desktop gui library",
   "scripts": {
-    "test": "ts-node test.ts | faucet",
+    "test": "ts-node test.ts # | faucet",
     "start": "ts-node example/form.ts",
     "build": "node-gyp configure build",
     "clear": "rm -rf build node_modules"

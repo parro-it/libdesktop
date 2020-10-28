@@ -257,8 +257,6 @@
 		goto dsk_error;                                                                            \
 	}
 
-#endif
-
 /**
  * @name Function and macro to exports function, objects, or classes.
  *
@@ -290,12 +288,15 @@ typedef struct dsk_modexports_def {
 	dsk_export_def **members;
 } dsk_modexports_def;
 
-void dsk_modexports_def_free(dsk_modexports_def *exports);
+// register a new member in the exports of a module.
 void dsk_modexports_def_register_member(dsk_modexports_def *exports, dsk_export_def *member);
+// register a new member of a class or object.
 void dsk_export_def_register_member(dsk_export_def *group, napi_property_descriptor member);
 
-#include <assert.h>
+// free the exports data structures after module registration.
+void dsk_modexports_def_free(dsk_modexports_def *exports);
 
+// default initialization function for modules.
 napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_def *exports_def);
 
 #define _DSK_MOD_EXPORTS(MODNAME) MODNAME##_exports
@@ -305,12 +306,17 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 #define DSK_USE_MODULE(MODNAME) dsk_modexports_def _DSK_MOD_EXPORTS(MODNAME)
 
 #define DSK_USE_MODULE_INITIALIZER(MODNAME)                                                        \
-	napi_value dsk_init_##MODNAME(napi_env env, napi_value exports)
+	napi_value dsk_init_##MODNAME /**/ (napi_env env, napi_value exports)
 
+#define DSK_MODULE_INITIALIZER(MODNAME) DSK_USE_MODULE_INITIALIZER(MODNAME)
+
+// used in a single C file per module, setup
+// the whole module exports using the static structures
+// filled during C files initialization stage.
 #define DSK_DEFINE_MODULE(MODNAME)                                                                 \
 	DSK_USE_MODULE(MODNAME);                                                                       \
                                                                                                    \
-	DSK_USE_MODULE_INITIALIZER(MODNAME) {                                                          \
+	DSK_MODULE_INITIALIZER(MODNAME) {                                                              \
 		return dsk_init_module_def(env, exports, &_DSK_MOD_EXPORTS(MODNAME));                      \
 	}
 
@@ -376,73 +382,4 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 
 #define DSK_DEFINE_STATIC_PROPERTY(MODNAME, CLASSNAME, GETTER, SETTER, DATA)
 
-// IMPLEMENTATION
-
-#include <assert.h>
-
-napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_def *exports_def) {
-	// Since this function is normally run during the process init,
-	// the safes thing to do is to crash the process.
-	DSK_ONERROR_FATAL_RET(NULL);
-
-	napi_property_descriptor properties[exports_def->members_count];
-
-	for (uint32_t i = 0; i < exports_def->members_count; i++) {
-		dsk_export_def *def = exports_def->members[i];
-		if (def->type == dsk_def_type_function) {
-			assert(def->properties_count == 1);
-			assert(def->properties != NULL);
-			// first property is the function itself
-			properties[i] = def->properties[0];
-			continue;
-		}
-
-		if (def->type == dsk_def_type_class) {
-			assert(def->properties_count >= 1);
-			assert(def->properties != NULL);
-
-			// first property contains name and constructor of the function
-			napi_property_descriptor classDef = def->properties[0];
-
-			// other ones contains members of the class (both static and instance members)
-			napi_property_descriptor *classProperties = def->properties + 1;
-
-			napi_value Class;
-
-			DSK_NAPI_CALL(napi_define_class(env, classDef.utf8name, NAPI_AUTO_LENGTH,
-											classDef.method, NULL, def->properties_count - 1,
-											classProperties, &Class));
-			napi_ref ignored_ref;
-			napi_ref *ClassRef;
-			if (classDef.data == NULL) {
-				ClassRef = &ignored_ref;
-			} else {
-				ClassRef = classDef.data;
-			}
-
-			DSK_NAPI_CALL(napi_create_reference(env, Class, 1, ClassRef));
-
-			properties[i] = (napi_property_descriptor){
-				.value = Class,
-				.utf8name = classDef.utf8name,
-			};
-			continue;
-		}
-
-		if (def->type == dsk_def_type_object) {
-			// data contains property of a singleton, that could contains
-			// function, other objects or classes.
-			assert("dsk_def_type_object NOT IMPLEMENTED" == NULL);
-		}
-
-		if (def->type == dsk_def_type_exec) {
-			// data is a function to run at init time
-			// that returns an array of props-defs to register on exports
-			assert("dsk_def_type_exec NOT IMPLEMENTED" == NULL);
-		}
-	}
-
-	DSK_NAPI_CALL(napi_define_properties(env, exports, exports_def->members_count, properties));
-
-	return exports;
-}
+#endif

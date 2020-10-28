@@ -29,7 +29,6 @@ DSK_DEFINE_FUNCTION(libdesktop, sum_at_least_two) {
     return result;
 }
 
-
 DSK_DEFINE_FUNCTION(libdesktop, sum_exactly_two) {
     DSK_JS_FUNC_INIT();
     DSK_EXACTLY_NARGS(2);
