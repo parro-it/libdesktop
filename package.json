@@ -20,9 +20,12 @@
   "author": "andrea@parro.it <Andrea Parodi>",
   "license": "MIT",
   "devDependencies": {
+    "@types/consolidate": "^0.14.0",
     "@types/node": "^14.14.2",
     "@types/tape-async": "^2.3.1",
+    "consolidate": "^0.16.0",
     "faucet": "0.0.1",
+    "handlebars": "^4.7.6",
     "javadoc": "^2.0.0",
     "node-gyp": "^7.1.0",
     "tape-async": "^2.3.0",

@@ -29,7 +29,6 @@ LIBUI_FUNCTION(newApp) {
     return NULL;
 }
 
-
 napi_value app_init_core(napi_env env, napi_value exports) {
     DEFINE_MODULE()
     

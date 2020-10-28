@@ -25,7 +25,6 @@ bool dsk_set_properties(napi_env env, napi_value props, napi_value target);
 void dsk_set_children_preferred_sizes(YGNodeRef node, UIHandle widget);
 void dsk_get_preferred_sizes(UIHandle widget, int* width, int* height);
 
-
 napi_value dsk_event_new_for_widget(napi_env env, const char* eventname, napi_value sender);
 
 struct dsk_event_args {
@@ -33,6 +32,7 @@ struct dsk_event_args {
     napi_ref sender;
     napi_ref event;
 };
+
 
 void dsk_connect_event(UIHandle widget, char* eventname, struct dsk_event_args* args);
 #endif

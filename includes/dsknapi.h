@@ -47,6 +47,7 @@
  * 
  * @arg FN - an expression that evaluates to `napi_status`, usually 
  * 		a NAPI function call.
+ * 
  */
 #define DSK_NAPI_CALL(FN) do {                                    \
     napi_status status = (FN);                                    \
@@ -61,7 +62,9 @@
 
 /**
  * @name DSK_JS_FUNC
+ * @brief declares a js callback function prototype
  * 
+ * @descr
  * DSK_JS_FUNC declares a js callback function prototype given the name.
  * It can be used to declare a function in a header file:
  * 
@@ -137,6 +140,7 @@
  *    code to throw a JS error with the message contained in `dsk_error_msg` variable, 
  *    and return `WHAT` argument afterward;  
  *  @arg WHAT - an expression to return that signal the caller that an error occurred.
+ * 
  */
 #define DSK_ONERROR_THROW_RET(WHAT)                                                                 \
     /* error handler */                                                                             \
@@ -162,6 +166,7 @@
  *    and return `WHAT` argument afterward. The call to `napi_fatal_error` causes the node process
  * 	  to immediately exit.
  *  @arg WHAT - an expression to return that signal the caller that an error occurred.
+ * 
  */
 #define DSK_ONERROR_FATAL_RET(WHAT)                                                                 \
     /* error handler */                                                                             \
@@ -211,7 +216,8 @@
  * callback. Use `DSK_JS_FUNC_INIT` when <= 10 arguments are required. 
  * 
  * @see `DSK_JS_FUNC_INIT`
- **/
+ * 
+ */
 #define DSK_JS_FUNC_INIT_WITH_ARGS(ARGS_COUNT)                                                      \
     DSK_ONERROR_THROW_RET(NULL);                                                                     \
     napi_value argv[(ARGS_COUNT)];                                                    				\
@@ -227,7 +233,7 @@
  * 
  * The calling scope must contains `env`, `argc` and `dsk_error_msg` variables, and a `dsk_error` label.
  * 
- **/
+ */
 #define DSK_AT_LEAST_NARGS(N)                                                               \
 	if (argc < (N)) {                                                        				        \
 		dsk_error_msg = "Too few arguments. At least " #N " required.";                       				\
@@ -241,7 +247,8 @@
  * @descr
  * 
  * The calling scope must contains `env`, `argc` and `dsk_error_msg` variables, and a `dsk_error` label.
- **/
+ * 
+ */
 #define DSK_EXACTLY_NARGS(N)                                                               \
 	if (argc != (N)) {                                                        				        \
 		dsk_error_msg = "Wrong number of arguments. " #N " required.";                       				\
