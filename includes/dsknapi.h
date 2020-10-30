@@ -259,14 +259,16 @@
 	}
 
 /**
- * @name Function and macro to exports function, objects, or classes.
+ *
+ * @group DSK_XP
+ * @brief Function and macro to exports function, objects, or classes.
  *
  */
 
 /**
  * @name dsk_def_type
  * @brief An enum used to specify the type of a dsk_export_def.
- *
+ * @group DSK_XP
  * @descr
  *
  * specifies if an export def is a class, object or method.
@@ -284,6 +286,7 @@ typedef enum dsk_def_type {
 /**
  * @name dsk_export_def
  * @brief contains all infos needed to create a class or function
+ * @group DSK_XP
  * @descr
  *
  * dsk_export_def contains all napi_property_descriptor that defines
@@ -318,6 +321,7 @@ typedef struct dsk_export_def {
 
 /**
  * @name dsk_modexports_def
+ * @group DSK_XP
  * @brief contains all infos needed to create all exported members of a module
  *
  */
@@ -328,16 +332,52 @@ typedef struct dsk_modexports_def {
 	dsk_export_def **members;
 } dsk_modexports_def;
 
-// register a new member in the exports of a module.
+/**
+ * @name dsk_modexports_def_register_member
+ * @group DSK_XP
+ * @brief register a new member in the exports of a module.
+ * @descr
+ * register a new member in the exports of a module.
+ *
+ * @param exports:dsk_modexports_def* -
+ * @param member:dsk_export_def* -
+ */
 void dsk_modexports_def_register_member(dsk_modexports_def *exports, dsk_export_def *member);
 
-// register a new member of a class or object.
+/**
+ * @name dsk_export_def_register_member
+ * @group DSK_XP
+ * @brief register a new member of a class or object.
+ * @descr
+ * register a new member of a class or object.
+ * @param group:dsk_export_def* -
+ * @param member:napi_property_descriptor -
+ */
 void dsk_export_def_register_member(dsk_export_def *group, napi_property_descriptor member);
 
 // free the exports data structures after module registration.
+/**
+ * @name dsk_modexports_def_free
+ * @group DSK_XP
+ * @brief free the exports data structures after module registration.
+ * @descr
+ * free the exports data structures after module registration.
+ * @param exports:dsk_modexports_def* -
+ */
 void dsk_modexports_def_free(dsk_modexports_def *exports);
 
-// default initialization function for modules.
+/**
+ * @name dsk_init_module_def
+ * @group DSK_XP
+ * @brief default initialization function for modules.
+ * @descr
+ * default initialization function for modules.
+ *
+ * @param env:napi_env -
+ * @param exports:napi_value -
+ * @param exports_def:dsk_modexports_def* -
+ * @return napi_value
+ */
 napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_def *exports_def);
 
 #define _DSK_MOD_EXPORTS(MODNAME) MODNAME##_exports
@@ -348,14 +388,36 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 	_DSK_METHOD_DEFS(MODNAME, CLASSNAME, FUNCNAME)
 #define _DSK_USE_MODULE(MODNAME) dsk_modexports_def _DSK_MOD_EXPORTS(MODNAME)
 
+/**
+ * @name DSK_USE_MODULE_INITIALIZER
+ * @group DSK_XP
+ * @brief declare the prototype of an external module initializer function
+ * @descr
+ * this macro could be usefule to register multiple module in
+ * the same NAPI exports
+ */
 #define DSK_USE_MODULE_INITIALIZER(MODNAME)                                                        \
 	napi_value dsk_init_##MODNAME /**/ (napi_env env, napi_value exports)
 
+/**
+ * @name DSK_MODULE_INITIALIZER
+ * @group DSK_XP
+ * @descr declare a custom module initializer to use instead of `dsk_init_module_def`
+ * @brief  declare a custom module initializer to use instead of `dsk_init_module_def`
+ *
+ */
 #define DSK_MODULE_INITIALIZER(MODNAME) DSK_USE_MODULE_INITIALIZER(MODNAME)
 
-// used in a single C file per module, setup
-// the whole module exports using the static structures
-// filled during C files initialization stage.
+/**
+ * @name DSK_DEFINE_MODULE
+ * @brief define a module initializer
+ * @group DSK_XP
+ * @descr
+ * define a module initializer function that setup
+ * the whole module exports using the static structures
+ * filled during C files initialization stage.
+ * Should be used in a single C file per module
+ */
 #define DSK_DEFINE_MODULE(MODNAME)                                                                 \
 	_DSK_USE_MODULE(MODNAME);                                                                      \
                                                                                                    \
@@ -363,15 +425,28 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 		return dsk_init_module_def(env, exports, &_DSK_MOD_EXPORTS(MODNAME));                      \
 	}
 
-// used in a C file to extend the definition of a module defined in anoth file.
-// the extern module can be extended using DSK_DEFINE_FUNCTION or DSK_DEFINE_CLASS macro,
-// or otherwise by directly using dsk_modexports_def_register_member function.
+/**
+ * @name DSK_EXTEND_MODULE
+ * @group DSK_XP
+ * @brief extend the definition of a module
+ * @descr
+ * used in a C file to extend the definition of a module defined in anoth file.
+ * the extern module can be extended using DSK_DEFINE_FUNCTION or DSK_DEFINE_CLASS macro,
+ * or otherwise by directly using dsk_modexports_def_register_member function.
+ */
 #define DSK_EXTEND_MODULE(MODNAME) extern _DSK_USE_MODULE(MODNAME)
 
-// define a new class constructor for a class named CLASSNAME.
-// automatically register the class in the MODNAME module exports.
-// the extern class or object definition can be extended using any of the DSK_DEFINE_*,
-// or otherwise by directly using dsk_export_def_register_member function.
+/**
+ * @name DSK_DEFINE_CLASS
+ * @group DSK_XP
+ * @brief define a new class constructor
+ * @descr
+ * define a new class constructor for a class named CLASSNAME.
+ * automatically register the class in the MODNAME module exports.
+ * the extern class or object definition can be extended using any of the DSK_DEFINE_*,
+ * or otherwise by directly using dsk_export_def_register_member function.
+ *
+ */
 #define DSK_DEFINE_CLASS(MODNAME, CLASSNAME)                                                       \
 	/* class constructor C prototype (predeclared because it's used in the initialezer below) */   \
 	DSK_JS_FUNC(MODNAME##_##CLASSNAME);                                                            \
@@ -401,15 +476,30 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 	/* provide the body of the function after the DSK_DEFINE_CLASS call */                         \
 	DSK_JS_FUNC(MODNAME##_##CLASSNAME)
 
-// used in a C file to extend the definition of a class or object defined in another file.
-// the extern class or object definition can be extended using any of the DSK_DEFINE_*,
-// or otherwise by directly using dsk_export_def_register_member function.
+/**
+ * @name DSK_EXTEND_CLASS
+ * @brief extend the definition of a class or object
+ * @group DSK_XP
+ * @descr
+ * used in a C file to extend the definition of a class or object defined in another file.
+ * the extern class or object definition can be extended using any of the DSK_DEFINE_*,
+ * or otherwise by directly using dsk_export_def_register_member function.
+ */
 #define DSK_EXTEND_CLASS(MODNAME, CLASSNAME) extern _DSK_USE_CLASS(MODNAME, CLASSNAME)
 
 #define _DSK_USE_CLASS(MODNAME, CLASSNAME)                                                         \
 	/* reference to class constructor function napi_value */                                       \
 	napi_ref MODNAME##_##CLASSNAME##_ref
 
+/**
+ * @name DSK_DEFINE_FUNCTION
+ * @group DSK_XP
+ * @brief define a function callback
+ * @descr
+ * define an exported function named FUNCNAME.
+ * automatically register function in the MODNAME module exports.
+ *
+ */
 #define DSK_DEFINE_FUNCTION(MODNAME, FUNCNAME)                                                     \
 	/* function C prototype (predeclared because it's used in the initialezer below) */            \
 	DSK_JS_FUNC(MODNAME##_##FUNCNAME);                                                             \
@@ -448,15 +538,18 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 	/* of the function after the DSK_DEFINE_FUNCTION macro call */                                 \
 	DSK_JS_FUNC(MODNAME##_##CLASSNAME##_##FUNCNAME)
 
-// define a method of a class or object in a module
+/**
+ * @name DSK_DEFINE_METHOD
+ * @group DSK_XP
+ * @brief define a method of a class or object in a module
+ * @descr
+ * define a method of a class or object in a module
+ * automatically register the member in the CLASSNAME class of MODNAME module exports.
+ *
+ */
 #define DSK_DEFINE_METHOD(MODNAME, CLASSNAME, FUNCNAME)                                            \
 	_DSK_DEFINE_METHOD(MODNAME, CLASSNAME, FUNCNAME, napi_default)
 
-// define a property of a class or object in a module
-// the property will be readonly if setter is not provider.
-// calling modules will probably provides shortcuts by
-// implement further macros with default values for GETTER, SETTER
-// and other macros to build values for DATA
 #define _DSK_DEFINE_PROPERTY(MODNAME, CLASSNAME, PROPNAME, GETTER, SETTER, DATA, ATTRS)            \
 	/* static dsk_export_def instance */                                                           \
 	napi_property_descriptor _DSK_PROPERTY_DEFS(MODNAME, CLASSNAME,                                \
@@ -473,14 +566,43 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 		dsk_export_def_register_member(exports, _DSK_PROPERTY_DEFS(MODNAME, CLASSNAME, PROPNAME)); \
 	}
 
+/**
+ * @name DSK_DEFINE_PROPERTY
+ * @group DSK_XP
+ * @brief define a property of a class or object in a module
+ * @descr
+ * define a property of a class or object in a module
+ * the property will be readonly if setter is not provider.
+ * calling modules will probably provides shortcuts by
+ * implement further macros with default values for GETTER, SETTER
+ * and other macros to build values for DATA
+ */
 #define DSK_DEFINE_PROPERTY(MODNAME, CLASSNAME, PROPNAME, GETTER, SETTER, DATA)                    \
 	_DSK_DEFINE_PROPERTY(MODNAME, CLASSNAME, PROPNAME, GETTER, SETTER, DATA, napi_default)
 
-// define a static method of a class in a module
+/**
+ * @name DSK_DEFINE_STATIC_METHOD
+ * @group DSK_XP
+ * @brief define a static method of a class or object in a module
+ * @descr
+ * define a static method of a class or object in a module
+ * automatically register the member in the CLASSNAME class of MODNAME module exports.
+ *
+ */
 #define DSK_DEFINE_STATIC_METHOD(MODNAME, CLASSNAME, FUNCNAME)                                     \
 	_DSK_DEFINE_METHOD(MODNAME, CLASSNAME, FUNCNAME, napi_static)
 
-// define a static property of a class in a module
+/**
+ * @name DSK_DEFINE_STATIC_PROPERTY
+ * @group DSK_XP
+ * @brief define a static property of a class or object in a module
+ * @descr
+ * define a static property of a class or object in a module
+ * the property will be readonly if setter is not provider.
+ * calling modules will probably provides shortcuts by
+ * implement further macros with default values for GETTER, SETTER
+ * and other macros to build values for DATA
+ */
 #define DSK_DEFINE_STATIC_PROPERTY(MODNAME, CLASSNAME, PROPNAME, GETTER, SETTER, DATA)             \
 	_DSK_DEFINE_PROPERTY(MODNAME, CLASSNAME, PROPNAME, GETTER, SETTER, DATA, napi_static)
 
