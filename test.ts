@@ -1,5 +1,5 @@
-import './tests/style.ts'
-import './tests/event.ts'
+//import './tests/style.ts'
+//import './tests/event.ts'
 import './tests/dsknapi.ts'
 /*
 

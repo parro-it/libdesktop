@@ -9,37 +9,35 @@
 // function arguments
 #define DSK_UNUSED(ARG) ;
 
+#define INIT_EMPTY_ARGS()                                                                          \
+	napi_value argv[1];                                                                            \
+	napi_value this;                                                                               \
+	size_t argc = 0;                                                                               \
+	napi_get_cb_info(env, info, &argc, argv, &this, NULL);                                         \
+	char *dsk_error_msg;                                                                           \
+	goto dsk_continue;                                                                             \
+	goto dsk_error;                                                                                \
+	dsk_error:                                                                                     \
+	napi_throw_error(env, NULL, dsk_error_msg);                                                    \
+	return NULL;                                                                                   \
+	dsk_continue:;
 
-#define INIT_EMPTY_ARGS()                                                                      		\
-	napi_value argv[1];                                                                   			\
-	napi_value this;																			   	\
-	size_t argc = 0;																				\
-	napi_get_cb_info(env, info, &argc, argv, &this, NULL);                                         	\
-	char* dsk_error_msg;																			\
-	goto dsk_continue;																				\
-	goto dsk_error;																					\
-	dsk_error:																						\
-		napi_throw_error(env, NULL, dsk_error_msg);          									\
-		return NULL;																				\
-	dsk_continue:																					\
-		;
-		
-#define INIT_ARGS(ARGS_COUNT)                                                       				\
-	napi_value argv[ARGS_COUNT];                                                    				\
-	napi_value this;																				\
-	size_t argc = ARGS_COUNT;                                                       				\
-	napi_get_cb_info(env, info, &argc, argv, &this, NULL);                          				\
-	if (argc < ARGS_COUNT) {                                                        				\
-		napi_throw_error(env, "EINVAL", "Too few arguments");                       				\
-		return NULL;                                                                				\
-	}																								\
-	char* dsk_error_msg;																						\
-	goto dsk_continue;																				\
-	goto dsk_error;																					\
-	dsk_error:																						\
-		napi_throw_error(env, NULL, dsk_error_msg);          									\
-		return NULL;																				\
-	dsk_continue:																					\
+#define INIT_ARGS(ARGS_COUNT)                                                                      \
+	napi_value argv[ARGS_COUNT];                                                                   \
+	napi_value this;                                                                               \
+	size_t argc = ARGS_COUNT;                                                                      \
+	napi_get_cb_info(env, info, &argc, argv, &this, NULL);                                         \
+	if (argc < ARGS_COUNT) {                                                                       \
+		napi_throw_error(env, "EINVAL", "Too few arguments");                                      \
+		return NULL;                                                                               \
+	}                                                                                              \
+	char *dsk_error_msg;                                                                           \
+	goto dsk_continue;                                                                             \
+	goto dsk_error;                                                                                \
+	dsk_error:                                                                                     \
+	napi_throw_error(env, NULL, dsk_error_msg);                                                    \
+	return NULL;                                                                                   \
+	dsk_continue:
 
 #define ARG_INT32(ARG_NAME, ARG_IDX)                                                               \
 	int32_t ARG_NAME;                                                                              \
@@ -152,15 +150,14 @@
 		}                                                                                          \
 	}
 
-
 #define ARG_CB_REF(ARG_NAME, ARG_IDX)                                                              \
 	napi_ref ARG_NAME;                                                                             \
 	{                                                                                              \
 		napi_valuetype arg_type;                                                                   \
 		napi_status status = napi_typeof(env, argv[ARG_IDX], &arg_type);                           \
-                                                                                  \
-		status = napi_create_reference(env, argv[ARG_IDX], 1, &ARG_NAME);                      \
-		CHECK_STATUS_THROW(status, napi_create_reference);                                     \
+                                                                                                   \
+		status = napi_create_reference(env, argv[ARG_IDX], 1, &ARG_NAME);                          \
+		CHECK_STATUS_THROW(status, napi_create_reference);                                         \
 	}
 
 // return values
@@ -293,7 +290,6 @@ static inline bool debug_enabled_for_module(const char *module) {
 
 	return (strncmp(module, enabled_debug_module, env_var_size) == 0);
 }
-
 
 #endif
 

@@ -1,5 +1,21 @@
 import test from 'tape-async'
-const {sum,sum_exactly_two,sum_at_least_two} = require("../build/Release/desktop.node")
+const {sum,sum_exactly_two,sum_at_least_two,Decimal} = require("../build/Release/desktop.node")
+
+
+test('Class definition', (t:any) => {
+    t.equal(typeof Decimal, "function")
+    t.equal(typeof new Decimal(4,42), "object")
+    t.end()
+})
+
+test('Class definition', (t:any) => {
+    const d = new Decimal(4,42)
+    t.equal(4, d.integral);
+    d.integral = 13;
+    t.equal(13, d.integral);
+    t.throws(()=>{d.integral = "13";}, /A number was expected/)
+    t.end()
+})
 
 test('sum exported', (t:any) => {
     t.equal(typeof sum, "function")

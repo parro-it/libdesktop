@@ -14,6 +14,7 @@
  */
 
 #include <node_api.h>
+#include <stdio.h>
 
 /**
  * @name DSK_NAPI_CALL
@@ -312,6 +313,7 @@ typedef struct dsk_export_def {
 	// napi_callback constructor;
 	size_t properties_count;
 	napi_property_descriptor *properties;
+	bool malloced;
 } dsk_export_def;
 
 /**
@@ -341,6 +343,9 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 #define _DSK_MOD_EXPORTS(MODNAME) MODNAME##_exports
 #define _DSK_CLASS_DEFS(MODNAME, CLASSNAME) MODNAME##_##CLASSNAME##_def
 #define _DSK_FUNC_DEFS(MODNAME, FUNCNAME) MODNAME##_##FUNCNAME##_def
+#define _DSK_METHOD_DEFS(MODNAME, CLASSNAME, FUNCNAME) MODNAME##_##CLASSNAME##_##FUNCNAME##_def
+#define _DSK_PROPERTY_DEFS(MODNAME, CLASSNAME, FUNCNAME)                                           \
+	_DSK_METHOD_DEFS(MODNAME, CLASSNAME, FUNCNAME)
 #define _DSK_USE_MODULE(MODNAME) dsk_modexports_def _DSK_MOD_EXPORTS(MODNAME)
 
 #define DSK_USE_MODULE_INITIALIZER(MODNAME)                                                        \
@@ -375,6 +380,7 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 	/* static dsk_export_def instance that could be used to enhance the class with */              \
 	/* further methods and properties */                                                           \
 	dsk_export_def _DSK_CLASS_DEFS(MODNAME, CLASSNAME) = /**/ {                                    \
+		.malloced = false,                                                                         \
 		.type = dsk_def_type_class,                                                                \
 		.properties_count = 1, /* todo, since first property is statically allocated,              \
 								  `properties` cannot be free at end .same below for function */   \
@@ -388,6 +394,7 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 	/* definitions of the module. */                                                               \
 	NAPI_C_CTOR(_dsk_register_class##MODNAME##_##CLASSNAME) {                                      \
 		dsk_modexports_def *exports = &_DSK_MOD_EXPORTS(MODNAME);                                  \
+		printf("REGISTER CLASS %s\n", _DSK_CLASS_DEFS(MODNAME, CLASSNAME).properties[0].utf8name); \
 		dsk_modexports_def_register_member(exports, &_DSK_CLASS_DEFS(MODNAME, CLASSNAME));         \
 	}                                                                                              \
 	/* begin of implementation of class constructor function. caller is required to */             \
@@ -409,6 +416,7 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 	/* static dsk_export_def instance */                                                           \
 	dsk_export_def _DSK_FUNC_DEFS(MODNAME, FUNCNAME) =                                             \
 		/**/ {.type = dsk_def_type_function,                                                       \
+			  .malloced = false,                                                                   \
 			  .properties_count = 1,                                                               \
 			  .properties = (napi_property_descriptor[]){                                          \
 				  {.method = MODNAME##_##FUNCNAME, .utf8name = #FUNCNAME}}};                       \
@@ -424,14 +432,39 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 	DSK_JS_FUNC(MODNAME##_##FUNCNAME)
 
 // define a method of a class or object in a module
-#define DSK_DEFINE_METHOD(MODNAME, CLASSNAME, FUNCNAME)
+#define DSK_DEFINE_METHOD(MODNAME, CLASSNAME, FUNCNAME)                                            \
+	/* function C prototype (predeclared because it's used in the initialezer below) */            \
+	DSK_JS_FUNC(MODNAME##_##CLASSNAME##_##FUNCNAME);                                               \
+	/* static dsk_export_def instance */                                                           \
+	napi_property_descriptor _DSK_METHOD_DEFS(MODNAME, CLASSNAME, FUNCNAME) = {                    \
+		.method = MODNAME##_##CLASSNAME##_##FUNCNAME, .utf8name = #FUNCNAME};                      \
+                                                                                                   \
+	/* this is an initializer function that add the property */                                    \
+	/* definition to the module. */                                                                \
+	NAPI_C_CTOR(_dsk_register_function_##MODNAME##_##CLASSNAME##_##FUNCNAME) {                     \
+		dsk_export_def *exports = &_DSK_CLASS_DEFS(MODNAME, CLASSNAME);                            \
+		dsk_export_def_register_member(exports, _DSK_METHOD_DEFS(MODNAME, CLASSNAME, FUNCNAME));   \
+	}                                                                                              \
+	/* begin of implementation of function. caller is required to provide the body */              \
+	/* of the function after the DSK_DEFINE_FUNCTION macro call */                                 \
+	DSK_JS_FUNC(MODNAME##_##CLASSNAME##_##FUNCNAME)
 
 // define a property of a class or object in a module
 // the property will be readonly if setter is not provider.
 // calling modules will probably provides shortcuts by
 // implement further macros with default values for GETTER, SETTER
 // and other macros to build values for DATA
-#define DSK_DEFINE_PROPERTY(MODNAME, CLASSNAME, GETTER, SETTER, DATA)
+#define DSK_DEFINE_PROPERTY(MODNAME, CLASSNAME, PROPNAME, GETTER, SETTER, DATA)                    \
+	/* static dsk_export_def instance */                                                           \
+	napi_property_descriptor _DSK_PROPERTY_DEFS(MODNAME, CLASSNAME, PROPNAME) = {                  \
+		.getter = GETTER, .setter = SETTER, .data = DATA, .utf8name = #PROPNAME};                  \
+                                                                                                   \
+	/* this is an initializer function that add the property */                                    \
+	/* definition to the module. */                                                                \
+	NAPI_C_CTOR(_dsk_register_function_##MODNAME##_##CLASSNAME##_##PROPNAME) {                     \
+		dsk_export_def *exports = &_DSK_CLASS_DEFS(MODNAME, CLASSNAME);                            \
+		dsk_export_def_register_member(exports, _DSK_PROPERTY_DEFS(MODNAME, CLASSNAME, PROPNAME)); \
+	}
 
 // define a static method of a class in a module
 #define DSK_DEFINE_STATIC_METHOD(MODNAME, CLASSNAME, FUNCNAME)
