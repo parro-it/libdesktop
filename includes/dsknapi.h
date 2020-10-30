@@ -374,14 +374,15 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 	_DSK_USE_CLASS(MODNAME, CLASSNAME);                                                            \
 	/* static dsk_export_def instance that could be used to enhance the class with */              \
 	/* further methods and properties */                                                           \
-	dsk_export_def _DSK_CLASS_DEFS(MODNAME, CLASSNAME) =                                           \
-		/**/ {.type = dsk_def_type_class,                                                          \
-			  .properties_count = 1,                                                               \
-			  .properties = (napi_property_descriptor[]){{                                         \
-				  .method = MODNAME##_##CLASSNAME,                                                 \
-				  .utf8name = #CLASSNAME,                                                          \
-				  .data = &MODNAME##_##CLASSNAME##_ref,                                            \
-			  }}};                                                                                 \
+	dsk_export_def _DSK_CLASS_DEFS(MODNAME, CLASSNAME) = /**/ {                                    \
+		.type = dsk_def_type_class,                                                                \
+		.properties_count = 1, /* todo, since first property is statically allocated,              \
+								  `properties` cannot be free at end .same below for function */   \
+		.properties = (napi_property_descriptor[]){{                                               \
+			.method = MODNAME##_##CLASSNAME,                                                       \
+			.utf8name = #CLASSNAME,                                                                \
+			.data = &MODNAME##_##CLASSNAME##_ref,                                                  \
+		}}};                                                                                       \
                                                                                                    \
 	/* this is an initializer function that register the class and add it to the property */       \
 	/* definitions of the module. */                                                               \
