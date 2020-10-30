@@ -83,7 +83,7 @@ DSK_DEFINE_METHOD(libdesktop, Decimal, toString) {
 	double integral_d = (double)integral;
 	double fractional_d = (double)fractional;
 	char buff[100];
-	snprintf(buff, 100, "%f", integral_d + fractional_d / 100);
+	snprintf(buff, 100, "%.2f", integral_d + fractional_d / 100);
 
 	napi_value res;
 	DSK_NAPI_CALL(napi_create_string_utf8(env, buff, NAPI_AUTO_LENGTH, &res));
