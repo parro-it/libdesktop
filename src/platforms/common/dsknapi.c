@@ -56,7 +56,7 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 	DSK_ONERROR_FATAL_RET(NULL);
 	napi_property_descriptor *properties =
 		malloc(sizeof(napi_property_descriptor) * exports_def->members_count);
-	printf("exports_def->members_count:%sz\n", exports_def->members_count);
+	printf("exports_def->members_count:%zu\n", exports_def->members_count);
 	for (uint32_t i = 0; i < exports_def->members_count; i++) {
 		printf("i:%d\n", i);
 		dsk_export_def *def = exports_def->members[i];
@@ -75,7 +75,7 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 			// first property contains name and constructor of the function
 			napi_property_descriptor classDef = def->properties[0];
 
-			printf("properties_count for class %sz\n", def->properties_count);
+			printf("properties_count for class %zu\n", def->properties_count);
 			// other ones contains members of the class (both static and instance members)
 			napi_property_descriptor *classProperties =
 				malloc(sizeof(napi_property_descriptor) * (def->properties_count - 1));
@@ -86,7 +86,7 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 				classProperties[i] = def->properties[i + 1];
 			}
 
-			printf("properties_count for class DNNE %sz %s\n", def->properties_count,
+			printf("properties_count for class DNNE %zu %s\n", def->properties_count,
 				   classDef.utf8name);
 
 			napi_value Class;

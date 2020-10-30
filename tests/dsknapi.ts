@@ -8,7 +8,7 @@ test('Class definition', (t:any) => {
     t.end()
 })
 
-test('Class definition', (t:any) => {
+test('property definition', (t:any) => {
     const d = new Decimal(4,42)
     t.equal(4, d.integral);
     d.integral = 13;
@@ -16,6 +16,13 @@ test('Class definition', (t:any) => {
     t.throws(()=>{d.integral = "13";}, /A number was expected/)
     t.end()
 })
+
+test('method definition', (t:any) => {
+    const d = new Decimal(4,42)
+    t.equal("4.42", String(d));
+    t.end()
+})
+
 
 test('sum exported', (t:any) => {
     t.equal(typeof sum, "function")

@@ -68,6 +68,28 @@ DSK_JS_FUNC(getIntegral) {
 	return _integral;
 }
 
+DSK_DEFINE_METHOD(libdesktop, Decimal, toString) {
+	DSK_JS_FUNC_INIT();
+	DSK_EXACTLY_NARGS(0);
+
+	napi_value _integral, _fractional;
+	DSK_NAPI_CALL(napi_get_named_property(env, this, "_integral", &_integral));
+	DSK_NAPI_CALL(napi_get_named_property(env, this, "_fractional", &_fractional));
+
+	uint32_t integral, fractional;
+	DSK_NAPI_CALL(napi_get_value_uint32(env, _integral, &integral));
+	DSK_NAPI_CALL(napi_get_value_uint32(env, _fractional, &fractional));
+
+	double integral_d = (double)integral;
+	double fractional_d = (double)fractional;
+	char buff[100];
+	snprintf(buff, 100, "%f", integral_d + fractional_d / 100);
+
+	napi_value res;
+	DSK_NAPI_CALL(napi_create_string_utf8(env, buff, NAPI_AUTO_LENGTH, &res));
+	return res;
+}
+
 DSK_JS_FUNC(setIntegral) {
 	DSK_JS_FUNC_INIT();
 	DSK_EXACTLY_NARGS(1);
