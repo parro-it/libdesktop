@@ -23,6 +23,21 @@ test('method definition', (t:any) => {
     t.end()
 })
 
+test('static method definition', (t:any) => {
+    t.equal("function", typeof Decimal.create);
+    t.equal(undefined, Decimal.create());
+    t.end()
+})
+
+test('static property definition', (t:any) => {
+    t.equal(undefined, Decimal.answer);
+    Decimal.answer=42
+    t.equal(42, Decimal._integral);
+    Decimal._integral=41;
+    t.equal(41, Decimal.answer);
+    t.end()
+})
+
 
 test('sum exported', (t:any) => {
     t.equal(typeof sum, "function")

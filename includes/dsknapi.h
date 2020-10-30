@@ -431,13 +431,12 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 	/* of the function after the DSK_DEFINE_FUNCTION macro call */                                 \
 	DSK_JS_FUNC(MODNAME##_##FUNCNAME)
 
-// define a method of a class or object in a module
-#define DSK_DEFINE_METHOD(MODNAME, CLASSNAME, FUNCNAME)                                            \
+#define _DSK_DEFINE_METHOD(MODNAME, CLASSNAME, FUNCNAME, ATTRS)                                    \
 	/* function C prototype (predeclared because it's used in the initialezer below) */            \
 	DSK_JS_FUNC(MODNAME##_##CLASSNAME##_##FUNCNAME);                                               \
 	/* static dsk_export_def instance */                                                           \
 	napi_property_descriptor _DSK_METHOD_DEFS(MODNAME, CLASSNAME, FUNCNAME) = {                    \
-		.method = MODNAME##_##CLASSNAME##_##FUNCNAME, .utf8name = #FUNCNAME};                      \
+		.method = MODNAME##_##CLASSNAME##_##FUNCNAME, .utf8name = #FUNCNAME, .attributes = ATTRS}; \
                                                                                                    \
 	/* this is an initializer function that add the property */                                    \
 	/* definition to the module. */                                                                \
@@ -449,15 +448,23 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 	/* of the function after the DSK_DEFINE_FUNCTION macro call */                                 \
 	DSK_JS_FUNC(MODNAME##_##CLASSNAME##_##FUNCNAME)
 
+// define a method of a class or object in a module
+#define DSK_DEFINE_METHOD(MODNAME, CLASSNAME, FUNCNAME)                                            \
+	_DSK_DEFINE_METHOD(MODNAME, CLASSNAME, FUNCNAME, napi_default)
+
 // define a property of a class or object in a module
 // the property will be readonly if setter is not provider.
 // calling modules will probably provides shortcuts by
 // implement further macros with default values for GETTER, SETTER
 // and other macros to build values for DATA
-#define DSK_DEFINE_PROPERTY(MODNAME, CLASSNAME, PROPNAME, GETTER, SETTER, DATA)                    \
+#define _DSK_DEFINE_PROPERTY(MODNAME, CLASSNAME, PROPNAME, GETTER, SETTER, DATA, ATTRS)            \
 	/* static dsk_export_def instance */                                                           \
-	napi_property_descriptor _DSK_PROPERTY_DEFS(MODNAME, CLASSNAME, PROPNAME) = {                  \
-		.getter = GETTER, .setter = SETTER, .data = DATA, .utf8name = #PROPNAME};                  \
+	napi_property_descriptor _DSK_PROPERTY_DEFS(MODNAME, CLASSNAME,                                \
+												PROPNAME) = {.getter = GETTER,                     \
+															 .setter = SETTER,                     \
+															 .data = DATA,                         \
+															 .utf8name = #PROPNAME,                \
+															 .attributes = ATTRS};                 \
                                                                                                    \
 	/* this is an initializer function that add the property */                                    \
 	/* definition to the module. */                                                                \
@@ -466,10 +473,15 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 		dsk_export_def_register_member(exports, _DSK_PROPERTY_DEFS(MODNAME, CLASSNAME, PROPNAME)); \
 	}
 
+#define DSK_DEFINE_PROPERTY(MODNAME, CLASSNAME, PROPNAME, GETTER, SETTER, DATA)                    \
+	_DSK_DEFINE_PROPERTY(MODNAME, CLASSNAME, PROPNAME, GETTER, SETTER, DATA, napi_default)
+
 // define a static method of a class in a module
-#define DSK_DEFINE_STATIC_METHOD(MODNAME, CLASSNAME, FUNCNAME)
+#define DSK_DEFINE_STATIC_METHOD(MODNAME, CLASSNAME, FUNCNAME)                                     \
+	_DSK_DEFINE_METHOD(MODNAME, CLASSNAME, FUNCNAME, napi_static)
 
 // define a static property of a class in a module
-#define DSK_DEFINE_STATIC_PROPERTY(MODNAME, CLASSNAME, GETTER, SETTER, DATA)
+#define DSK_DEFINE_STATIC_PROPERTY(MODNAME, CLASSNAME, PROPNAME, GETTER, SETTER, DATA)             \
+	_DSK_DEFINE_PROPERTY(MODNAME, CLASSNAME, PROPNAME, GETTER, SETTER, DATA, napi_static)
 
 #endif

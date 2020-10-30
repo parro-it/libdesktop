@@ -68,6 +68,12 @@ DSK_JS_FUNC(getIntegral) {
 	return _integral;
 }
 
+DSK_DEFINE_STATIC_METHOD(libdesktop, Decimal, create) {
+	DSK_JS_FUNC_INIT();
+	DSK_EXACTLY_NARGS(0);
+	return NULL;
+}
+
 DSK_DEFINE_METHOD(libdesktop, Decimal, toString) {
 	DSK_JS_FUNC_INIT();
 	DSK_EXACTLY_NARGS(0);
@@ -105,3 +111,5 @@ DSK_JS_FUNC(setIntegral) {
 }
 
 DSK_DEFINE_PROPERTY(libdesktop, Decimal, integral, getIntegral, setIntegral, NULL)
+
+DSK_DEFINE_STATIC_PROPERTY(libdesktop, Decimal, answer, getIntegral, setIntegral, NULL)
