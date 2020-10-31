@@ -38,8 +38,16 @@ function copyDocsify() {
     return copyDir(srcDirPath, targetDirPath)
 }
 
+function trimMember(it: Array<string>){
+    const res = {
+        [it[0].trim().slice(1)]: String((it[1])).slice(0).trim(),
+    }      
+    return res
+}
+
 
 async function run() {
+
 
     await copyDocsify();
 
@@ -53,27 +61,47 @@ async function run() {
     
     const jsonDocs = require(jsonFile);
     const exports = jsonDocs.success[0].map((block: any) => 
-            Object.assign({},...Object.entries(block).map(([key,val])=> {
-                return {
-                    [key.trim().slice(1)]: String((val as any)[0]).trim(),
-                }      
-            })))
-    const data = {
-        exports: exports
-            .filter((it: { name: string; })=>it.name),
-        file: exports
-            .filter((it: {name:string})=>!it.name)
-            .map((it: {file:string,brief:string,descr:string})=>({file:it.file,brief:it.brief,descr:it.descr}))[0],
-
-    };
+            Object.assign({},...Object.entries(block).map(trimMember as any)));
+    
+    
     
 
+    const groups = {};
+    for (const xp of exports){
+        if (xp.group) {
+            const group = (groups as any)[xp.group] ||= {
+                members: [],
+                name: xp.group,
+            }
+            if (xp.name) {
+                group.members.push(xp);
+            } else {
+                group.descr = xp.descr;
+                group.brief = xp.brief;
+            }
+
+        }
+    }
+
+    const data = {
+        groups,
+        //exports: exports
+        //    .filter((it: { name: string; })=>it.name),
+        file: exports
+            .filter((it: {name:string})=>!it.name)
+            .map((it: {file:string,brief:string,descr:string})=>({
+                file:it.file,
+                brief:it.brief,
+                descr:it.descr
+            }))[0],
+    };
+    
     handlebars(join(__dirname,"../src/docs/cheader.md"), data, async (err, html) => {
         if (err) throw err;
         const target = join(docsDir,"./dsknapi.md")
         await writeFile(target,html)
     });
-    //console.log(JSON.stringify(data,null,4))
+    console.log(JSON.stringify(data,null,4))
 }
  
 

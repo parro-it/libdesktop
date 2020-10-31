@@ -16,8 +16,46 @@
 #include <node_api.h>
 #include <stdio.h>
 
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ *
+ * @group DSK_FN_CALL
+ * @brief Function and macro to call NAPI and callback functions.
+ *
+ */
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+//
+//
+//
+//
+//
+//
+//
+//
+
 /**
  * @name DSK_NAPI_CALL
+ * @group DSK_FN_CALL
  * @brief wraps its FN argument with code to check that a NAPI call succeded.
  *
  * @descr
@@ -61,8 +99,164 @@
 		}                                                                                          \
 	} while (0)
 
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ *
+ * @group DSK_ERR
+ * @brief Function and macro to declare error handlers.
+ *
+ */
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+//
+//
+//
+//
+//
+//
+//
+//
+
+/**
+ * 	@name DSK_ONERROR_THROW_RET
+ *  @brief defines an error handler that throw a JavaScript error.
+ *  @group DSK_ERR
+ *
+ *  @descr
+ * 	This macro defines following variables in current scope:
+ *
+ *  * a `dsk_error_msg` variable of type char* that is compiled by DSK_NAPI_CALL in
+ *    case of errors.
+ *  * a `dsk_error` label to which execution will jump in case of error. It contains
+ *    code to throw a JS error with the message contained in `dsk_error_msg` variable,
+ *    and return `WHAT` argument afterward;
+ *  @arg WHAT - an expression to return that signal the caller that an error occurred.
+ *
+ */
+#define DSK_ONERROR_THROW_RET(WHAT)                                                                \
+	/* error handler */                                                                            \
+	char *dsk_error_msg;                                                                           \
+	goto dsk_continue;                                                                             \
+	goto dsk_error;                                                                                \
+	dsk_error:                                                                                     \
+	napi_throw_error(env, NULL, dsk_error_msg);                                                    \
+	return WHAT;                                                                                   \
+	dsk_continue:
+
+/**
+ * 	@name DSK_ONERROR_FATAL_RET
+ *  @brief defines an error handler that bort the process
+ *  @group DSK_ERR
+ *  @descr
+ *
+ * 	This macro defines following variables in current scope:
+ *
+ *  * a `dsk_error_msg` variable of type char* that is compiled by DSK_NAPI_CALL in
+ *    case of errors.
+ *  * a `dsk_error` label to which execution will jump in case of error. It contains
+ *    code to call `napi_fatal_error` with the message contained in `dsk_error_msg` variable,
+ *    and return `WHAT` argument afterward. The call to `napi_fatal_error` causes the node process
+ * 	  to immediately exit.
+ *  @arg WHAT - an expression to return that signal the caller that an error occurred.
+ *
+ */
+#define DSK_ONERROR_FATAL_RET(WHAT)                                                                \
+	/* error handler */                                                                            \
+	char *dsk_error_msg;                                                                           \
+	goto dsk_continue;                                                                             \
+	goto dsk_error;                                                                                \
+	dsk_error:                                                                                     \
+	napi_fatal_error(NULL, 0, dsk_error_msg, NAPI_AUTO_LENGTH);                                    \
+	return WHAT;                                                                                   \
+	dsk_continue:
+
+/**
+ * 	@name DSK_ONERROR_UNCAUGHT_RET
+ *  @group DSK_ERR
+ *  @brief defines an error handler that throw an uncaught JavaScript error.
+ *  @descr
+ * 	This macro defines following variables in current scope:
+ *
+ *  * a `dsk_error_msg` variable of type char* that is compiled by DSK_NAPI_CALL in
+ *    case of errors.
+ *  * a `dsk_error` label to which execution will jump in case of error. It contains
+ *    code to throw an uncaught Javascript exception with the message contained in `dsk_error_msg`
+ *    variable, and return `WHAT` argument afterward.
+ *
+ */
+#define DSK_ONERROR_UNCAUGHT_RET(WHAT)                                                             \
+	/* error handler */                                                                            \
+	char *dsk_error_msg;                                                                           \
+	goto dsk_continue;                                                                             \
+	goto dsk_error;                                                                                \
+	dsk_error : {                                                                                  \
+		napi_value err, errmsg;                                                                    \
+		napi_create_string_utf8(env, dsk_error_msg, &errmsg);                                      \
+		napi_create_error(env, NULL, errmsg, &err);                                                \
+		napi_fatal_exception(env, err);                                                            \
+		return WHAT;                                                                               \
+	}                                                                                              \
+	dsk_continue:
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ *
+ * @group DSK_FN
+ * @brief Function and macro to declare callback functions and theis arguments.
+ *
+ */
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+//
+//
+//
+//
+//
+//
+//
+//
+
 /**
  * @name DSK_JS_FUNC
+ * @group DSK_FN
  * @brief declares a js callback function prototype
  *
  * @descr
@@ -96,6 +290,7 @@
 
 /**
  * @name DSK_JS_FUNC_INIT
+ * @group DSK_FN
  * @brief initialize a scope with the following variables:
  *
  * @descr
@@ -130,85 +325,8 @@
 #define DSK_JS_FUNC_INIT() DSK_JS_FUNC_INIT_WITH_ARGS(10)
 
 /**
- * 	@name DSK_ONERROR_THROW_RET
- *  @brief defines an error handler that throw a JavaScript error.
- *
- *  @descr
- * 	This macro defines following variables in current scope:
- *
- *  * a `dsk_error_msg` variable of type char* that is compiled by DSK_NAPI_CALL in
- *    case of errors.
- *  * a `dsk_error` label to which execution will jump in case of error. It contains
- *    code to throw a JS error with the message contained in `dsk_error_msg` variable,
- *    and return `WHAT` argument afterward;
- *  @arg WHAT - an expression to return that signal the caller that an error occurred.
- *
- */
-#define DSK_ONERROR_THROW_RET(WHAT)                                                                \
-	/* error handler */                                                                            \
-	char *dsk_error_msg;                                                                           \
-	goto dsk_continue;                                                                             \
-	goto dsk_error;                                                                                \
-	dsk_error:                                                                                     \
-	napi_throw_error(env, NULL, dsk_error_msg);                                                    \
-	return WHAT;                                                                                   \
-	dsk_continue:
-
-/**
- * 	@name DSK_ONERROR_FATAL_RET
- *  @brief defines an error handler that bort the process
- *  @descr
- *
- * 	This macro defines following variables in current scope:
- *
- *  * a `dsk_error_msg` variable of type char* that is compiled by DSK_NAPI_CALL in
- *    case of errors.
- *  * a `dsk_error` label to which execution will jump in case of error. It contains
- *    code to call `napi_fatal_error` with the message contained in `dsk_error_msg` variable,
- *    and return `WHAT` argument afterward. The call to `napi_fatal_error` causes the node process
- * 	  to immediately exit.
- *  @arg WHAT - an expression to return that signal the caller that an error occurred.
- *
- */
-#define DSK_ONERROR_FATAL_RET(WHAT)                                                                \
-	/* error handler */                                                                            \
-	char *dsk_error_msg;                                                                           \
-	goto dsk_continue;                                                                             \
-	goto dsk_error;                                                                                \
-	dsk_error:                                                                                     \
-	napi_fatal_error(NULL, 0, dsk_error_msg, NAPI_AUTO_LENGTH);                                    \
-	return WHAT;                                                                                   \
-	dsk_continue:
-
-/**
- * 	@name DSK_ONERROR_UNCAUGHT_RET
- *  @brief defines an error handler that throw an uncaught JavaScript error.
- *  @descr
- * 	This macro defines following variables in current scope:
- *
- *  * a `dsk_error_msg` variable of type char* that is compiled by DSK_NAPI_CALL in
- *    case of errors.
- *  * a `dsk_error` label to which execution will jump in case of error. It contains
- *    code to throw an uncaught Javascript exception with the message contained in `dsk_error_msg`
- *    variable, and return `WHAT` argument afterward.
- *
- */
-#define DSK_ONERROR_UNCAUGHT_RET(WHAT)                                                             \
-	/* error handler */                                                                            \
-	char *dsk_error_msg;                                                                           \
-	goto dsk_continue;                                                                             \
-	goto dsk_error;                                                                                \
-	dsk_error : {                                                                                  \
-		napi_value err, errmsg;                                                                    \
-		napi_create_string_utf8(env, dsk_error_msg, &errmsg);                                      \
-		napi_create_error(env, NULL, errmsg, &err);                                                \
-		napi_fatal_exception(env, err);                                                            \
-		return WHAT;                                                                               \
-	}                                                                                              \
-	dsk_continue:
-
-/**
  * @name DSK_JS_FUNC_INIT_WITH_ARGS
+ * @group DSK_FN
  * @brief initialize a function scope with a set of standard variables
  *
  * @descr
@@ -228,6 +346,7 @@
 
 /**
  * @name DSK_AT_LEAST_NARGS
+ * @group DSK_FN
  * @brief Throw a "EINVAL" errors if the callback is not called with at least N arguments.
  *
  * @descr
@@ -244,6 +363,7 @@
 
 /**
  * @name DSK_EXACTLY_NARGS
+ * @group DSK_FN
  * @brief Throw a "EINVAL" errors if the callback is not called with exactly N arguments.
  *
  * @descr
@@ -258,12 +378,42 @@
 		goto dsk_error;                                                                            \
 	}
 
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+///////////////////////////////////////////////////////////////////////////////////////
+
 /**
  *
  * @group DSK_XP
  * @brief Function and macro to exports function, objects, or classes.
  *
  */
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+//
+//
+//
+//
+//
+//
+//
+//
 
 /**
  * @name dsk_def_type

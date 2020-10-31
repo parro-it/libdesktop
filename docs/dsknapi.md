@@ -5,15 +5,27 @@ helps working with Node.js NAPI framework.
 
 ## Members
 
+
+**Function and macro to call NAPI and callback functions.**
+
 * [DSK_NAPI_CALL](#DSK_NAPI_CALL) - wraps its FN argument with code to check that a NAPI call succeded.
-* [DSK_JS_FUNC](#DSK_JS_FUNC) - declares a js callback function prototype
-* [DSK_JS_FUNC_INIT](#DSK_JS_FUNC_INIT) - initialize a scope with the following variables:
+
+**Function and macro to declare error handlers.**
+
 * [DSK_ONERROR_THROW_RET](#DSK_ONERROR_THROW_RET) - defines an error handler that throw a JavaScript error.
 * [DSK_ONERROR_FATAL_RET](#DSK_ONERROR_FATAL_RET) - defines an error handler that bort the process
 * [DSK_ONERROR_UNCAUGHT_RET](#DSK_ONERROR_UNCAUGHT_RET) - defines an error handler that throw an uncaught JavaScript error.
+
+**Function and macro to declare callback functions and theis arguments.**
+
+* [DSK_JS_FUNC](#DSK_JS_FUNC) - declares a js callback function prototype
+* [DSK_JS_FUNC_INIT](#DSK_JS_FUNC_INIT) - initialize a scope with the following variables:
 * [DSK_JS_FUNC_INIT_WITH_ARGS](#DSK_JS_FUNC_INIT_WITH_ARGS) - initialize a function scope with a set of standard variables
 * [DSK_AT_LEAST_NARGS](#DSK_AT_LEAST_NARGS) - Throw a "EINVAL" errors if the callback is not called with at least N arguments.
 * [DSK_EXACTLY_NARGS](#DSK_EXACTLY_NARGS) - Throw a "EINVAL" errors if the callback is not called with exactly N arguments.
+
+**Function and macro to exports function, objects, or classes.**
+
 * [dsk_def_type](#dsk_def_type) - An enum used to specify the type of a dsk_export_def.
 * [dsk_export_def](#dsk_export_def) - contains all infos needed to create a class or function
 * [dsk_modexports_def](#dsk_modexports_def) - contains all infos needed to create all exported members of a module
@@ -33,7 +45,8 @@ helps working with Node.js NAPI framework.
 * [DSK_DEFINE_STATIC_METHOD](#DSK_DEFINE_STATIC_METHOD) - define a static method of a class or object in a module
 * [DSK_DEFINE_STATIC_PROPERTY](#DSK_DEFINE_STATIC_PROPERTY) - define a static property of a class or object in a module
 
-### DSK_NAPI_CALL
+### Function and macro to call NAPI and callback functions.
+#### DSK_NAPI_CALL
 
 > wraps its FN argument with code to check that a NAPI call succeded.
 
@@ -61,9 +74,54 @@ in the scope all variables needed by DSK_NAPI_CALL. Otherwise, it is
 caller responsibility to appropriately prepare the scope before
 the call to DSK_NAPI_CALL.
 
+
 ---
 
-### DSK_JS_FUNC
+### Function and macro to declare error handlers.
+#### DSK_ONERROR_THROW_RET
+
+> defines an error handler that throw a JavaScript error.
+
+This macro defines following variables in current scope:
+
+ * a `dsk_error_msg` variable of type char* that is compiled by DSK_NAPI_CALL in
+   case of errors.
+ * a `dsk_error` label to which execution will jump in case of error. It contains
+   code to throw a JS error with the message contained in `dsk_error_msg` variable,
+   and return `WHAT` argument afterward;
+
+
+#### DSK_ONERROR_FATAL_RET
+
+> defines an error handler that bort the process
+
+This macro defines following variables in current scope:
+
+ * a `dsk_error_msg` variable of type char* that is compiled by DSK_NAPI_CALL in
+   case of errors.
+ * a `dsk_error` label to which execution will jump in case of error. It contains
+   code to call `napi_fatal_error` with the message contained in `dsk_error_msg` variable,
+   and return `WHAT` argument afterward. The call to `napi_fatal_error` causes the node process
+	  to immediately exit.
+
+
+#### DSK_ONERROR_UNCAUGHT_RET
+
+> defines an error handler that throw an uncaught JavaScript error.
+
+This macro defines following variables in current scope:
+
+ * a `dsk_error_msg` variable of type char* that is compiled by DSK_NAPI_CALL in
+   case of errors.
+ * a `dsk_error` label to which execution will jump in case of error. It contains
+   code to throw an uncaught Javascript exception with the message contained in `dsk_error_msg`
+   variable, and return `WHAT` argument afterward.
+
+
+---
+
+### Function and macro to declare callback functions and theis arguments.
+#### DSK_JS_FUNC
 
 > declares a js callback function prototype
 
@@ -90,9 +148,8 @@ DSK_JS_FUNC(external_function) {
 
 ```
 
----
 
-### DSK_JS_FUNC_INIT
+#### DSK_JS_FUNC_INIT
 
 > initialize a scope with the following variables:
 
@@ -123,87 +180,42 @@ to 10 are filled witth `napi_undefined`. If you have to use accepts more than 10
 value);
  * an `argc` variable of type size_t containing actual number of arguments received in the call.
 
----
 
-### DSK_ONERROR_THROW_RET
-
-> defines an error handler that throw a JavaScript error.
-
-This macro defines following variables in current scope:
-
- * a `dsk_error_msg` variable of type char* that is compiled by DSK_NAPI_CALL in
-   case of errors.
- * a `dsk_error` label to which execution will jump in case of error. It contains
-   code to throw a JS error with the message contained in `dsk_error_msg` variable,
-   and return `WHAT` argument afterward;
-
----
-
-### DSK_ONERROR_FATAL_RET
-
-> defines an error handler that bort the process
-
-This macro defines following variables in current scope:
-
- * a `dsk_error_msg` variable of type char* that is compiled by DSK_NAPI_CALL in
-   case of errors.
- * a `dsk_error` label to which execution will jump in case of error. It contains
-   code to call `napi_fatal_error` with the message contained in `dsk_error_msg` variable,
-   and return `WHAT` argument afterward. The call to `napi_fatal_error` causes the node process
-	  to immediately exit.
-
----
-
-### DSK_ONERROR_UNCAUGHT_RET
-
-> defines an error handler that throw an uncaught JavaScript error.
-
-This macro defines following variables in current scope:
-
- * a `dsk_error_msg` variable of type char* that is compiled by DSK_NAPI_CALL in
-   case of errors.
- * a `dsk_error` label to which execution will jump in case of error. It contains
-   code to throw an uncaught Javascript exception with the message contained in `dsk_error_msg`
-   variable, and return `WHAT` argument afterward.
-
----
-
-### DSK_JS_FUNC_INIT_WITH_ARGS
+#### DSK_JS_FUNC_INIT_WITH_ARGS
 
 > initialize a function scope with a set of standard variables
 
 You can use this function when you have to accepts more than 10 arguments in your
 callback. Use `DSK_JS_FUNC_INIT` when <= 10 arguments are required.
 
----
 
-### DSK_AT_LEAST_NARGS
+#### DSK_AT_LEAST_NARGS
 
 > Throw a "EINVAL" errors if the callback is not called with at least N arguments.
 
 The calling scope must contains `env`, `argc` and `dsk_error_msg` variables, and a `dsk_error`
 label.
 
----
 
-### DSK_EXACTLY_NARGS
+#### DSK_EXACTLY_NARGS
 
 > Throw a "EINVAL" errors if the callback is not called with exactly N arguments.
 
 The calling scope must contains `env`, `argc` and `dsk_error_msg` variables, and a `dsk_error`
 label.
 
+
 ---
 
-### dsk_def_type
+### Function and macro to exports function, objects, or classes.
+#### dsk_def_type
 
 > An enum used to specify the type of a dsk_export_def.
 
 specifies if an export def is a class, object or method.
 
----
 
-### dsk_export_def
+#### dsk_export_def
 
 > contains all infos needed to create a class or function
 
@@ -227,66 +239,58 @@ type member contains the kind of export to define.
 
   All other properties specify the properties to define in the class prototype.
 
----
 
-### dsk_modexports_def
+#### dsk_modexports_def
 
 > contains all infos needed to create all exported members of a module
 
 
 
----
 
-### dsk_modexports_def_register_member
+#### dsk_modexports_def_register_member
 
 > register a new member in the exports of a module.
 
 register a new member in the exports of a module.
 
----
 
-### dsk_export_def_register_member
+#### dsk_export_def_register_member
 
 > register a new member of a class or object.
 
 register a new member of a class or object.
 
----
 
-### dsk_modexports_def_free
+#### dsk_modexports_def_free
 
 > free the exports data structures after module registration.
 
 free the exports data structures after module registration.
 
----
 
-### dsk_init_module_def
+#### dsk_init_module_def
 
 > default initialization function for modules.
 
 default initialization function for modules.
 
----
 
-### DSK_USE_MODULE_INITIALIZER
+#### DSK_USE_MODULE_INITIALIZER
 
 > declare the prototype of an external module initializer function
 
 this macro could be usefule to register multiple module in
 the same NAPI exports
 
----
 
-### DSK_MODULE_INITIALIZER
+#### DSK_MODULE_INITIALIZER
 
 > declare a custom module initializer to use instead of `dsk_init_module_def`
 
 declare a custom module initializer to use instead of `dsk_init_module_def`
 
----
 
-### DSK_DEFINE_MODULE
+#### DSK_DEFINE_MODULE
 
 > define a module initializer
 
@@ -295,9 +299,8 @@ the whole module exports using the static structures
 filled during C files initialization stage.
 Should be used in a single C file per module
 
----
 
-### DSK_EXTEND_MODULE
+#### DSK_EXTEND_MODULE
 
 > extend the definition of a module
 
@@ -305,9 +308,8 @@ used in a C file to extend the definition of a module defined in anoth file.
 the extern module can be extended using DSK_DEFINE_FUNCTION or DSK_DEFINE_CLASS macro,
 or otherwise by directly using dsk_modexports_def_register_member function.
 
----
 
-### DSK_DEFINE_CLASS
+#### DSK_DEFINE_CLASS
 
 > define a new class constructor
 
@@ -316,9 +318,8 @@ automatically register the class in the MODNAME module exports.
 the extern class or object definition can be extended using any of the DSK_DEFINE_*,
 or otherwise by directly using dsk_export_def_register_member function.
 
----
 
-### DSK_EXTEND_CLASS
+#### DSK_EXTEND_CLASS
 
 > extend the definition of a class or object
 
@@ -326,27 +327,24 @@ used in a C file to extend the definition of a class or object defined in anothe
 the extern class or object definition can be extended using any of the DSK_DEFINE_*,
 or otherwise by directly using dsk_export_def_register_member function.
 
----
 
-### DSK_DEFINE_FUNCTION
+#### DSK_DEFINE_FUNCTION
 
 > define a function callback
 
 define an exported function named FUNCNAME.
 automatically register function in the MODNAME module exports.
 
----
 
-### DSK_DEFINE_METHOD
+#### DSK_DEFINE_METHOD
 
 > define a method of a class or object in a module
 
 define a method of a class or object in a module
 automatically register the member in the CLASSNAME class of MODNAME module exports.
 
----
 
-### DSK_DEFINE_PROPERTY
+#### DSK_DEFINE_PROPERTY
 
 > define a property of a class or object in a module
 
@@ -356,18 +354,16 @@ calling modules will probably provides shortcuts by
 implement further macros with default values for GETTER, SETTER
 and other macros to build values for DATA
 
----
 
-### DSK_DEFINE_STATIC_METHOD
+#### DSK_DEFINE_STATIC_METHOD
 
 > define a static method of a class or object in a module
 
 define a static method of a class or object in a module
 automatically register the member in the CLASSNAME class of MODNAME module exports.
 
----
 
-### DSK_DEFINE_STATIC_PROPERTY
+#### DSK_DEFINE_STATIC_PROPERTY
 
 > define a static property of a class or object in a module
 
@@ -376,6 +372,7 @@ the property will be readonly if setter is not provider.
 calling modules will probably provides shortcuts by
 implement further macros with default values for GETTER, SETTER
 and other macros to build values for DATA
+
 
 ---
 
