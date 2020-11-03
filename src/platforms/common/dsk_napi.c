@@ -136,3 +136,88 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 	free(properties);
 	return exports;
 }
+
+napi_value dsk_new_instance(napi_env env, napi_ref class, size_t arg_c, napi_value *arg_v) {
+	DSK_ONERROR_THROW_RET(NULL);
+
+	napi_value constructor;
+	napi_value instance;
+
+	DSK_NAPI_CALL(napi_get_reference_value(env, class, &constructor));
+	DSK_NAPI_CALL(napi_new_instance(env, constructor, arg_c, arg_v, &instance));
+
+	return instance;
+}
+
+void *dsk_unwrap(napi_env env, napi_value this) {
+	DSK_ONERROR_THROW_RET(NULL);
+	void *data;
+	DSK_NAPI_CALL(napi_unwrap(env, this, &data));
+	return data;
+}
+
+DSK_JS_FUNC(dsk_setPropI32) {
+	DSK_JS_FUNC_INIT();
+	DSK_AT_LEAST_NARGS(1);
+	int32_t value;
+	DSK_NAPI_CALL(napi_get_value_int32(env, argv[0], &value));
+
+	void *node;
+	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&node));
+
+	void **fns;
+	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&fns));
+
+	dsk_SetterI32 *setter = fns[1];
+
+	setter(node, value);
+	return NULL;
+}
+
+DSK_JS_FUNC(dsk_getPropI32) {
+	DSK_JS_FUNC_INIT()
+
+	void *node;
+	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&node));
+
+	void **fns;
+
+	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&fns));
+
+	dsk_GetterI32 *getter = fns[0];
+	int32_t result = getter(node);
+
+	return make_int32(env, result);
+}
+
+DSK_JS_FUNC(dsk_setPropF32) {
+	DSK_JS_FUNC_INIT()
+	DSK_AT_LEAST_NARGS(1)
+	double value;
+	DSK_NAPI_CALL(napi_get_value_double(env, argv[0], &value));
+
+	void *node;
+	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&node));
+
+	void **fns;
+	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&fns));
+
+	dsk_SetterF32 *setter = fns[1];
+	setter(node, (float)value);
+	return NULL;
+}
+
+DSK_JS_FUNC(dsk_getPropF32) {
+	DSK_JS_FUNC_INIT()
+
+	void *node;
+	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&node));
+
+	void **fns;
+	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&fns));
+
+	dsk_GetterF32 *getter = fns[0];
+	float result = getter(node);
+
+	return make_double(env, (double)result);
+}

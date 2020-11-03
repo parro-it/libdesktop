@@ -1,18 +1,11 @@
 #include "libdesktop.h"
-#include "napi_utils.h"
 #include "widget.h"
 
 #include <yoga/Yoga.h>
 DSK_EXTEND_MODULE(libdesktop);
 _DSK_USE_CLASS(libdesktop, EdgedProp);
 
-typedef void SetterI32(const YGNodeRef node, const int32_t value);
-typedef int32_t GetterI32(const YGNodeConstRef node);
-
-typedef void SetterF32(const YGNodeRef node, const float value);
-typedef float GetterF32(const YGNodeConstRef node);
 typedef YGValue GetterYGVALUE(const YGNodeConstRef node);
-
 typedef YGValue GetterEdgedYGVALUE(const YGNodeConstRef node, YGEdge edge);
 typedef float GetterEdgedF32(const YGNodeConstRef node, YGEdge edge);
 typedef void SetterEdgedF32(const YGNodeRef node, YGEdge edge, const float value);
@@ -24,68 +17,6 @@ struct EdgedPropData {
 	YGNodeRef node;
 	YGUnit unit;
 };
-
-DSK_JS_FUNC(setPropI32) {
-	DSK_JS_FUNC_INIT()
-	ARG_INT32(value, 0);
-
-	YGNodeRef node;
-	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&node));
-
-	void **fns;
-	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&fns));
-
-	SetterI32 *setter = fns[1];
-
-	setter(node, value);
-	return NULL;
-}
-
-DSK_JS_FUNC(getPropI32) {
-	DSK_JS_FUNC_INIT()
-
-	YGNodeRef node;
-	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&node));
-
-	void **fns;
-
-	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&fns));
-
-	GetterI32 *getter = fns[0];
-	int32_t result = getter(node);
-
-	return make_int32(env, result);
-}
-
-DSK_JS_FUNC(setPropF32) {
-	DSK_JS_FUNC_INIT()
-	ARG_DOUBLE(value, 0);
-
-	YGNodeRef node;
-	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&node));
-
-	void **fns;
-	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&fns));
-
-	SetterF32 *setter = fns[1];
-	setter(node, (float)value);
-	return NULL;
-}
-
-DSK_JS_FUNC(getPropF32) {
-	DSK_JS_FUNC_INIT()
-
-	YGNodeRef node;
-	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&node));
-
-	void **fns;
-	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&fns));
-
-	GetterF32 *getter = fns[0];
-	float result = getter(node);
-
-	return make_double(env, (double)result);
-}
 
 DSK_JS_FUNC(getPropYGValue) {
 	DSK_JS_FUNC_INIT()
@@ -122,36 +53,9 @@ DSK_JS_FUNC(getPropYGValue) {
 	return NULL;
 }
 
-#define PROP_I32(NAME, NATIVE_GETTER, NATIVE_SETTER)                                               \
-	DSK_DEFINE_PROPERTY(libdesktop, Style, NAME, getPropI32, setPropI32,                           \
-						((void *[]){NATIVE_GETTER, NATIVE_SETTER}))
-
-#define PROP_F32(NAME, NATIVE_GETTER, NATIVE_SETTER)                                               \
-	DSK_DEFINE_PROPERTY(libdesktop, Style, NAME, getPropF32, setPropF32,                           \
-						((void *[]){NATIVE_GETTER, NATIVE_SETTER}))
-
 #define PROP_YGVALUE_F32(NAME, UNIT, NATIVE_GETTER, NATIVE_SETTER)                                 \
-	DSK_DEFINE_PROPERTY(libdesktop, Style, NAME, getPropYGValue, setPropF32,                       \
+	DSK_DEFINE_PROPERTY(libdesktop, Style, NAME, getPropYGValue, dsk_setPropF32,                   \
 						((void *[]){NATIVE_GETTER, NATIVE_SETTER, #UNIT}))
-
-napi_value dsk_new_instance(napi_env env, napi_ref class, size_t arg_c, napi_value *arg_v) {
-	DSK_ONERROR_THROW_RET(NULL);
-
-	napi_value constructor;
-	napi_value instance;
-
-	DSK_NAPI_CALL(napi_get_reference_value(env, class, &constructor));
-	DSK_NAPI_CALL(napi_new_instance(env, constructor, arg_c, arg_v, &instance));
-
-	return instance;
-}
-
-void *dsk_unwrap(napi_env env, napi_value this) {
-	DSK_ONERROR_THROW_RET(NULL);
-	void *data;
-	DSK_NAPI_CALL(napi_unwrap(env, this, &data));
-	return data;
-}
 
 napi_value mk_edged_prop(napi_env env, YGNodeRef node, YGUnit unit, GetterEdgedYGVALUE *getter,
 						 SetterEdgedF32 *setter) {
@@ -218,6 +122,10 @@ static void set_margin_auto(YGNodeRef node, YGEdge edge, float margin) {
 	YGNodeStyleSetMarginAuto(node, edge);
 }
 
+static void set_style_auto(const YGNodeRef node, float _) {
+	YGNodeStyleSetFlexBasisAuto(node);
+}
+
 DSK_DEFINE_CLASS(libdesktop, Style) {
 	DSK_JS_FUNC_INIT()
 	DSK_EXACTLY_NARGS(2);
@@ -254,23 +162,19 @@ DSK_DEFINE_CLASS(libdesktop, Style) {
 	return this;
 }
 
-static void set_style_auto(const YGNodeRef node, float _) {
-	YGNodeStyleSetFlexBasisAuto(node);
-}
-
-PROP_I32(direction, YGNodeStyleGetDirection, YGNodeStyleSetDirection);
-PROP_I32(flexDirection, YGNodeStyleGetFlexDirection, YGNodeStyleSetFlexDirection);
-PROP_I32(justifyContent, YGNodeStyleGetJustifyContent, YGNodeStyleSetJustifyContent);
-PROP_I32(alignContent, YGNodeStyleGetAlignContent, YGNodeStyleSetAlignContent);
-PROP_I32(alignItems, YGNodeStyleGetAlignItems, YGNodeStyleSetAlignItems);
-PROP_I32(alignSelf, YGNodeStyleGetAlignSelf, YGNodeStyleSetAlignSelf);
-PROP_I32(positionType, YGNodeStyleGetPositionType, YGNodeStyleSetPositionType);
-PROP_I32(flexWrap, YGNodeStyleGetFlexWrap, YGNodeStyleSetFlexWrap);
-PROP_I32(overflow, YGNodeStyleGetOverflow, YGNodeStyleSetOverflow);
-PROP_I32(display, YGNodeStyleGetDisplay, YGNodeStyleSetDisplay);
-PROP_F32(flex, YGNodeStyleGetFlex, YGNodeStyleSetFlex);
-PROP_F32(flexGrow, YGNodeStyleGetFlexGrow, YGNodeStyleSetFlexGrow);
-PROP_F32(flexShrink, YGNodeStyleGetFlexShrink, YGNodeStyleSetFlexShrink);
+DSK_PROP_I32(direction, YGNodeStyleGetDirection, YGNodeStyleSetDirection);
+DSK_PROP_I32(flexDirection, YGNodeStyleGetFlexDirection, YGNodeStyleSetFlexDirection);
+DSK_PROP_I32(justifyContent, YGNodeStyleGetJustifyContent, YGNodeStyleSetJustifyContent);
+DSK_PROP_I32(alignContent, YGNodeStyleGetAlignContent, YGNodeStyleSetAlignContent);
+DSK_PROP_I32(alignItems, YGNodeStyleGetAlignItems, YGNodeStyleSetAlignItems);
+DSK_PROP_I32(alignSelf, YGNodeStyleGetAlignSelf, YGNodeStyleSetAlignSelf);
+DSK_PROP_I32(positionType, YGNodeStyleGetPositionType, YGNodeStyleSetPositionType);
+DSK_PROP_I32(flexWrap, YGNodeStyleGetFlexWrap, YGNodeStyleSetFlexWrap);
+DSK_PROP_I32(overflow, YGNodeStyleGetOverflow, YGNodeStyleSetOverflow);
+DSK_PROP_I32(display, YGNodeStyleGetDisplay, YGNodeStyleSetDisplay);
+DSK_PROP_F32(flex, YGNodeStyleGetFlex, YGNodeStyleSetFlex);
+DSK_PROP_F32(flexGrow, YGNodeStyleGetFlexGrow, YGNodeStyleSetFlexGrow);
+DSK_PROP_F32(flexShrink, YGNodeStyleGetFlexShrink, YGNodeStyleSetFlexShrink);
 PROP_YGVALUE_F32(flexBasis, POINT, YGNodeStyleGetFlexBasis, YGNodeStyleSetFlexBasis);
 PROP_YGVALUE_F32(flexBasisPercent, PERCENT, YGNodeStyleGetFlexBasis,
 				 YGNodeStyleSetFlexBasisPercent);
