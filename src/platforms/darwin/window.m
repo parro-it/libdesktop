@@ -1,7 +1,6 @@
-#include "control.h"
+#include "__widget.h"
 #include "libdesktop.h"
 #include "napi_utils.h"
-#include "widget.h"
 #import <Cocoa/Cocoa.h>
 
 #define MODULE "win"
@@ -64,7 +63,7 @@ LIBUI_FUNCTION(windowNew) {
 	dsk_calculate_layout(env, child_gtk, root, YGUndefined, YGUndefined);
 
 	//[win setStyleMask: (NSWindowStyleMaskTitled | NSWindowStyleMaskClosable |
-	//NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskResizable)];
+	// NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskResizable)];
 
 	float w = YGNodeLayoutGetWidth(root);
 	float h = YGNodeLayoutGetHeight(root);

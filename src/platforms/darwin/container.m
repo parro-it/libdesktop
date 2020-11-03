@@ -1,9 +1,8 @@
+#include "__widget.h"
+#include "libdesktop.h"
 #include "napi_utils.h"
-#include "widget.h"
 #import <Cocoa/Cocoa.h>
 #include <yoga/Yoga.h>
-
-#include "control.h"
 
 #define MODULE "container"
 

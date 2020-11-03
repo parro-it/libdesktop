@@ -186,8 +186,9 @@ DSK_JS_FUNC(dsk_getPropI32) {
 
 	dsk_GetterI32 *getter = fns[0];
 	int32_t result = getter(node);
-
-	return make_int32(env, result);
+	napi_value ret;
+	DSK_NAPI_CALL(napi_create_int32(env, result, &ret));
+	return ret;
 }
 
 DSK_JS_FUNC(dsk_setPropF32) {
@@ -219,5 +220,7 @@ DSK_JS_FUNC(dsk_getPropF32) {
 	dsk_GetterF32 *getter = fns[0];
 	float result = getter(node);
 
-	return make_double(env, (double)result);
+	napi_value ret;
+	DSK_NAPI_CALL(napi_create_double(env, result, &ret));
+	return ret;
 }

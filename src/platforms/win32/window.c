@@ -1,19 +1,16 @@
+#include "libdesktop.h"
 #include "napi_utils.h"
 #include <windows.h>
-#include "control.h"
 #define MODULE "win"
 
 static napi_ref WindowRef;
 extern napi_ref ContainerRef;
 
-static void window_finalize(napi_env env, void *finalize_data, void *finalize_hint) {
-
-}
+static void window_finalize(napi_env env, void *finalize_data, void *finalize_hint) {}
 
 #define windowClass L"libui_uiWindowClass"
 
-static LRESULT CALLBACK windowWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
+static LRESULT CALLBACK windowWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	/*LONG_PTR ww;
 	uiWindow *w;
 	CREATESTRUCTW *cs = (CREATESTRUCTW *) lParam;
@@ -37,7 +34,8 @@ static LRESULT CALLBACK windowWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 		// not a menu
 		if (lParam != 0)
 			break;
-		// IsDialogMessage() will also generate IDOK and IDCANCEL when pressing Enter and Escape (respectively) on some controls, like EDIT controls
+		// IsDialogMessage() will also generate IDOK and IDCANCEL when pressing Enter and Escape
+	(respectively) on some controls, like EDIT controls
 		// swallow those too; they'll cause runMenuEvent() to panic
 		// TODO fix the root cause somehow
 		if (HIWORD(wParam) != 0 || LOWORD(wParam) <= IDCANCEL)
@@ -47,8 +45,8 @@ static LRESULT CALLBACK windowWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 	case WM_WINDOWPOSCHANGED:
 		if ((wp->flags & SWP_NOSIZE) != 0)
 			break;
-		if (w->onContentSizeChanged != NULL)		// TODO figure out why this is happening too early
-			if (!w->changingSize)
+		if (w->onContentSizeChanged != NULL)		// TODO figure out why this is happening too
+	early if (!w->changingSize)
 				(*(w->onContentSizeChanged))(w, w->onContentSizeChangedData);
 		windowRelayout(w);
 		return 0;
@@ -74,92 +72,82 @@ static LRESULT CALLBACK windowWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARA
 	return DefWindowProcW(hwnd, uMsg, wParam, lParam);
 }
 
-ATOM registerWindowClass(HICON hDefaultIcon, HCURSOR hDefaultCursor)
-{
+ATOM registerWindowClass(HICON hDefaultIcon, HCURSOR hDefaultCursor) {
 	WNDCLASSW wc;
-HINSTANCE hInstance = GetModuleHandle(NULL);
-	ZeroMemory(&wc, sizeof (WNDCLASSW));
+	HINSTANCE hInstance = GetModuleHandle(NULL);
+	ZeroMemory(&wc, sizeof(WNDCLASSW));
 	wc.lpszClassName = windowClass;
 	wc.lpfnWndProc = windowWndProc;
 	wc.hInstance = hInstance;
 	wc.hIcon = hDefaultIcon;
 	wc.hCursor = hDefaultCursor;
-	wc.hbrBackground = (HBRUSH) (COLOR_BTNFACE + 1);
+	wc.hbrBackground = (HBRUSH)(COLOR_BTNFACE + 1);
 	return RegisterClassW(&wc);
 }
 
 LIBUI_FUNCTION(windowNew) {
-    INIT_ARGS(2);
-    HINSTANCE hInstance = GetModuleHandle(NULL);
-    // printf("WIDNWOS NEW\n");
-    HWND win = CreateWindowExW(0,
-		windowClass, L"prova",
-		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, CW_USEDEFAULT,
-		// use the raw width and height for now
-		// this will get CW_USEDEFAULT (hopefully) predicting well
-		// even if it doesn't, we're adjusting it later
-		800, 600,
-		NULL, NULL, hInstance, NULL);
+	INIT_ARGS(2);
+	HINSTANCE hInstance = GetModuleHandle(NULL);
+	// printf("WIDNWOS NEW\n");
+	HWND win =
+		CreateWindowExW(0, windowClass, L"prova", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
+						// use the raw width and height for now
+						// this will get CW_USEDEFAULT (hopefully) predicting well
+						// even if it doesn't, we're adjusting it later
+						800, 600, NULL, NULL, hInstance, NULL);
 
-  	dsk_wrap_widget(env, win, this);
+	dsk_wrap_widget(env, win, this);
 
+	napi_value Container;
+	napi_value container;
+	napi_value null;
 
-    napi_value Container;
-    napi_value container;
-    napi_value null;
+	napi_get_reference_value(env, ContainerRef, &Container);
+	napi_get_null(env, &null);
+	napi_new_instance(env, Container, 2, (napi_value[]){null, argv[1]}, &container);
+	napi_set_named_property(env, this, "container", container);
 
-    napi_get_reference_value(env, ContainerRef, &Container);
-    napi_get_null(env,&null);
-    napi_new_instance(env, Container,2,(napi_value[]){null,argv[1]},&container);
-    napi_set_named_property(env, this, "container", container);
+	HWND child_gtk;
+	napi_unwrap(env, container, (void **)&child_gtk);
+	SetParent(child_gtk, win);
 
-    HWND child_gtk;
-    napi_unwrap(env,container,(void**)&child_gtk);
-    SetParent(child_gtk, win);
+	YGNodeRef root = dsk_widget_get_node(env, container);
+	dsk_calculate_layout(env, child_gtk, root, YGUndefined, YGUndefined);
 
-    YGNodeRef root = dsk_widget_get_node(env, container);
-    dsk_calculate_layout(env, child_gtk, root, YGUndefined, YGUndefined);
-	
 	ShowWindow(win, SW_SHOW);
 
-    return this;
+	return this;
 }
 
 HWND dummy;
 
 napi_value win_init(napi_env env, napi_value exports) {
-    DEFINE_MODULE()
+	DEFINE_MODULE()
 
-    HINSTANCE hInstance = GetModuleHandle(NULL);
-	dummy = CreateWindowExW(0,
-		windowClass, L"",
-		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, CW_USEDEFAULT,
-		0, 0,
-		NULL, NULL, hInstance, NULL);
+	HINSTANCE hInstance = GetModuleHandle(NULL);
+	dummy = CreateWindowExW(0, windowClass, L"", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
+							0, 0, NULL, NULL, hInstance, NULL);
 
+	registerWindowClass(NULL, NULL);
+	const napi_property_descriptor properties[1]; // = {
+												  // DSK_RWPROP_S(title),
+												  // DSK_RWPROP_I32(width,"default-width"),
+												  // DSK_RWPROP_I32(height,"default-height"),
+												  // DSK_RWPROP_BOOL(visible,"visible"),
+	//};
 
-    registerWindowClass(NULL,NULL);
-    const napi_property_descriptor properties[1];// = {
-        //DSK_RWPROP_S(title),
-        //DSK_RWPROP_I32(width,"default-width"),
-        //DSK_RWPROP_I32(height,"default-height"),
-        //DSK_RWPROP_BOOL(visible,"visible"),
-    //};
-    
-    napi_status status;
-    napi_value Window;
+	napi_status status;
+	napi_value Window;
 
-    status = napi_define_class(env, "Window", NAPI_AUTO_LENGTH, windowNew, NULL, 0, properties, &Window);
-    CHECK_STATUS_THROW(status, napi_define_class);                                          
-	
-    status = napi_create_reference(env, Window, 1, &WindowRef);
-    CHECK_STATUS_THROW(status, napi_create_reference);                                          
+	status =
+		napi_define_class(env, "Window", NAPI_AUTO_LENGTH, windowNew, NULL, 0, properties, &Window);
+	CHECK_STATUS_THROW(status, napi_define_class);
 
-    status = napi_set_named_property(env, module, "Window", Window);                                  
-	CHECK_STATUS_THROW(status, napi_set_named_property);   
+	status = napi_create_reference(env, Window, 1, &WindowRef);
+	CHECK_STATUS_THROW(status, napi_create_reference);
 
-    return exports;
+	status = napi_set_named_property(env, module, "Window", Window);
+	CHECK_STATUS_THROW(status, napi_set_named_property);
+
+	return exports;
 }
-

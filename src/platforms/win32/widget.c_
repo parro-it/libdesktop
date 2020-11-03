@@ -1,5 +1,5 @@
 #include "napi_utils.h"
-#include "widget.h"
+#include "__widget.h"
 
 LIBUI_FUNCTION(widgetSetPropS) {
     INIT_ARGS(1);

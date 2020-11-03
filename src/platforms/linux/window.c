@@ -1,7 +1,6 @@
-#include "control.h"
+#include "__widget.h"
 #include "libdesktop.h"
 #include "napi_utils.h"
-#include "widget.h"
 #include <gtk/gtk.h>
 
 #define MODULE "win"

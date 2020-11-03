@@ -1,4 +1,3 @@
-#include "control.h"
 #include "libdesktop.h"
 
 DSK_EXTEND_MODULE(libdesktop);

@@ -1,5 +1,4 @@
 #include "libdesktop.h"
-#include "widget.h"
 
 #include <yoga/Yoga.h>
 DSK_EXTEND_MODULE(libdesktop);
