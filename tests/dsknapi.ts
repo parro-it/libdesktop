@@ -1,7 +1,7 @@
 import test from 'tape-async'
 const {sum,sum_exactly_two,sum_at_least_two,Decimal} = require("../build/Release/desktop.node")
 
-/*
+
 test('Class definition', (t:any) => {
     t.equal(typeof Decimal, "function")
     t.equal(typeof new Decimal(4,42), "object")
@@ -114,7 +114,7 @@ test('DSK_FAILURE called ', (t:any) => {
     t.equal(true,false)
 })
 
-*/
+
 
 
 test('throw pending exception', (t:any) => {

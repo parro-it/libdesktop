@@ -19,10 +19,12 @@
 void uiQueueMain(void (*f)(void *data), void *data);
 ATOM registerWindowClass(HICON hDefaultIcon, HCURSOR hDefaultCursor);
 
+
 const char *uiInit() {
-	if (registerWindowClass(NULL, NULL) == 0)
-		// printf("error registering uiWindow window class\n");
-		return NULL;
+	if (registerWindowClass(NULL, NULL) == 0) {
+		printf("error registering uiWindow window class\n");
+	}
+	return NULL;
 }
 void noop(void *data) {}
 
