@@ -762,4 +762,6 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 		goto dsk_error;                                                                            \
 	}
 
+napi_value dsk_new_instance(napi_env env, napi_ref class, size_t arg_c, napi_value *arg_v);
+
 #endif

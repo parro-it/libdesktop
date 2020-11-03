@@ -134,26 +134,40 @@ DSK_JS_FUNC(getPropYGValue) {
 	DSK_DEFINE_PROPERTY(libdesktop, Style, NAME, getPropYGValue, setPropF32,                       \
 						((void *[]){NATIVE_GETTER, NATIVE_SETTER, #UNIT}))
 
+napi_value dsk_new_instance(napi_env env, napi_ref class, size_t arg_c, napi_value *arg_v) {
+	DSK_ONERROR_THROW_RET(NULL);
+
+	napi_value constructor;
+	napi_value instance;
+
+	DSK_NAPI_CALL(napi_get_reference_value(env, class, &constructor));
+	DSK_NAPI_CALL(napi_new_instance(env, constructor, arg_c, arg_v, &instance));
+
+	return instance;
+}
+
+void *dsk_unwrap(napi_env env, napi_value this) {
+	DSK_ONERROR_THROW_RET(NULL);
+	void *data;
+	DSK_NAPI_CALL(napi_unwrap(env, this, &data));
+	return data;
+}
+
 napi_value mk_edged_prop(napi_env env, YGNodeRef node, YGUnit unit, GetterEdgedYGVALUE *getter,
 						 SetterEdgedF32 *setter) {
-	napi_value constructor;
-	napi_status status;
-	napi_value edgedProp;
 
-	status = napi_get_reference_value(env, libdesktop_EdgedProp_ref, &constructor);
-	CHECK_STATUS_THROW(status, napi_get_reference_value);
+	napi_value edgedProp = dsk_new_instance(env, libdesktop_EdgedProp_ref, 0, NULL);
+	if (edgedProp == NULL) {
+		return NULL;
+	}
 
-	status = napi_new_instance(env, constructor, 0, NULL, &edgedProp);
-	CHECK_STATUS_THROW(status, napi_new_instance);
-
-	struct EdgedPropData *data;
-	status = napi_unwrap(env, edgedProp, (void **)&data);
-	CHECK_STATUS_THROW(status, napi_unwrap);
-
+	struct EdgedPropData *data = dsk_unwrap(env, edgedProp);
+	if (data == NULL) {
+		return NULL;
+	}
 	data->getter = getter;
 	data->setter = setter;
 	data->node = node;
-	printf("YGUnit %d\n", unit);
 	data->unit = unit;
 
 	return edgedProp;
@@ -161,19 +175,15 @@ napi_value mk_edged_prop(napi_env env, YGNodeRef node, YGUnit unit, GetterEdgedY
 
 napi_value mk_edged_prop_f(napi_env env, YGNodeRef node, YGUnit unit, GetterEdgedF32 *getter,
 						   SetterEdgedF32 *setter) {
-	napi_value constructor;
-	napi_status status;
-	napi_value edgedProp;
+	napi_value edgedProp = dsk_new_instance(env, libdesktop_EdgedProp_ref, 0, NULL);
+	if (edgedProp == NULL) {
+		return NULL;
+	}
 
-	status = napi_get_reference_value(env, libdesktop_EdgedProp_ref, &constructor);
-	CHECK_STATUS_THROW(status, napi_get_reference_value);
-
-	status = napi_new_instance(env, constructor, 0, NULL, &edgedProp);
-	CHECK_STATUS_THROW(status, napi_new_instance);
-
-	struct EdgedPropData *data;
-	status = napi_unwrap(env, edgedProp, (void **)&data);
-	CHECK_STATUS_THROW(status, napi_unwrap);
+	struct EdgedPropData *data = dsk_unwrap(env, edgedProp);
+	if (data == NULL) {
+		return NULL;
+	}
 
 	data->getter_f = getter;
 	data->setter = setter;
