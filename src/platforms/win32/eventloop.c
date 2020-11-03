@@ -16,16 +16,13 @@
 	msgD2DScratchLButtonDown,
 };*/
 
-
-
 void uiQueueMain(void (*f)(void *data), void *data);
 ATOM registerWindowClass(HICON hDefaultIcon, HCURSOR hDefaultCursor);
 
-
-const char *uiInit(){
+const char *uiInit() {
 	if (registerWindowClass(NULL, NULL) == 0)
-		printf("error registering uiWindow window class\n");
-	return NULL;
+		// printf("error registering uiWindow window class\n");
+		return NULL;
 }
 void noop(void *data) {}
 
@@ -84,36 +81,31 @@ void uiMain(void)
 }
 #endif
 
-void uiMainSteps(void)
-{
+void uiMainSteps(void) {
 	// don't need to do anything here
 }
 
-static int peekMessage(MSG *msg)
-{
+static int peekMessage(MSG *msg) {
 	BOOL res;
 
 	res = PeekMessageW(msg, NULL, 0, 0, PM_REMOVE);
 	if (res == 0)
-		return 2;		// no message available
+		return 2; // no message available
 	if (msg->message != WM_QUIT)
-		return 1;		// a message
-	return 0;			// WM_QUIT
+		return 1; // a message
+	return 0;	 // WM_QUIT
 }
 
-
-HWND parentToplevel(HWND child)
-{
+HWND parentToplevel(HWND child) {
 	return GetAncestor(child, GA_ROOT);
 }
 
-static void processMessage(MSG *msg)
-{
+static void processMessage(MSG *msg) {
 	HWND correctParent;
 
 	if (msg->hwnd != NULL)
 		correctParent = parentToplevel(msg->hwnd);
-	else		// just to be safe
+	else // just to be safe
 		correctParent = GetActiveWindow();
 	if (correctParent != NULL)
 		// this calls our mesage filter above for us
@@ -123,22 +115,18 @@ static void processMessage(MSG *msg)
 	DispatchMessageW(msg);
 }
 
-static int waitMessage(MSG *msg)
-{
+static int waitMessage(MSG *msg) {
 	int res;
 
 	res = GetMessageW(msg, NULL, 0, 0);
 	if (res < 0) {
-		printf("error calling GetMessage()\n");
-		return 0;		// bail out on error
+		// printf("error calling GetMessage()\n");
+		return 0; // bail out on error
 	}
-	return res != 0;		// returns false on WM_QUIT
-	
+	return res != 0; // returns false on WM_QUIT
 }
 
-
-int uiMainStep(int wait)
-{
+int uiMainStep(int wait) {
 	MSG msg;
 
 	if (wait) {
@@ -150,35 +138,30 @@ int uiMainStep(int wait)
 
 	// don't wait for a message
 	switch (peekMessage(&msg)) {
-	case 0:		// quit
+	case 0: // quit
 		// TODO PostQuitMessage() again?
 		return 0;
-	case 1:		// process a message
+	case 1: // process a message
 		processMessage(&msg);
 		// fall out to the case for no message
 	}
-	return 1;		// no message
+	return 1; // no message
 }
 
-void uiQuit(void)
-{
+void uiQuit(void) {
 	PostQuitMessage(0);
 }
 
-void uiQueueMain(void (*f)(void *data), void *data)
-{
+void uiQueueMain(void (*f)(void *data), void *data) {
 	/*if (PostMessageW(utilWindow, msgQueued, (WPARAM) f, (LPARAM) data) == 0)
 		// LONGTERM this is likely not safe to call across threads (allocates memory)
 		logLastError(L"error queueing function to run on main thread");*/
 }
 
-
 int uiEventsPending() {
 	MSG msg;
 	return PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
 }
-
-
 
 struct _internal_uv_loop_s {
 	/* User data - use this for whatever. */
@@ -254,5 +237,5 @@ int waitForNodeEvents(void *loop, int timeout) {
 		PostQueuedCompletionStatus(_loop->iocp, bytes, key, overlapped);
 	}
 
-	return ret; 
+	return ret;
 }

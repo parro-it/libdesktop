@@ -1,11 +1,10 @@
+#include "libdesktop.h"
 #include "napi_utils.h"
 #include "widget.h"
 
 #include <yoga/Yoga.h>
-
-#define MODULE "style"
-
-
+DSK_EXTEND_MODULE(libdesktop);
+_DSK_USE_CLASS(libdesktop, EdgedProp);
 
 typedef void SetterI32(const YGNodeRef node, const int32_t value);
 typedef int32_t GetterI32(const YGNodeConstRef node);
@@ -18,503 +17,381 @@ typedef YGValue GetterEdgedYGVALUE(const YGNodeConstRef node, YGEdge edge);
 typedef float GetterEdgedF32(const YGNodeConstRef node, YGEdge edge);
 typedef void SetterEdgedF32(const YGNodeRef node, YGEdge edge, const float value);
 
-struct prop_fns {
-    SetterI32* setterI32;
-    GetterI32* getterI32;
-    SetterF32* setterF32;
-    GetterF32* getterF32;
-    GetterYGVALUE* getterYGValue;
-    char* unit;
-    
-};
-
 struct EdgedPropData {
-    GetterEdgedYGVALUE* getter;
-    SetterEdgedF32* setter;
-    GetterEdgedF32* getter_f;
-    YGNodeRef node;
-    YGUnit unit;
+	GetterEdgedYGVALUE *getter;
+	SetterEdgedF32 *setter;
+	GetterEdgedF32 *getter_f;
+	YGNodeRef node;
+	YGUnit unit;
 };
 
+DSK_JS_FUNC(setPropI32) {
+	DSK_JS_FUNC_INIT()
+	ARG_INT32(value, 0);
 
-static struct prop_fns mk_prop_fns_i32(GetterI32* getterI32, SetterI32* setterI32) {
-   struct prop_fns fns= {.getterI32=getterI32,.setterI32=setterI32};
-   return fns;
+	YGNodeRef node;
+	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&node));
+
+	void **fns;
+	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&fns));
+
+	SetterI32 *setter = fns[1];
+
+	setter(node, value);
+	return NULL;
 }
 
-static struct prop_fns mk_prop_fns_f32(GetterF32* getterF32, SetterF32* setterF32) {
-   struct prop_fns fns= {.getterF32=getterF32,.setterF32=setterF32};
-   return fns;
+DSK_JS_FUNC(getPropI32) {
+	DSK_JS_FUNC_INIT()
+
+	YGNodeRef node;
+	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&node));
+
+	void **fns;
+
+	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&fns));
+
+	GetterI32 *getter = fns[0];
+	int32_t result = getter(node);
+
+	return make_int32(env, result);
 }
 
-static struct prop_fns mk_prop_fns_ygvalue(char* unit, GetterYGVALUE* getter, SetterF32* setter) {
-   struct prop_fns fns= {.getterYGValue=getter,.setterF32=setter,.unit=unit};
-   return fns;
+DSK_JS_FUNC(setPropF32) {
+	DSK_JS_FUNC_INIT()
+	ARG_DOUBLE(value, 0);
+
+	YGNodeRef node;
+	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&node));
+
+	void **fns;
+	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&fns));
+
+	SetterF32 *setter = fns[1];
+	setter(node, (float)value);
+	return NULL;
 }
 
-//static LIBUI_FUNCTION( edgedFloatGetter);
-static LIBUI_FUNCTION( edgedFloatSetter);
-static LIBUI_FUNCTION( edgedYgValueGetter);
+DSK_JS_FUNC(getPropF32) {
+	DSK_JS_FUNC_INIT()
 
+	YGNodeRef node;
+	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&node));
 
+	void **fns;
+	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&fns));
 
+	GetterF32 *getter = fns[0];
+	float result = getter(node);
 
-LIBUI_FUNCTION(setPropI32) {                                                           
-    INIT_ARGS(1);                                                                      
-    ARG_INT32(value, 0);                                                               
-    
-    YGNodeRef node;                                                                 
-    napi_status status = napi_unwrap(env, this, (void**)&node);
-    CHECK_STATUS_THROW(status, napi_unwrap);   
-
-    struct prop_fns* fns; 
-    
-    status = napi_get_cb_info(env, info, NULL, NULL, NULL,(void**)&fns); 
-    CHECK_STATUS_THROW(status, napi_get_cb_info);                                         
-    
-    fns->setterI32(node, value);                                                                                     
-    return NULL;                                                                       
-}                                                                                      
-                                                                                       
-LIBUI_FUNCTION(getPropI32) {                                                           
-    INIT_EMPTY_ARGS();                                                                 
-    
-    YGNodeRef node;                                                                 
-    napi_status status = napi_unwrap(env, this, (void**)&node);
-    CHECK_STATUS_THROW(status, napi_unwrap);   
-
-    struct prop_fns* fns; 
-    
-    status = napi_get_cb_info(env, info, NULL, NULL, NULL,(void**)&fns); 
-    CHECK_STATUS_THROW(status, napi_get_cb_info);                                         
-                                                                   
-                                                                                       
-    int32_t result = fns->getterI32(node);
-                                                                                       
-    return make_int32(env, result);                                                    
-}                                                                                      
-
-LIBUI_FUNCTION(setPropF32) {                                                           
-    INIT_ARGS(1);                                                                      
-    ARG_DOUBLE(value, 0);                                                               
-    
-    YGNodeRef node;                                                                 
-    napi_status status = napi_unwrap(env, this, (void**)&node);
-    CHECK_STATUS_THROW(status, napi_unwrap);   
-
-    struct prop_fns* fns; 
-    
-    status = napi_get_cb_info(env, info, NULL, NULL, NULL,(void**)&fns); 
-    CHECK_STATUS_THROW(status, napi_get_cb_info);                                         
-    
-    fns->setterF32(node, (float)value);                                                                                     
-    return NULL;                                                                       
-}                                                                                      
-                                                                                       
-LIBUI_FUNCTION(getPropF32) {                                                           
-    INIT_EMPTY_ARGS();                                                                 
-    
-    YGNodeRef node;                                                                 
-    napi_status status = napi_unwrap(env, this, (void**)&node);
-    CHECK_STATUS_THROW(status, napi_unwrap);   
-
-    struct prop_fns* fns; 
-    
-    status = napi_get_cb_info(env, info, NULL, NULL, NULL,(void**)&fns); 
-    CHECK_STATUS_THROW(status, napi_get_cb_info);                                         
-                                                                   
-                                                                                       
-    float result = fns->getterF32(node);
-                                                                                       
-    return make_double(env, (double)result);                                                    
-}  
-
-LIBUI_FUNCTION(getPropYGValue) {                                                           
-    INIT_EMPTY_ARGS();                                                                 
-    
-    YGNodeRef node;                                                                 
-    napi_status status = napi_unwrap(env, this, (void**)&node);
-    CHECK_STATUS_THROW(status, napi_unwrap);   
-
-    struct prop_fns* fns; 
-    
-    status = napi_get_cb_info(env, info, NULL, NULL, NULL,(void**)&fns); 
-    CHECK_STATUS_THROW(status, napi_get_cb_info);                                         
-                                                                   
-                                                                                       
-    YGValue result = fns->getterYGValue(node);
-    
-    if (strcmp(fns->unit,"AUTO")) {
-        return make_bool(env, result.unit==YGUnitAuto);
-    }                                                                                      
-
-    if (strcmp(fns->unit,"POINT")) {
-        if (result.unit!=YGUnitPoint) {
-            return make_double(env,NAN);
-        }
-        return make_double(env, result.value);
-    }  
-
-    if (strcmp(fns->unit,"PERCENT")) {
-        if (result.unit!=YGUnitPercent) {
-            return make_double(env,NAN);
-        }
-        return make_double(env, result.value);
-    }                                                                                      
-
-    napi_throw_error(env, "EINVAL", "Unknown unit");
-    return NULL;
-}  
-
-
-
-static struct prop_fns direction_fns;
-static struct prop_fns flex_direction_fns;
-static struct prop_fns justify_content_fns;
-static struct prop_fns position_type_fns;
-static struct prop_fns align_content_fns;
-static struct prop_fns align_items_fns;
-static struct prop_fns align_self_fns;
-static struct prop_fns flex_wrap_fns;
-static struct prop_fns overflow_fns;
-static struct prop_fns display_fns;
-static struct prop_fns flex_fns;
-static struct prop_fns flex_grow_fns;
-static struct prop_fns flex_shrink_fns;
-static struct prop_fns flex_basis_fns;
-static struct prop_fns flex_basis_percent_fns;
-static struct prop_fns flex_basis_auto_fns;
-static struct prop_fns width_fns;
-static struct prop_fns width_percent_fns;
-static struct prop_fns height_fns;
-static struct prop_fns height_percent_fns;
-static struct prop_fns min_width_fns;
-static struct prop_fns min_width_percent_fns;
-static struct prop_fns min_height_fns;
-static struct prop_fns min_height_percent_fns;
-static struct prop_fns max_width_fns;
-static struct prop_fns max_width_percent_fns;
-static struct prop_fns max_height_fns;
-static struct prop_fns max_height_percent_fns;
-
-//static struct prop_fns position_fns;
-
-
-
-#define PROP_I32(NAME,FNS) (napi_property_descriptor) {.utf8name = #NAME, .getter = getPropI32, .setter = setPropI32, .data = FNS}
-#define PROP_F32(NAME,FNS) (napi_property_descriptor) {.utf8name = #NAME, .getter = getPropF32, .setter = setPropF32, .data = FNS}                        
-#define PROP_YGVALUE_F32(NAME,FNS) (napi_property_descriptor) {.utf8name = #NAME, .getter = getPropYGValue, .setter = setPropF32, .data = FNS}
-
-
-napi_ref EdgedPropRef;
-napi_ref StyleRef;
-
-napi_value mk_edged_prop(napi_env env, YGNodeRef node, YGUnit unit, GetterEdgedYGVALUE* getter, SetterEdgedF32* setter) {
-    napi_value constructor;
-    napi_status status;
-    napi_value edgedProp;
-
-    status = napi_get_reference_value(env, EdgedPropRef, &constructor);
-    CHECK_STATUS_THROW(status, napi_get_reference_value);                                          
-
-    status = napi_new_instance(env,constructor,0,NULL,&edgedProp);
-    CHECK_STATUS_THROW(status,napi_new_instance);
-
-    struct EdgedPropData* data; 
-    status = napi_unwrap(env, edgedProp, (void**)&data);
-    CHECK_STATUS_THROW(status, napi_unwrap);   
-
-    data->getter = getter;
-    data->setter = setter;
-    data->node = node;
-    data->unit = unit;
-
-    return edgedProp;
+	return make_double(env, (double)result);
 }
 
-napi_value mk_edged_prop_f(napi_env env, YGNodeRef node, YGUnit unit, GetterEdgedF32* getter, SetterEdgedF32* setter) {
-    napi_value constructor;
-    napi_status status;
-    napi_value edgedProp;
+DSK_JS_FUNC(getPropYGValue) {
+	DSK_JS_FUNC_INIT()
 
-    status = napi_get_reference_value(env, EdgedPropRef, &constructor);
-    CHECK_STATUS_THROW(status, napi_get_reference_value);                                          
+	YGNodeRef node;
+	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&node));
 
-    status = napi_new_instance(env,constructor,0,NULL,&edgedProp);
-    CHECK_STATUS_THROW(status,napi_new_instance);
+	void **fns;
+	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&fns));
 
-    struct EdgedPropData* data; 
-    status = napi_unwrap(env, edgedProp, (void**)&data);
-    CHECK_STATUS_THROW(status, napi_unwrap);   
+	GetterYGVALUE *getter = fns[0];
+	char *unit = fns[2];
+	YGValue result = getter(node);
 
-    data->getter_f = getter;
-    data->setter = setter;
-    data->node = node;
-    data->unit = unit;
+	if (strcmp(unit, "AUTO") == 0) {
+		return make_bool(env, result.unit == YGUnitAuto);
+	}
 
-    return edgedProp;
+	if (strcmp(unit, "POINT") == 0) {
+		if (result.unit != YGUnitPoint) {
+			return make_double(env, NAN);
+		}
+		return make_double(env, result.value);
+	}
+
+	if (strcmp(unit, "PERCENT") == 0) {
+		if (result.unit != YGUnitPercent) {
+			return make_double(env, NAN);
+		}
+		return make_double(env, result.value);
+	}
+
+	napi_throw_error(env, "EINVAL", "Unknown unit");
+	return NULL;
 }
 
-#define EDGED_PROP(NAME,UNIT,GETTER,SETTER) \
-    napi_define_properties(env,this,1, (napi_property_descriptor[]) {{\
-        .utf8name=#NAME,\
-        .value=mk_edged_prop(env, node, UNIT, GETTER, SETTER),\
-        .attributes=napi_enumerable,  /*!napi_configurable !napi_writable*/ \
-    }})
+#define PROP_I32(NAME, NATIVE_GETTER, NATIVE_SETTER)                                               \
+	DSK_DEFINE_PROPERTY(libdesktop, Style, NAME, getPropI32, setPropI32,                           \
+						((void *[]){NATIVE_GETTER, NATIVE_SETTER}))
 
-#define EDGED_PROP_F(NAME,GETTER,SETTER) \
-    napi_define_properties(env,this,1, (napi_property_descriptor[]) {{\
-        .utf8name=#NAME,\
-        .value=mk_edged_prop_f(env, node, 0xbabe, GETTER, SETTER),\
-        .attributes=napi_enumerable,  /*!napi_configurable !napi_writable*/ \
-    }})
+#define PROP_F32(NAME, NATIVE_GETTER, NATIVE_SETTER)                                               \
+	DSK_DEFINE_PROPERTY(libdesktop, Style, NAME, getPropF32, setPropF32,                           \
+						((void *[]){NATIVE_GETTER, NATIVE_SETTER}))
+
+#define PROP_YGVALUE_F32(NAME, UNIT, NATIVE_GETTER, NATIVE_SETTER)                                 \
+	DSK_DEFINE_PROPERTY(libdesktop, Style, NAME, getPropYGValue, setPropF32,                       \
+						((void *[]){NATIVE_GETTER, NATIVE_SETTER, #UNIT}))
+
+napi_value mk_edged_prop(napi_env env, YGNodeRef node, YGUnit unit, GetterEdgedYGVALUE *getter,
+						 SetterEdgedF32 *setter) {
+	napi_value constructor;
+	napi_status status;
+	napi_value edgedProp;
+
+	status = napi_get_reference_value(env, libdesktop_EdgedProp_ref, &constructor);
+	CHECK_STATUS_THROW(status, napi_get_reference_value);
+
+	status = napi_new_instance(env, constructor, 0, NULL, &edgedProp);
+	CHECK_STATUS_THROW(status, napi_new_instance);
+
+	struct EdgedPropData *data;
+	status = napi_unwrap(env, edgedProp, (void **)&data);
+	CHECK_STATUS_THROW(status, napi_unwrap);
+
+	data->getter = getter;
+	data->setter = setter;
+	data->node = node;
+	printf("YGUnit %d\n", unit);
+	data->unit = unit;
+
+	return edgedProp;
+}
+
+napi_value mk_edged_prop_f(napi_env env, YGNodeRef node, YGUnit unit, GetterEdgedF32 *getter,
+						   SetterEdgedF32 *setter) {
+	napi_value constructor;
+	napi_status status;
+	napi_value edgedProp;
+
+	status = napi_get_reference_value(env, libdesktop_EdgedProp_ref, &constructor);
+	CHECK_STATUS_THROW(status, napi_get_reference_value);
+
+	status = napi_new_instance(env, constructor, 0, NULL, &edgedProp);
+	CHECK_STATUS_THROW(status, napi_new_instance);
+
+	struct EdgedPropData *data;
+	status = napi_unwrap(env, edgedProp, (void **)&data);
+	CHECK_STATUS_THROW(status, napi_unwrap);
+
+	data->getter_f = getter;
+	data->setter = setter;
+	data->node = node;
+	data->unit = unit;
+
+	return edgedProp;
+}
+
+#define EDGED_PROP(NAME, UNIT, GETTER, SETTER)                                                     \
+	napi_define_properties(                                                                        \
+		env, this, 1,                                                                              \
+		(napi_property_descriptor[]){{                                                             \
+			.utf8name = #NAME,                                                                     \
+			.value = mk_edged_prop(env, node, UNIT, GETTER, SETTER),                               \
+			.attributes = napi_enumerable, /*!napi_configurable !napi_writable*/                   \
+		}})
+
+#define EDGED_PROP_F(NAME, GETTER, SETTER)                                                         \
+	napi_define_properties(                                                                        \
+		env, this, 1,                                                                              \
+		(napi_property_descriptor[]){{                                                             \
+			.utf8name = #NAME,                                                                     \
+			.value = mk_edged_prop_f(env, node, 0xbabe, GETTER, SETTER),                           \
+			.attributes = napi_enumerable, /*!napi_configurable !napi_writable*/                   \
+		}})
 
 static void set_margin_auto(YGNodeRef node, YGEdge edge, float margin) {
-    if (margin == 0.0) {
-        YGNodeStyleSetMargin(node,edge,0.0);    
-    }
-    YGNodeStyleSetMarginAuto(node,edge);
+	if (margin == 0.0) {
+		YGNodeStyleSetMargin(node, edge, 0.0);
+	}
+	YGNodeStyleSetMarginAuto(node, edge);
 }
 
-static napi_value link_style_to_node(napi_env env, YGNodeRef node, napi_value this) {
-    napi_status status = napi_wrap(env, this, node, NULL, NULL, NULL);
-    CHECK_STATUS_THROW(status, napi_wrap);                                          
-    
-    EDGED_PROP(position, YGUnitPoint, YGNodeStyleGetPosition, YGNodeStyleSetPosition);
-    EDGED_PROP(positionPercent, YGUnitPercent, YGNodeStyleGetPosition, YGNodeStyleSetPositionPercent);
-   
-    EDGED_PROP_F(border, YGNodeStyleGetBorder, YGNodeStyleSetBorder);
+DSK_DEFINE_CLASS(libdesktop, Style) {
+	DSK_JS_FUNC_INIT()
+	DSK_EXACTLY_NARGS(2);
+	napi_valuetype argType;
 
-    EDGED_PROP(padding, YGUnitPoint, YGNodeStyleGetPadding, YGNodeStyleSetPadding);
-    EDGED_PROP(paddingPercent, YGUnitPercent, YGNodeStyleGetPadding, YGNodeStyleSetPaddingPercent);
-   
-    EDGED_PROP(margin,        YGUnitPoint,     YGNodeStyleGetMargin, YGNodeStyleSetMargin);
-    EDGED_PROP(marginPercent, YGUnitPercent,   YGNodeStyleGetMargin, YGNodeStyleSetMarginPercent);
-    EDGED_PROP(marginAuto,    YGUnitAuto,      YGNodeStyleGetMargin, set_margin_auto);
+	YGNodeRef node;
+	// printf("argc %zd\n",argc);
+	if (argc < 2) {
+		node = YGNodeNew();
+	} else {
+		DSK_NAPI_CALL(napi_typeof(env, argv[1], &argType));
+		if (argType == napi_null) {
+			node = YGNodeNew();
+		} else {
+			node = dsk_widget_get_node(env, argv[1]);
+		}
+	}
 
-    return NULL;
+	DSK_NAPI_CALL(napi_wrap(env, this, node, NULL, NULL, NULL));
+
+	EDGED_PROP(position, YGUnitPoint, YGNodeStyleGetPosition, YGNodeStyleSetPosition);
+	EDGED_PROP(positionPercent, YGUnitPercent, YGNodeStyleGetPosition,
+			   YGNodeStyleSetPositionPercent);
+
+	EDGED_PROP_F(border, YGNodeStyleGetBorder, YGNodeStyleSetBorder);
+
+	EDGED_PROP(padding, YGUnitPoint, YGNodeStyleGetPadding, YGNodeStyleSetPadding);
+	EDGED_PROP(paddingPercent, YGUnitPercent, YGNodeStyleGetPadding, YGNodeStyleSetPaddingPercent);
+
+	EDGED_PROP(margin, YGUnitPoint, YGNodeStyleGetMargin, YGNodeStyleSetMargin);
+	EDGED_PROP(marginPercent, YGUnitPercent, YGNodeStyleGetMargin, YGNodeStyleSetMarginPercent);
+	EDGED_PROP(marginAuto, YGUnitAuto, YGNodeStyleGetMargin, set_margin_auto);
+
+	return this;
 }
-
-
-LIBUI_FUNCTION(styleNew) {
-    INIT_ARGS(2);
-    napi_valuetype argType;
-
-    YGNodeRef node;
-    // printf("argc %zd\n",argc);
-    if (argc < 2) {
-        node = YGNodeNew();
-    } else {
-        napi_typeof(env, argv[1], &argType);
-        if (argType == napi_null) {
-            node = YGNodeNew();
-        } else {
-            node = dsk_widget_get_node(env, argv[1]);
-        }
-    }
-    
-    link_style_to_node(env, node, this);
-    return this;
-}
-
-
-
-static void finalize_edgedProp(napi_env env, void *finalize_data, void *finalize_hint) {
-    free(finalize_data);
-}
-
-LIBUI_FUNCTION(edgedPropNew) {
-    INIT_EMPTY_ARGS();
-
-    struct EdgedPropData* data = malloc(sizeof (struct EdgedPropData));  
-
-    napi_status status = napi_wrap(env, this, data, finalize_edgedProp, NULL, NULL);
-    CHECK_STATUS_THROW(status, napi_wrap);                                          
-
-    return this;
-}
-
-
-typedef void SetterF32(const YGNodeRef node, const float value);
-typedef float GetterF32(const YGNodeConstRef node);
-typedef YGValue GetterYGVALUE(const YGNodeConstRef node);
-
-
-
-static LIBUI_FUNCTION(edgedFloatSetter) {                    
-    INIT_ARGS(1);                                                                      
-    ARG_DOUBLE(value, 0);                                                               
-    
-    struct EdgedPropData* data; 
-    napi_status status = napi_unwrap(env, this, (void**)&data);
-    CHECK_STATUS_THROW(status, napi_unwrap);   
-
-    YGEdge* edge; 
-    status = napi_get_cb_info(env, info, NULL, NULL, NULL,(void**)&edge); 
-    CHECK_STATUS_THROW(status, napi_get_cb_info); 
-    data->setter(data->node, *edge, (float)value);
-    
-    return NULL;
-}
-
-/*
-static LIBUI_FUNCTION(edgedFloatGetter) {                    
-    INIT_EMPTY_ARGS();                                                          
-    
-    struct EdgedPropData* data; 
-    napi_status status = napi_unwrap(env, this, (void**)&data);
-    CHECK_STATUS_THROW(status, napi_unwrap);   
-
-    YGEdge* edge; 
-    status = napi_get_cb_info(env, info, NULL, NULL, NULL,(void**)&edge); 
-    CHECK_STATUS_THROW(status, napi_get_cb_info); 
-
-    float result = data->getter_f(data->node, *edge);
-    return make_double(env,result);
-}
-*/
-static LIBUI_FUNCTION(edgedYgValueGetter) {
-    INIT_EMPTY_ARGS();
-    struct EdgedPropData* data; 
-    napi_status status = napi_unwrap(env, this, (void**)&data);
-    CHECK_STATUS_THROW(status, napi_unwrap);   
-
-    YGEdge* edge; 
-    status = napi_get_cb_info(env, info, NULL, NULL, NULL,(void**)&edge); 
-    CHECK_STATUS_THROW(status, napi_get_cb_info); 
-
-    if (data->unit==0xbabe) {
-       float result = data->getter_f(data->node, *edge);
-        return make_double(env,result);
-    }                                                                                      
-
-    YGValue result = data->getter(data->node, *edge);
-
-    if (data->unit==YGUnitAuto) {
-        return make_bool(env, result.unit==YGUnitAuto);
-    }                                                                                      
-
-    if (data->unit==YGUnitPoint) {
-        if (result.unit!=YGUnitPoint) {
-            return make_double(env,NAN);
-        }
-        return make_double(env, result.value);
-    }  
-
-    if (data->unit==YGUnitPercent) {
-        if (result.unit!=YGUnitPercent) {
-            return make_double(env,NAN);
-        }
-        return make_double(env, result.value);
-    }                                                                                      
-
-    napi_throw_error(env, "EINVAL", "Unknown unit");
-    return NULL;
-}
-
-
-static YGEdge edgeAll = YGEdgeAll;
-static YGEdge edgeLeft = YGEdgeLeft;
-static YGEdge edgeTop = YGEdgeTop;
-static YGEdge edgeRight = YGEdgeRight;
-static YGEdge edgeBottom = YGEdgeBottom;
-static YGEdge edgeStart = YGEdgeStart;
-static YGEdge edgeEnd = YGEdgeEnd;
-static YGEdge edgeHorizontal = YGEdgeHorizontal;
-static YGEdge edgeVertical = YGEdgeVertical;
-
-
-#define EDGED_PROP_YGVALUE(NAME, EDGE) (napi_property_descriptor) {.utf8name = #NAME, .getter = edgedYgValueGetter, .setter = edgedFloatSetter, .data = &EDGE}
 
 static void set_style_auto(const YGNodeRef node, float _) {
-    YGNodeStyleSetFlexBasisAuto(node);
+	YGNodeStyleSetFlexBasisAuto(node);
 }
 
-napi_value style_init(napi_env env, napi_value exports) {
-    DEFINE_MODULE()
+PROP_I32(direction, YGNodeStyleGetDirection, YGNodeStyleSetDirection);
+PROP_I32(flexDirection, YGNodeStyleGetFlexDirection, YGNodeStyleSetFlexDirection);
+PROP_I32(justifyContent, YGNodeStyleGetJustifyContent, YGNodeStyleSetJustifyContent);
+PROP_I32(alignContent, YGNodeStyleGetAlignContent, YGNodeStyleSetAlignContent);
+PROP_I32(alignItems, YGNodeStyleGetAlignItems, YGNodeStyleSetAlignItems);
+PROP_I32(alignSelf, YGNodeStyleGetAlignSelf, YGNodeStyleSetAlignSelf);
+PROP_I32(positionType, YGNodeStyleGetPositionType, YGNodeStyleSetPositionType);
+PROP_I32(flexWrap, YGNodeStyleGetFlexWrap, YGNodeStyleSetFlexWrap);
+PROP_I32(overflow, YGNodeStyleGetOverflow, YGNodeStyleSetOverflow);
+PROP_I32(display, YGNodeStyleGetDisplay, YGNodeStyleSetDisplay);
+PROP_F32(flex, YGNodeStyleGetFlex, YGNodeStyleSetFlex);
+PROP_F32(flexGrow, YGNodeStyleGetFlexGrow, YGNodeStyleSetFlexGrow);
+PROP_F32(flexShrink, YGNodeStyleGetFlexShrink, YGNodeStyleSetFlexShrink);
+PROP_YGVALUE_F32(flexBasis, POINT, YGNodeStyleGetFlexBasis, YGNodeStyleSetFlexBasis);
+PROP_YGVALUE_F32(flexBasisPercent, PERCENT, YGNodeStyleGetFlexBasis,
+				 YGNodeStyleSetFlexBasisPercent);
+PROP_YGVALUE_F32(flexBasisAuto, AUTO, YGNodeStyleGetFlexBasis, set_style_auto);
+PROP_YGVALUE_F32(width, POINT, YGNodeStyleGetWidth, YGNodeStyleSetWidth);
+PROP_YGVALUE_F32(widthPercent, PERCENT, YGNodeStyleGetWidth, YGNodeStyleSetWidthPercent);
+PROP_YGVALUE_F32(height, POINT, YGNodeStyleGetHeight, YGNodeStyleSetHeight);
+PROP_YGVALUE_F32(heightPercent, PERCENT, YGNodeStyleGetHeight, YGNodeStyleSetHeightPercent);
+PROP_YGVALUE_F32(minWidth, POINT, YGNodeStyleGetMinWidth, YGNodeStyleSetMinWidth);
+PROP_YGVALUE_F32(minWidthPercent, PERCENT, YGNodeStyleGetMinWidth, YGNodeStyleSetMinWidthPercent);
+PROP_YGVALUE_F32(minHeight, POINT, YGNodeStyleGetMinHeight, YGNodeStyleSetMinHeight);
+PROP_YGVALUE_F32(minHeightPercent, PERCENT, YGNodeStyleGetMinHeight,
+				 YGNodeStyleSetMinHeightPercent);
+PROP_YGVALUE_F32(maxWidth, POINT, YGNodeStyleGetMaxWidth, YGNodeStyleSetMaxWidth);
+PROP_YGVALUE_F32(maxWidthPercent, PERCENT, YGNodeStyleGetMaxWidth, YGNodeStyleSetMaxWidthPercent);
+PROP_YGVALUE_F32(maxHeight, POINT, YGNodeStyleGetMaxHeight, YGNodeStyleSetMaxHeight);
+PROP_YGVALUE_F32(maxHeightPercent, PERCENT, YGNodeStyleGetMaxHeight,
+				 YGNodeStyleSetMinHeightPercent);
 
-    direction_fns = mk_prop_fns_i32((GetterI32*)YGNodeStyleGetDirection, (SetterI32*)YGNodeStyleSetDirection);
-    flex_direction_fns = mk_prop_fns_i32((GetterI32*)YGNodeStyleGetFlexDirection, (SetterI32*)YGNodeStyleSetFlexDirection);
-    justify_content_fns = mk_prop_fns_i32((GetterI32*)YGNodeStyleGetJustifyContent, (SetterI32*)YGNodeStyleSetJustifyContent);
-    align_content_fns = mk_prop_fns_i32((GetterI32*)YGNodeStyleGetAlignContent, (SetterI32*)YGNodeStyleSetAlignContent);
-    align_items_fns = mk_prop_fns_i32((GetterI32*)YGNodeStyleGetAlignItems, (SetterI32*)YGNodeStyleSetAlignItems);
-    align_self_fns = mk_prop_fns_i32((GetterI32*)YGNodeStyleGetAlignSelf, (SetterI32*)YGNodeStyleSetAlignSelf);
-    position_type_fns= mk_prop_fns_i32((GetterI32*)YGNodeStyleGetPositionType, (SetterI32*)YGNodeStyleSetPositionType);
-    flex_wrap_fns= mk_prop_fns_i32((GetterI32*)YGNodeStyleGetFlexWrap, (SetterI32*)YGNodeStyleSetFlexWrap);
-    overflow_fns= mk_prop_fns_i32((GetterI32*)YGNodeStyleGetOverflow, (SetterI32*)YGNodeStyleSetOverflow);
-    display_fns= mk_prop_fns_i32((GetterI32*)YGNodeStyleGetDisplay, (SetterI32*)YGNodeStyleSetDisplay);
-    flex_fns= mk_prop_fns_f32((GetterF32*)YGNodeStyleGetFlex, (SetterF32*)YGNodeStyleSetFlex);
-    flex_grow_fns= mk_prop_fns_f32((GetterF32*)YGNodeStyleGetFlexGrow, (SetterF32*)YGNodeStyleSetFlexGrow);
-    flex_shrink_fns= mk_prop_fns_f32((GetterF32*)YGNodeStyleGetFlexShrink, (SetterF32*)YGNodeStyleSetFlexShrink);
-    flex_basis_fns              = mk_prop_fns_ygvalue("POINT",(GetterYGVALUE*)      YGNodeStyleGetFlexBasis, (SetterF32*)   YGNodeStyleSetFlexBasis         );
-    flex_basis_percent_fns      = mk_prop_fns_ygvalue("PERCENT",(GetterYGVALUE*)    YGNodeStyleGetFlexBasis, (SetterF32*)   YGNodeStyleSetFlexBasisPercent  );
-    flex_basis_auto_fns         = mk_prop_fns_ygvalue("AUTO",(GetterYGVALUE*)       YGNodeStyleGetFlexBasis, (SetterF32*)   set_style_auto     );
-    width_fns              = mk_prop_fns_ygvalue("POINT",(GetterYGVALUE*)      YGNodeStyleGetWidth, (SetterF32*)   YGNodeStyleSetWidth         );
-    width_percent_fns      = mk_prop_fns_ygvalue("PERCENT",(GetterYGVALUE*)    YGNodeStyleGetWidth, (SetterF32*)   YGNodeStyleSetWidthPercent  );
-    height_fns              = mk_prop_fns_ygvalue("POINT",(GetterYGVALUE*)      YGNodeStyleGetHeight, (SetterF32*)   YGNodeStyleSetHeight         );
-    height_percent_fns      = mk_prop_fns_ygvalue("PERCENT",(GetterYGVALUE*)    YGNodeStyleGetHeight, (SetterF32*)   YGNodeStyleSetHeightPercent  );
-    min_width_fns              = mk_prop_fns_ygvalue("POINT",(GetterYGVALUE*)      YGNodeStyleGetMinWidth, (SetterF32*)   YGNodeStyleSetMinWidth         );
-    min_width_percent_fns      = mk_prop_fns_ygvalue("PERCENT",(GetterYGVALUE*)    YGNodeStyleGetMinWidth, (SetterF32*)   YGNodeStyleSetMinWidthPercent  );
-    min_height_fns              = mk_prop_fns_ygvalue("POINT",(GetterYGVALUE*)      YGNodeStyleGetMinHeight, (SetterF32*)   YGNodeStyleSetMinHeight         );
-    min_height_percent_fns      = mk_prop_fns_ygvalue("PERCENT",(GetterYGVALUE*)    YGNodeStyleGetMinHeight, (SetterF32*)   YGNodeStyleSetMinHeightPercent  );
-    max_width_fns              = mk_prop_fns_ygvalue("POINT",(GetterYGVALUE*)      YGNodeStyleGetMaxWidth, (SetterF32*)   YGNodeStyleSetMaxWidth         );
-    max_width_percent_fns      = mk_prop_fns_ygvalue("PERCENT",(GetterYGVALUE*)    YGNodeStyleGetMaxWidth, (SetterF32*)   YGNodeStyleSetMaxWidthPercent  );
-    max_height_fns              = mk_prop_fns_ygvalue("POINT",(GetterYGVALUE*)      YGNodeStyleGetMaxHeight, (SetterF32*)   YGNodeStyleSetMaxHeight         );
-    max_height_percent_fns      = mk_prop_fns_ygvalue("PERCENT",(GetterYGVALUE*)    YGNodeStyleGetMaxHeight, (SetterF32*)   YGNodeStyleSetMaxHeightPercent  );
+static DSK_JS_FUNC(edgedFloatSetter) {
+	DSK_JS_FUNC_INIT();
+	DSK_AT_LEAST_NARGS(1)
 
+	double value;
+	DSK_NAPI_CALL(napi_get_value_double(env, argv[0], &value));
 
+	struct EdgedPropData *data;
+	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&data));
 
-    dsk_define_class_ref(env,module,"EdgedProp",edgedPropNew,((napi_property_descriptor[]){
-      EDGED_PROP_YGVALUE(left, edgeLeft),
-      EDGED_PROP_YGVALUE(top, edgeTop),
-      EDGED_PROP_YGVALUE(right, edgeRight),
-      EDGED_PROP_YGVALUE(bottom, edgeBottom),
-      EDGED_PROP_YGVALUE(start, edgeStart),
-      EDGED_PROP_YGVALUE(end, edgeEnd),
-      EDGED_PROP_YGVALUE(horizontal, edgeHorizontal),
-      EDGED_PROP_YGVALUE(vertical, edgeVertical),
-      EDGED_PROP_YGVALUE(all, edgeAll),
-    }), &EdgedPropRef);
+	YGEdge *edge;
+	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&edge));
+	data->setter(data->node, *edge, (float)value);
 
-    
-    dsk_define_class_ref(env,module,"Style",styleNew,((napi_property_descriptor[]){
-      PROP_I32(direction,&direction_fns),
-      PROP_I32(flexDirection,&flex_direction_fns),
-      PROP_I32(justifyContent,&justify_content_fns),
-      PROP_I32(alignContent,&align_content_fns),
-      PROP_I32(alignItems,&align_items_fns),
-      PROP_I32(alignSelf,&align_self_fns),
-      PROP_I32(positionType,&position_type_fns),
-      PROP_I32(flexWrap,&flex_wrap_fns),
-      PROP_I32(overflow,&overflow_fns),
-      PROP_I32(display,&display_fns),
-      PROP_F32(flex,&flex_fns),
-      PROP_F32(flexGrow,&flex_grow_fns),
-      PROP_F32(flexShrink,&flex_shrink_fns),
-
-      PROP_YGVALUE_F32(flexBasis  ,&flex_basis_fns),
-      PROP_YGVALUE_F32(flexBasisPercent,  &flex_basis_percent_fns),
-      PROP_YGVALUE_F32(flexBasisAuto,  &flex_basis_auto_fns),
-      PROP_YGVALUE_F32(width, &width_fns),
-      PROP_YGVALUE_F32(widthPercent, &width_percent_fns),
-      PROP_YGVALUE_F32(height, &height_fns),
-      PROP_YGVALUE_F32(heightPercent, &height_percent_fns),
-      PROP_YGVALUE_F32(minWidth, &min_width_fns),
-      PROP_YGVALUE_F32(minWidthPercent, &min_width_percent_fns),
-      PROP_YGVALUE_F32(minHeight, &min_height_fns),
-      PROP_YGVALUE_F32(minHeightPercent, &min_height_percent_fns),
-      PROP_YGVALUE_F32(maxWidth, &max_width_fns),
-      PROP_YGVALUE_F32(maxWidthPercent, &max_width_percent_fns),
-      PROP_YGVALUE_F32(maxHeight, &max_height_fns),
-      PROP_YGVALUE_F32(maxHeightPercent, &max_height_percent_fns),
-    }), &StyleRef);
-
-    return exports;
+	return NULL;
 }
-
 
 /*
- 
+
+static DSK_JS_FUNC(edgedFloatGetter) {
+	DSK_JS_FUNC_INIT();
+
+
+	struct EdgedPropData* data;
+	napi_status status = napi_unwrap(env, this, (void**)&data);
+	CHECK_STATUS_THROW(status, napi_unwrap);
+
+	YGEdge* edge;
+	status = napi_get_cb_info(env, info, NULL, NULL, NULL,(void**)&edge);
+	CHECK_STATUS_THROW(status, napi_get_cb_info);
+
+	float result = data->getter_f(data->node, *edge);
+	return make_double(env,result);
+}
+*/
+static DSK_JS_FUNC(edgedYgValueGetter) {
+	DSK_JS_FUNC_INIT();
+
+	struct EdgedPropData *data;
+	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&data));
+
+	YGEdge *edge;
+	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&edge));
+
+	if (data->unit == 0xbabe) {
+		float result = data->getter_f(data->node, *edge);
+		napi_value ret;
+		DSK_NAPI_CALL(napi_create_double(env, result, &ret));
+		return ret;
+	}
+
+	YGValue result = data->getter(data->node, *edge);
+
+	if (data->unit == YGUnitAuto) {
+		return make_bool(env, result.unit == YGUnitAuto);
+	}
+
+	if (data->unit == YGUnitPoint) {
+		napi_value ret;
+
+		if (result.unit != YGUnitPoint) {
+			DSK_NAPI_CALL(napi_create_double(env, NAN, &ret));
+			return ret;
+		}
+		DSK_NAPI_CALL(napi_create_double(env, result.value, &ret));
+		return ret;
+	}
+
+	if (data->unit == YGUnitPercent) {
+		napi_value ret;
+		if (result.unit != YGUnitPercent) {
+			DSK_NAPI_CALL(napi_create_double(env, NAN, &ret));
+			return ret;
+		}
+		DSK_NAPI_CALL(napi_create_double(env, result.value, &ret));
+		return ret;
+	}
+
+	DSK_FAILURE("Unknown unit");
+	return NULL;
+}
+
+#define EDGED_PROP_YGVALUE(NAME, EDGE)                                                             \
+	DSK_DEFINE_PROPERTY(libdesktop, EdgedProp, NAME, edgedYgValueGetter, edgedFloatSetter,         \
+						(YGEdge[]){EDGE})
+
+static void finalize_edgedProp(napi_env env, void *finalize_data, void *finalize_hint) {
+	free(finalize_data);
+}
+
+DSK_DEFINE_CLASS(libdesktop, EdgedProp) {
+	DSK_JS_FUNC_INIT();
+
+	struct EdgedPropData *data = malloc(sizeof(struct EdgedPropData));
+
+	DSK_NAPI_CALL(napi_wrap(env, this, data, finalize_edgedProp, NULL, NULL));
+
+	return this;
+}
+
+EDGED_PROP_YGVALUE(left, YGEdgeLeft)
+EDGED_PROP_YGVALUE(top, YGEdgeTop)
+EDGED_PROP_YGVALUE(right, YGEdgeRight)
+EDGED_PROP_YGVALUE(bottom, YGEdgeBottom)
+EDGED_PROP_YGVALUE(start, YGEdgeStart)
+EDGED_PROP_YGVALUE(end, YGEdgeEnd)
+EDGED_PROP_YGVALUE(horizontal, YGEdgeHorizontal)
+EDGED_PROP_YGVALUE(vertical, YGEdgeVertical)
+EDGED_PROP_YGVALUE(all, YGEdgeAll)
+
+/*
+
 
 
 

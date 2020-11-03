@@ -1,64 +1,61 @@
+#include "control.h"
 #include "napi_utils.h"
 #include "widget.h"
 #include <windows.h>
-#include "control.h"
 #include <yoga/Yoga.h>
 
 #define MODULE "container"
-void dsk_widget_reposition(napi_env env, UIHandle container, UIHandle widget, float x, float y, float width, float height) {
-    //printf("SET POS %p TO %d, %d\n", widget,(int)xcoord,(int)ycoord);
-    bool ret = SetWindowPos((HWND)widget,HWND_TOP,(int)x,(int)y,0,0 ,SWP_NOSIZE|SWP_NOZORDER);
+void dsk_widget_reposition(napi_env env, UIHandle container, UIHandle widget, float x, float y,
+						   float width, float height) {
+	// printf("SET POS %p TO %d, %d\n", widget,(int)xcoord,(int)ycoord);
+	bool ret =
+		SetWindowPos((HWND)widget, HWND_TOP, (int)x, (int)y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 	if (!ret) {
-		printf("ERROR\n");
+		// printf("ERROR\n");
 	}
 }
 
 void dsk_platform_container_add_child(UIHandle parent, UIHandle child) {
-    SetParent((HWND)child,(HWND)parent);
+	SetParent((HWND)child, (HWND)parent);
 }
 extern HWND dummy;
 
 LIBUI_FUNCTION(containerNew) {
-    INIT_ARGS(2);
+	INIT_ARGS(2);
 
-    HINSTANCE hInstance = GetModuleHandle(NULL);
-    HWND widget = CreateWindowExW(WS_EX_CONTROLPARENT,
-		L"DSKcontainerClass", L"",
-		WS_CHILD ,
-		CW_USEDEFAULT, CW_USEDEFAULT,
-		// use the raw width and height for now
-		// this will get CW_USEDEFAULT (hopefully) predicting well
-		// even if it doesn't, we're adjusting it later
-		800, 600,
-		dummy, NULL, hInstance, NULL);
+	HINSTANCE hInstance = GetModuleHandle(NULL);
+	HWND widget = CreateWindowExW(WS_EX_CONTROLPARENT, L"DSKcontainerClass", L"", WS_CHILD,
+								  CW_USEDEFAULT, CW_USEDEFAULT,
+								  // use the raw width and height for now
+								  // this will get CW_USEDEFAULT (hopefully) predicting well
+								  // even if it doesn't, we're adjusting it later
+								  800, 600, dummy, NULL, hInstance, NULL);
 
 	// printf("CREATED container\n");
-  
-    dsk_wrap_widget(env, widget, this);
-        
-    dsk_append_all_children(env, widget, argv[1]);
 
-    SetWindowPos(widget, 0, 0, 0, 0, 0, 
-  	SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+	dsk_wrap_widget(env, widget, this);
 
-    return this;
+	dsk_append_all_children(env, widget, argv[1]);
+
+	SetWindowPos(widget, 0, 0, 0, 0, 0,
+				 SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+
+	return this;
 }
 
 napi_ref ContainerRef;
 ATOM initContainer();
 
 napi_value container_init(napi_env env, napi_value exports) {
-    DEFINE_MODULE()
-    initContainer();
-    //napi_property_descriptor empty[0];
-    dsk_define_class_ref(env,module,"Container",containerNew,NULL, &ContainerRef);
+	DEFINE_MODULE()
+	initContainer();
+	// napi_property_descriptor empty[0];
+	dsk_define_class_ref(env, module, "Container", containerNew, NULL, &ContainerRef);
 
-    return exports;
+	return exports;
 }
 
-
-static LRESULT CALLBACK containerWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
+static LRESULT CALLBACK containerWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	/*RECT r;
 	HDC dc;
 	PAINTSTRUCT ps;
@@ -120,33 +117,29 @@ static LRESULT CALLBACK containerWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
 ATOM initContainer() {
 	WNDCLASSW wc;
 
-	ZeroMemory(&wc, sizeof (WNDCLASSW));
+	ZeroMemory(&wc, sizeof(WNDCLASSW));
 	wc.lpszClassName = L"DSKcontainerClass";
 	wc.lpfnWndProc = containerWndProc;
-	//wc.hInstance = hInstance;
-	//wc.hIcon = hDefaultIcon;
-	//wc.hCursor = hDefaultCursor;
-	wc.hbrBackground = (HBRUSH) (COLOR_BTNFACE + 1);
-	wc.cbWndExtra = sizeof (void *);
+	// wc.hInstance = hInstance;
+	// wc.hIcon = hDefaultIcon;
+	// wc.hCursor = hDefaultCursor;
+	wc.hbrBackground = (HBRUSH)(COLOR_BTNFACE + 1);
+	wc.cbWndExtra = sizeof(void *);
 	return RegisterClassW(&wc);
 }
 
-void uninitContainer(void)
-{
-	//if (UnregisterClassW(L"DSKcontainerClass", NULL) == 0)
-		//logLastError(L"error unregistering container window class");
+void uninitContainer(void) {
+	// if (UnregisterClassW(L"DSKcontainerClass", NULL) == 0)
+	// logLastError(L"error unregistering container window class");
 }
 
+void dsk_get_preferred_sizes(UIHandle widget, int *width, int *height) {
+	/*NSView* view = widget;
+	NSSize sz = [view fittingSize];
 
-
-void dsk_get_preferred_sizes(UIHandle widget, int* width, int* height) {
-    /*NSView* view = widget;
-    NSSize sz = [view fittingSize];
-    
-    *width = sz.width;
-    if (*width < 130) {
-        *width = 130;
-    }
-    *height = sz.height;*/
+	*width = sz.width;
+	if (*width < 130) {
+		*width = 130;
+	}
+	*height = sz.height;*/
 }
-

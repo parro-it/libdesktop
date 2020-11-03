@@ -1,4 +1,4 @@
-const {style} = require("../../build/Release/desktop.node")
+const {Style : NativeStyle} = require("../../build/Release/desktop.node")
 
 /**
  * Style contains all the properties 
@@ -224,7 +224,7 @@ export const Style:{
 	 * @param children - ignored
 	 */
 	new(props: any, widget: any): Style
-} = style.Style;
+} = NativeStyle;
   
 
 const ALIGN_AUTO = 0;

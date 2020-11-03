@@ -1,7 +1,7 @@
 import test from 'tape-async'
 const {sum,sum_exactly_two,sum_at_least_two,Decimal} = require("../build/Release/desktop.node")
 
-
+/*
 test('Class definition', (t:any) => {
     t.equal(typeof Decimal, "function")
     t.equal(typeof new Decimal(4,42), "object")
@@ -87,4 +87,44 @@ test('sum_at_least_two requires at least two args', (t:any) => {
     t.throws(()=>sum_at_least_two(40), /Too few arguments. At least 2 required./)
     t.equal(sum_at_least_two(40,1,2),41)
     t.end()
+})
+
+test('napi_throw_error called manually', (t:any) => {
+    try {
+        Decimal.throwError1()
+    } catch (err:any) {
+        t.equal(err.code,"CIAO")
+        t.equal(err.message,"SALVE")
+        t.end()
+        return
+    }
+    t.equal(true,false)
+})
+
+
+test('DSK_FAILURE called ', (t:any) => {
+    try {
+        Decimal.throwError2()
+    } catch (err:any) {
+        t.equal(err.code,undefined)
+        t.equal(err.message,"gege")
+        t.end()
+        return
+    }
+    t.equal(true,false)
+})
+
+*/
+
+
+test('throw pending exception', (t:any) => {
+    try {
+        new Decimal(1,1).throwError3()
+    } catch (err:any) {
+        t.equal(err.code,undefined)
+        t.equal(err.message,"gege")
+        t.end()
+        return
+    }
+    t.equal(true,false)
 })

@@ -29,6 +29,6 @@ test('Invoke event', async (t:any): Promise<void> => {
     ev.listen(() => {
         called++;
     });
-    ev.invoke()
+    ev.invoke(null)
     t.equal(2, called);
 })

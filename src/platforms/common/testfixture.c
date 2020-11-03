@@ -74,6 +74,32 @@ DSK_DEFINE_STATIC_METHOD(libdesktop, Decimal, create) {
 	return NULL;
 }
 
+DSK_DEFINE_STATIC_METHOD(libdesktop, Decimal, throwError1) {
+	DSK_JS_FUNC_INIT();
+	DSK_EXACTLY_NARGS(0);
+	DSK_NAPI_CALL(napi_throw_error(env, "CIAO", "SALVE"));
+	return NULL;
+}
+
+DSK_DEFINE_STATIC_METHOD(libdesktop, Decimal, throwError2) {
+	DSK_JS_FUNC_INIT();
+	DSK_EXACTLY_NARGS(0);
+	DSK_FAILURE("gege");
+	return NULL;
+}
+
+DSK_DEFINE_METHOD(libdesktop, Decimal, throwError3) {
+	DSK_JS_FUNC_INIT();
+	DSK_EXACTLY_NARGS(0);
+	napi_value _;
+	DSK_NAPI_CALL(napi_get_named_property(env, this, "thisthrows", &_));
+
+	DSK_NAPI_CALL(napi_throw_error(env, "", "this is not the right error"));
+	return NULL;
+}
+
+DSK_DEFINE_PROPERTY(libdesktop, Decimal, thisthrows, libdesktop_Decimal_throwError2, NULL, NULL)
+
 DSK_DEFINE_METHOD(libdesktop, Decimal, toString) {
 	DSK_JS_FUNC_INIT();
 	DSK_EXACTLY_NARGS(0);

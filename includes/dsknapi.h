@@ -619,7 +619,7 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 	/* definitions of the module. */                                                               \
 	NAPI_C_CTOR(_dsk_register_class##MODNAME##_##CLASSNAME) {                                      \
 		dsk_modexports_def *exports = &_DSK_MOD_EXPORTS(MODNAME);                                  \
-		printf("REGISTER CLASS %s\n", _DSK_CLASS_DEFS(MODNAME, CLASSNAME).properties[0].utf8name); \
+                                                                                                   \
 		dsk_modexports_def_register_member(exports, &_DSK_CLASS_DEFS(MODNAME, CLASSNAME));         \
 	}                                                                                              \
 	/* begin of implementation of class constructor function. caller is required to */             \
@@ -755,5 +755,11 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
  */
 #define DSK_DEFINE_STATIC_PROPERTY(MODNAME, CLASSNAME, PROPNAME, GETTER, SETTER, DATA)             \
 	_DSK_DEFINE_PROPERTY(MODNAME, CLASSNAME, PROPNAME, GETTER, SETTER, DATA, napi_static)
+
+#define DSK_FAILURE(MSG)                                                                           \
+	{                                                                                              \
+		dsk_error_msg = (MSG);                                                                     \
+		goto dsk_error;                                                                            \
+	}
 
 #endif

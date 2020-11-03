@@ -45,7 +45,6 @@ function trimMember(it: Array<string>){
     return res
 }
 
-
 async function run() {
 
 
@@ -62,9 +61,6 @@ async function run() {
     const jsonDocs = require(jsonFile);
     const exports = jsonDocs.success[0].map((block: any) => 
             Object.assign({},...Object.entries(block).map(trimMember as any)));
-    
-    
-    
 
     const groups = {};
     for (const xp of exports){
@@ -103,7 +99,6 @@ async function run() {
     });
     console.log(JSON.stringify(data,null,4))
 }
- 
 
 run().catch(error => {
     console.error(error)
