@@ -41,7 +41,7 @@ DSK_DEFINE_CLASS(libdesktop, Container) {
 }
 
 DSK_DEFINE_METHOD(libdesktop, Container, append) {
-	INIT_ARGS(1);
+	DSK_JS_FUNC_INIT();
 
 	// GtkWidget *widget;
 	// DSK_UNWRAP_WIDGET();

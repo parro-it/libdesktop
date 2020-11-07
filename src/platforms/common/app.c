@@ -17,7 +17,10 @@ DSK_DEFINE_CLASS(libdesktop, App) {
 DSK_JS_FUNC(dsk_app_getArch);
 
 static DSK_JS_FUNC(getVer) {
-	return make_utf8_string(env, "0.0.1");
+	DSK_JS_FUNC_INIT();
+	napi_value ver;
+	DSK_NAPI_CALL(napi_create_string_utf8(env, "0.0.1", NAPI_AUTO_LENGTH, &ver));
+	return ver;
 }
 
 DSK_DEFINE_PROPERTY(libdesktop, App, arch, dsk_app_getArch, NULL, NULL)

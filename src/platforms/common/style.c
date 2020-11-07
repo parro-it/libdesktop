@@ -31,21 +31,31 @@ DSK_JS_FUNC(getPropYGValue) {
 	YGValue result = getter(node);
 
 	if (strcmp(unit, "AUTO") == 0) {
-		return make_bool(env, result.unit == YGUnitAuto);
+		napi_value ret;
+		DSK_NAPI_CALL(napi_get_boolean(env, result.unit == YGUnitAuto, &ret));
+		return ret;
 	}
 
 	if (strcmp(unit, "POINT") == 0) {
 		if (result.unit != YGUnitPoint) {
-			return make_double(env, NAN);
+			napi_value ret;
+			DSK_NAPI_CALL(napi_create_double(env, NAN, &ret));
+			return ret;
 		}
-		return make_double(env, result.value);
+		napi_value ret;
+		DSK_NAPI_CALL(napi_create_double(env, result.value, &ret));
+		return ret;
 	}
 
 	if (strcmp(unit, "PERCENT") == 0) {
 		if (result.unit != YGUnitPercent) {
-			return make_double(env, NAN);
+			napi_value ret;
+			DSK_NAPI_CALL(napi_create_double(env, NAN, &ret));
+			return ret;
 		}
-		return make_double(env, result.value);
+		napi_value ret;
+		DSK_NAPI_CALL(napi_create_double(env, result.value, &ret));
+		return ret;
 	}
 
 	napi_throw_error(env, "EINVAL", "Unknown unit");
@@ -247,7 +257,9 @@ static DSK_JS_FUNC(edgedYgValueGetter) {
 	YGValue result = data->getter(data->node, *edge);
 
 	if (data->unit == YGUnitAuto) {
-		return make_bool(env, result.unit == YGUnitAuto);
+		napi_value ret;
+		DSK_NAPI_CALL(napi_get_boolean(env, result.unit == YGUnitAuto, &ret));
+		return ret;
 	}
 
 	if (data->unit == YGUnitPoint) {

@@ -1,7 +1,7 @@
 #ifndef DSK_CONTROL_H__
 #define DSK_CONTROL_H__ 1
 
-#include "napi_utils.h"
+//#include "napi_utils.h"
 #include "yoga/Yoga.h"
 
 YGNodeRef dsk_widget_get_node(napi_env env, napi_value widget);

@@ -60,7 +60,7 @@ enum ln_loop_status ln_get_loop_status() {
 	uv_sem_wait(&sem_status);
 	enum ln_loop_status ret = status;
 	uv_sem_post(&sem_status);
-	LIBUI_NODE_DEBUG_F("status ? %d\n", ret);
+	DSK_DEBUG_F("status ? %d\n", ret);
 
 	return ret;
 }
@@ -82,8 +82,8 @@ napi_status ln_init_loop_status() {
 }
 
 napi_status ln_set_loop_status(enum ln_loop_status new_status) {
-	LIBUI_NODE_DEBUG_F("status ! %d\n", status);
-	LIBUI_NODE_DEBUG_F("new_status ! %d\n", new_status);
+	DSK_DEBUG_F("status ! %d\n", status);
+	DSK_DEBUG_F("new_status ! %d\n", new_status);
 
 	switch (status) {
 	case stopped:
@@ -113,7 +113,7 @@ napi_status ln_set_loop_status(enum ln_loop_status new_status) {
 	uv_sem_wait(&sem_status);
 	status = new_status;
 	uv_sem_post(&sem_status);
-	LIBUI_NODE_DEBUG_F("status = %d\n", status);
+	DSK_DEBUG_F("status = %d\n", status);
 
 	return napi_ok;
 }
