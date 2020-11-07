@@ -1,4 +1,4 @@
-#include "__widget.h"
+
 #include "napi_utils.h"
 #import <Cocoa/Cocoa.h>
 
