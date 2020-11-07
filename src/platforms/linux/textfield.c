@@ -1,5 +1,3 @@
-#include "napi_utils.h"
-
 #include <gtk/gtk.h>
 
 #include <assert.h>
@@ -8,8 +6,11 @@
 #include "libdesktop.h"
 #define MODULE "textfield"
 
-LIBUI_FUNCTION(textfieldNew) {
-	INIT_ARGS(2);
+DSK_EXTEND_MODULE(libdesktop);
+
+DSK_DEFINE_CLASS(libdesktop, Textfield) {
+	DSK_JS_FUNC_INIT();
+	DSK_EXACTLY_NARGS(2);
 
 	GtkWidget *widget = gtk_entry_new();
 	dsk_wrap_widget(env, widget, this);
@@ -29,17 +30,7 @@ LIBUI_FUNCTION(textfieldNew) {
 	return this;
 }
 
-napi_value textfield_init(napi_env env, napi_value exports) {
-	DEFINE_MODULE()
-
-	dsk_define_class(env, module, "Textfield", textfieldNew,
-					 ((napi_property_descriptor[]){
-						 DSK_RWPROP_BOOL(visible, "visible"),
-						 // DSK_RWPROP_BOOL(visible,"enabled"),
-						 DSK_RWPROP_S(text, "text"),
-						 DSK_CHILDPROP_I32(left, "x"),
-						 DSK_CHILDPROP_I32(top, "y"),
-					 }));
-
-	return exports;
-}
+DSK_UI_PROP_I32(libdesktop, Textfield, left, "x");
+DSK_UI_PROP_I32(libdesktop, Textfield, top, "y");
+DSK_UI_PROP_S(libdesktop, Textfield, text, "text");
+DSK_UI_PROP_BOOL(libdesktop, Textfield, visible, "visible");

@@ -162,30 +162,30 @@ DSK_JS_FUNC(dsk_setPropI32) {
 	int32_t value;
 	DSK_NAPI_CALL(napi_get_value_int32(env, argv[0], &value));
 
-	void *node;
-	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&node));
+	void *instance;
+	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&instance));
 
-	void **fns;
-	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&fns));
+	void **datas;
+	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&datas));
 
-	dsk_SetterI32 *setter = fns[1];
+	dsk_SetterI32 *setter = datas[1];
 
-	setter(node, value);
+	setter(instance, value, datas);
 	return NULL;
 }
 
 DSK_JS_FUNC(dsk_getPropI32) {
 	DSK_JS_FUNC_INIT()
 
-	void *node;
-	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&node));
+	void *instance;
+	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&instance));
 
-	void **fns;
+	void **datas;
 
-	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&fns));
+	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&datas));
 
-	dsk_GetterI32 *getter = fns[0];
-	int32_t result = getter(node);
+	dsk_GetterI32 *getter = datas[0];
+	int32_t result = getter(instance, datas);
 	napi_value ret;
 	DSK_NAPI_CALL(napi_create_int32(env, result, &ret));
 	return ret;
@@ -197,31 +197,113 @@ DSK_JS_FUNC(dsk_setPropF32) {
 	double value;
 	DSK_NAPI_CALL(napi_get_value_double(env, argv[0], &value));
 
-	void *node;
-	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&node));
+	void *instance;
+	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&instance));
 
-	void **fns;
-	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&fns));
+	void **datas;
+	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&datas));
 
-	dsk_SetterF32 *setter = fns[1];
-	setter(node, (float)value);
+	dsk_SetterF32 *setter = datas[1];
+	setter(instance, (float)value, datas);
 	return NULL;
 }
 
 DSK_JS_FUNC(dsk_getPropF32) {
 	DSK_JS_FUNC_INIT()
 
-	void *node;
-	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&node));
+	void *instance;
+	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&instance));
 
-	void **fns;
-	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&fns));
+	void **datas;
+	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&datas));
 
-	dsk_GetterF32 *getter = fns[0];
-	float result = getter(node);
+	dsk_GetterF32 *getter = datas[0];
+	float result = getter(instance, datas);
 
 	napi_value ret;
 	DSK_NAPI_CALL(napi_create_double(env, result, &ret));
+	return ret;
+}
+
+DSK_JS_FUNC(dsk_setPropBOOL) {
+	DSK_JS_FUNC_INIT()
+	DSK_AT_LEAST_NARGS(1)
+	bool value;
+	DSK_NAPI_CALL(napi_get_value_bool(env, argv[0], &value));
+
+	void *instance;
+	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&instance));
+
+	void **datas;
+	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&datas));
+
+	dsk_SetterBOOL *setter = datas[1];
+	setter(instance, value, datas);
+	return NULL;
+}
+
+DSK_JS_FUNC(dsk_getPropBOOL) {
+	DSK_JS_FUNC_INIT()
+
+	void *instance;
+	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&instance));
+
+	void **datas;
+	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&datas));
+
+	dsk_GetterBOOL *getter = datas[0];
+	bool result = getter(instance, datas);
+
+	napi_value ret;
+	DSK_NAPI_CALL(napi_get_boolean(env, result, &ret));
+	return ret;
+}
+
+DSK_JS_FUNC(dsk_setPropSTR) {
+	DSK_JS_FUNC_INIT();
+	DSK_AT_LEAST_NARGS(1);
+	char *value;
+	size_t value_len;
+	DSK_NAPI_CALL(napi_get_value_string_utf8(env, argv[0], NULL, 0, &value_len));
+	value = malloc(value_len + 1);
+	if (value == NULL) {
+		DSK_FAILURE("out of memory");
+	}
+	DSK_NAPI_CALL(napi_get_value_string_utf8(env, argv[0], value, value_len, &value_len));
+
+	void *instance;
+	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&instance));
+
+	void **datas;
+	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&datas));
+
+	dsk_SetterSTR *setter = datas[1];
+
+	setter(instance, value, datas);
+	free(value);
+	return NULL;
+}
+
+DSK_JS_FUNC(dsk_getPropSTR) {
+	DSK_JS_FUNC_INIT()
+
+	void *instance;
+	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&instance));
+
+	void **datas;
+
+	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&datas));
+
+	dsk_GetterSTR *getter = datas[0];
+	char *result = getter(instance, datas);
+	if (result == NULL) {
+		napi_value ret;
+		DSK_NAPI_CALL(napi_get_null(env, &ret));
+		return ret;
+	}
+
+	napi_value ret;
+	DSK_NAPI_CALL(napi_create_string_utf8(env, result, NAPI_AUTO_LENGTH, &ret));
 	return ret;
 }
 

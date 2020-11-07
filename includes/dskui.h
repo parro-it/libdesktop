@@ -36,6 +36,13 @@ struct dsk_event_args {
 
 void dsk_connect_event(UIHandle widget, char *eventname, struct dsk_event_args *args);
 
+void dsk_ui_set_prop_s(void *instance, char *value, void **datas);
+char *dsk_ui_get_prop_s(void *instance, void **datas);
+void dsk_ui_set_prop_i32(void *instance, int32_t value, void **datas);
+int32_t dsk_ui_get_prop_i32(void *instance, void **datas);
+void dsk_ui_set_prop_bool(void *instance, bool value, void **datas);
+bool dsk_ui_get_prop_bool(void *instance, void **datas);
+/*
 #define DSK_UNWRAP_WIDGET()                                                                        \
 	{                                                                                              \
 		napi_status status = napi_unwrap(env, this, (void **)&widget);                             \
@@ -48,7 +55,20 @@ void dsk_connect_event(UIHandle widget, char *eventname, struct dsk_event_args *
 		napi_status status = napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&propname);    \
 		CHECK_STATUS_THROW(status, napi_get_cb_info);                                              \
 	}
+*/
+#define DSK_UI_PROP_S(MODNAME, CLASSNAME, PROPNAME, UI_NAME)                                       \
+	DSK_DEFINE_PROPERTY(MODNAME, CLASSNAME, PROPNAME, dsk_getPropSTR, dsk_setPropSTR,              \
+						((void *[]){dsk_ui_get_prop_s, dsk_ui_set_prop_s, UI_NAME}))
 
+#define DSK_UI_PROP_I32(MODNAME, CLASSNAME, PROPNAME, UI_NAME)                                     \
+	DSK_DEFINE_PROPERTY(MODNAME, CLASSNAME, PROPNAME, dsk_getPropI32, dsk_setPropI32,              \
+						((void *[]){dsk_ui_get_prop_i32, dsk_ui_set_prop_i32, UI_NAME}))
+
+#define DSK_UI_PROP_BOOL(MODNAME, CLASSNAME, PROPNAME, UI_NAME)                                    \
+	DSK_DEFINE_PROPERTY(MODNAME, CLASSNAME, PROPNAME, dsk_getPropBOOL, dsk_setPropBOOL,            \
+						((void *[]){dsk_ui_get_prop_bool, dsk_ui_set_prop_bool, UI_NAME}))
+
+/*
 #define DSK_RWPROP_S(NAME, UI_NAME)                                                                \
 	(napi_property_descriptor) {                                                                   \
 		.utf8name = #NAME, .getter = widgetGetPropS, .setter = widgetSetPropS, .data = UI_NAME     \
@@ -76,5 +96,5 @@ LIBUI_FUNCTION(widgetSetChildPropI32);
 LIBUI_FUNCTION(widgetGetChildPropI32);
 LIBUI_FUNCTION(widgetSetPropBool);
 LIBUI_FUNCTION(widgetGetPropBool);
-
+*/
 #endif

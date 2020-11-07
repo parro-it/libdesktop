@@ -1,5 +1,5 @@
 import {Control} from './control'
-const {textfield} = require("../../build/Release/desktop.node")
+const {Textfield: NativeTextfield} = require("../../build/Release/desktop.node")
 import {Event} from "./event";
 
 /**
@@ -25,5 +25,5 @@ export const Textfield:{
 	 * @param children - ignored
 	 */
 	new(props: any, children: Array<Control>): Textfield
-} = textfield.Textfield;
+} = NativeTextfield;
   

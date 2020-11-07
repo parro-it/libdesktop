@@ -1,5 +1,5 @@
 import {Control} from './control';
-const {label} = require("../../build/Release/desktop.node");
+const {Label: NativeLabel} = require("../../build/Release/desktop.node");
 import {Event} from "./event";
 
 /**
@@ -25,5 +25,5 @@ export const Label:{
 	 * @param children - ignored
 	 */
 	new(props: any, children: Array<Control>): Label
-} = label.Label;
+} = NativeLabel;
   

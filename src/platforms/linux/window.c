@@ -1,5 +1,4 @@
 #include "libdesktop.h"
-#include "napi_utils.h"
 #include <gtk/gtk.h>
 
 #define MODULE "win"
@@ -9,7 +8,8 @@ static void window_finalize(napi_env env, void *finalize_data, void *finalize_hi
 
 }
 */
-extern napi_ref ContainerRef;
+DSK_EXTEND_MODULE(libdesktop);
+DSK_EXTEND_CLASS(libdesktop, Container);
 
 struct on_resize_args {
 	GtkWidget *container;
@@ -51,8 +51,9 @@ dsk_error:;
 	return false;
 }
 
-LIBUI_FUNCTION(windowNew) {
-	INIT_ARGS(2);
+DSK_DEFINE_CLASS(libdesktop, Window) {
+	DSK_JS_FUNC_INIT();
+	DSK_EXACTLY_NARGS(2);
 
 	// printf("WINDOWS NEW\n");
 	GtkWindow *window = (GtkWindow *)gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -82,7 +83,7 @@ LIBUI_FUNCTION(windowNew) {
 	napi_value props;
 
 	napi_create_object(env, &props);
-	napi_get_reference_value(env, ContainerRef, &Container);
+	napi_get_reference_value(env, libdesktop_Container_ref, &Container);
 
 	bool hasStyle;
 	DSK_NAPI_CALL(napi_has_named_property(env, argv[0], "style", &hasStyle));
@@ -128,16 +129,9 @@ LIBUI_FUNCTION(windowNew) {
 	return this;
 }
 
-napi_value win_init(napi_env env, napi_value exports) {
-	DEFINE_MODULE()
-
-	dsk_define_class(env, module, "Window", windowNew,
-					 ((napi_property_descriptor[]){
-						 DSK_RWPROP_S(title, "title"),
-						 DSK_RWPROP_I32(width, "default-width"),
-						 DSK_RWPROP_I32(height, "default-height"),
-						 DSK_RWPROP_BOOL(visible, "visible"),
-					 }));
-
-	return exports;
-}
+DSK_UI_PROP_I32(libdesktop, Window, width, "default-width");
+DSK_UI_PROP_I32(libdesktop, Window, height, "default-height");
+DSK_UI_PROP_I32(libdesktop, Window, top, "y");
+DSK_UI_PROP_I32(libdesktop, Window, left, "x");
+DSK_UI_PROP_S(libdesktop, Window, title, "title");
+DSK_UI_PROP_BOOL(libdesktop, Window, visible, "visible");

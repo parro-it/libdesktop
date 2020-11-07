@@ -1,4 +1,4 @@
-#include "event-loop.h"
+#include "libdesktop-host.h"
 #include "libdesktop.h"
 #include <assert.h>
 #include <stdbool.h>

@@ -1,6 +1,6 @@
 // 6 april 2015
 #include <windows.h>
-//#include "event-loop.h"
+//#include "libdesktop-host.h"
 #include <stdio.h>
 //#include <uv.h>
 
@@ -18,7 +18,6 @@
 
 void uiQueueMain(void (*f)(void *data), void *data);
 ATOM registerWindowClass(HICON hDefaultIcon, HCURSOR hDefaultCursor);
-
 
 const char *uiInit() {
 	if (registerWindowClass(NULL, NULL) == 0) {

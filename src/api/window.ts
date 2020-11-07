@@ -1,6 +1,6 @@
 import { Control } from "./control";
 
-const {win} = require("../../build/Release/desktop.node")
+const {Window: NativeWindow} = require("../../build/Release/desktop.node")
 
 /**
  * The Window class is responsible for showing and managing native windows.
@@ -84,4 +84,4 @@ export const Window: {
 	 * @param children - children widgets of the window
 	 */
 	new(props: any, children: Array<Control>): Window
-} = win.Window;
+} = NativeWindow;

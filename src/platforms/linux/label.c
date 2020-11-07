@@ -1,15 +1,13 @@
-#include "napi_utils.h"
-
-#include <gtk/gtk.h>
-
+#include "libdesktop.h"
 #include <assert.h>
+#include <gtk/gtk.h>
 #include <yoga/Yoga.h>
 
-#include "libdesktop.h"
-#define MODULE "label"
+DSK_EXTEND_MODULE(libdesktop);
 
-LIBUI_FUNCTION(labelNew) {
-	INIT_ARGS(2);
+DSK_DEFINE_CLASS(libdesktop, Label) {
+	DSK_JS_FUNC_INIT();
+	DSK_EXACTLY_NARGS(2);
 
 	GtkWidget *widget = gtk_label_new("");
 
@@ -34,22 +32,7 @@ LIBUI_FUNCTION(labelNew) {
 	return this;
 }
 
-// napi_value dsk_define_class(napi_env env, const char* name, napi_callback constructor,const
-// napi_property_descriptor properties[], size_t propertiesCount,napi_ref* ref);
-
-napi_value label_init(napi_env env, napi_value exports) {
-	DEFINE_MODULE()
-
-	dsk_define_class(env, module, "Label", labelNew,
-					 ((napi_property_descriptor[]){
-						 DSK_RWPROP_BOOL(visible, "visible"),
-						 // DSK_RWPROP_BOOL(visible,"enabled"),
-						 DSK_RWPROP_S(text, "label"),
-						 (napi_property_descriptor){
-							 .utf8name = "setLabel", .method = widgetSetPropS, .data = "label"},
-						 DSK_CHILDPROP_I32(left, "x"),
-						 DSK_CHILDPROP_I32(top, "y"),
-					 }));
-
-	return exports;
-}
+DSK_UI_PROP_I32(libdesktop, Label, left, "x");
+DSK_UI_PROP_I32(libdesktop, Label, top, "y");
+DSK_UI_PROP_S(libdesktop, Label, text, "label");
+DSK_UI_PROP_BOOL(libdesktop, Label, visible, "visible");

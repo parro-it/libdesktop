@@ -3,16 +3,7 @@
 
 #include <yoga/Yoga.h>
 
-#define MODULE "container"
-
-LIBUI_FUNCTION(containerAppend) {
-	INIT_ARGS(1);
-
-	GtkWidget *widget;
-	DSK_UNWRAP_WIDGET();
-
-	return this;
-}
+DSK_EXTEND_MODULE(libdesktop);
 
 void dsk_widget_reposition(napi_env env, UIHandle container, UIHandle widget, float xcoord,
 						   float ycoord, float width, float height) {
@@ -31,8 +22,9 @@ void dsk_platform_container_add_child(UIHandle parent, UIHandle child) {
 	gtk_container_add(GTK_CONTAINER(parent), GTK_WIDGET(child));
 }
 
-LIBUI_FUNCTION(containerNew) {
-	INIT_ARGS(2);
+DSK_DEFINE_CLASS(libdesktop, Container) {
+	DSK_JS_FUNC_INIT();
+	DSK_EXACTLY_NARGS(2);
 
 	GtkWidget *widget = gtk_fixed_new();
 	dsk_wrap_widget(env, widget, this);
@@ -48,6 +40,15 @@ LIBUI_FUNCTION(containerNew) {
 	return this;
 }
 
+DSK_DEFINE_METHOD(libdesktop, Container, append) {
+	INIT_ARGS(1);
+
+	// GtkWidget *widget;
+	// DSK_UNWRAP_WIDGET();
+
+	return this;
+}
+/*
 napi_ref ContainerRef;
 
 napi_value container_init(napi_env env, napi_value exports) {
@@ -62,3 +63,4 @@ napi_value container_init(napi_env env, napi_value exports) {
 
 	return exports;
 }
+*/

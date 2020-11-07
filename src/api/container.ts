@@ -1,5 +1,5 @@
 import {Control} from './control'
-const {container} = require("../../build/Release/desktop.node")
+const {Container: NativeContainer} = require("../../build/Release/desktop.node")
 
 export interface Container extends Control {
 	
@@ -24,5 +24,5 @@ export const Container:{
 	 * @param children - children to add to this container.
 	 */
 	new(props: any, children: Array<Control>): Container
-} = container.Container;
+} = NativeContainer;
   

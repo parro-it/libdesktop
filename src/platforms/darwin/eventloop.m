@@ -1,15 +1,14 @@
-#import <dlfcn.h>		// see future.m
+#include "libdesktop-host.h"
 #import <Cocoa/Cocoa.h>
 #import <CoreFoundation/CoreFoundation.h>
+#import <dlfcn.h> // see future.m
 #include <sys/event.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <uv.h>
-#include "event-loop.h"
 
 static BOOL (^isRunning)(void);
 static BOOL stepsIsRunning;
-
 
 /*
 static BOOL canQuit = NO;
@@ -27,10 +26,13 @@ static uiprivAppDelegate *delegate;
 	[super sendEvent:e];
 }
 
-// NSColorPanel always sends changeColor: to the first responder regardless of whether there's a target set on it
+// NSColorPanel always sends changeColor: to the first responder regardless of whether there's a
+target set on it
 // we can override it here (see colorbutton.m)
-// thanks to mikeash in irc.freenode.net/#macdev for informing me this is how the first responder chain is initiated
-// it turns out NSFontManager also sends changeFont: through this; let's inhibit that here too (see fontbutton.m)
+// thanks to mikeash in irc.freenode.net/#macdev for informing me this is how the first responder
+chain is initiated
+// it turns out NSFontManager also sends changeFont: through this; let's inhibit that here too (see
+fontbutton.m)
 - (BOOL)sendAction:(SEL)sel to:(id)to from:(id)from
 {
 	if (uiprivColorButtonInhibitSendAction(sel, from, to))
@@ -40,7 +42,8 @@ static uiprivAppDelegate *delegate;
 	return [super sendAction:sel to:to from:from];
 }
 
-// likewise, NSFontManager also sends NSFontPanelValidation messages to the first responder, however it does NOT use sendAction:from:to:!
+// likewise, NSFontManager also sends NSFontPanelValidation messages to the first responder, however
+it does NOT use sendAction:from:to:!
 // instead, it uses this one (thanks swillits in irc.freenode.net/#macdev)
 // we also need to override it (see fontbutton.m)
 - (id)targetForAction:(SEL)sel to:(id)to from:(id)from
@@ -65,7 +68,8 @@ static uiprivAppDelegate *delegate;
 	NSEvent *e;
 
 	if (!canQuit)
-		uiprivImplBug("call to [NSApp terminate:] when not ready to terminate; definitely contact andlabs");
+		uiprivImplBug("call to [NSApp terminate:] when not ready to terminate; definitely contact
+andlabs");
 
 	[[NSApplication sharedApplication] stop:[NSApplication sharedApplication]];
 	// stop: won't register until another event has passed; let's synthesize one
@@ -78,7 +82,10 @@ static uiprivAppDelegate *delegate;
 		subtype:0
 		data1:0
 		data2:0];
-	[[NSApplication sharedApplication] postEvent:e atStart:NO];		// let pending events take priority (this is what PostQuitMessage() on Windows does so we have to do it here too for parity; thanks to mikeash in irc.freenode.net/#macdev for confirming that this parameter should indeed be NO)
+	[[NSApplication sharedApplication] postEvent:e atStart:NO];		// let pending events take
+priority (this is what PostQuitMessage() on Windows does so we have to do it here too for parity;
+thanks to mikeash in irc.freenode.net/#macdev for confirming that this parameter should indeed be
+NO)
 
 	// and in case uiMainSteps() was called
 	stepsIsRunning = NO;
@@ -145,11 +152,13 @@ void uiMain(void)
 
 
 
-// thanks to mikeash in irc.freenode.net/#macdev for suggesting the use of Grand Central Dispatch for this
+// thanks to mikeash in irc.freenode.net/#macdev for suggesting the use of Grand Central Dispatch
+for this
 // LONGTERM will dispatch_get_main_queue() break after _CFRunLoopSetCurrent()?
 void uiQueueMain(void (*f)(void *data), void *data)
 {
-	// dispatch_get_main_queue() is a serial queue so it will not execute multiple uiQueueMain() functions concurrently
+	// dispatch_get_main_queue() is a serial queue so it will not execute multiple uiQueueMain()
+functions concurrently
 	// the signature of f matches dispatch_function_t
 	dispatch_async_f(dispatch_get_main_queue(), data, f);
 }
@@ -170,13 +179,11 @@ typedef struct uiprivNextEventArgs {
 	BOOL dequeue;
 } uiprivNextEventArgs;
 
-
 // see also:
 // - http://www.cocoawithlove.com/2009/01/demystifying-nsapplication-by.html
 // - https://github.com/gnustep/gui/blob/master/Source/NSApplication.m
-int uiprivMainStep(uiprivNextEventArgs *nea, BOOL (^interceptEvent)(NSEvent *e))
-{
-	//NSDate *expire;
+int uiprivMainStep(uiprivNextEventArgs *nea, BOOL (^interceptEvent)(NSEvent *e)) {
+	// NSDate *expire;
 	NSEvent *e;
 	NSEventType type;
 
@@ -185,9 +192,9 @@ int uiprivMainStep(uiprivNextEventArgs *nea, BOOL (^interceptEvent)(NSEvent *e))
 			return 0;
 
 		e = [[NSApplication sharedApplication] nextEventMatchingMask:nea->mask
-			untilDate:nea->duration
-			inMode:nea->mode
-			dequeue:nea->dequeue];
+														   untilDate:nea->duration
+															  inMode:nea->mode
+															 dequeue:nea->dequeue];
 		if (e == nil)
 			return 1;
 
@@ -205,15 +212,12 @@ int uiprivMainStep(uiprivNextEventArgs *nea, BOOL (^interceptEvent)(NSEvent *e))
 	}
 }
 
-
-void uiQuit(void)
-{
-	//canQuit = YES;
+void uiQuit(void) {
+	// canQuit = YES;
 	[[NSApplication sharedApplication] terminate:[NSApplication sharedApplication]];
 }
 
-int uiMainStep(int wait)
-{
+int uiMainStep(int wait) {
 	uiprivNextEventArgs nea;
 
 	nea.mask = NSEventMaskAny;
@@ -221,35 +225,35 @@ int uiMainStep(int wait)
 	// ProPuke did this in his original PR requesting this
 	// I'm not sure if this will work, but I assume it will...
 	nea.duration = [NSDate distantPast];
-	if (wait)		// but this is normal so it will work
+	if (wait) // but this is normal so it will work
 		nea.duration = [NSDate distantFuture];
 
 	nea.mode = NSDefaultRunLoopMode;
 	nea.dequeue = YES;
 
 	return uiprivMainStep(&nea, ^(NSEvent *e) {
-		return NO;
+	  return NO;
 	});
 }
 
-void uiMainSteps(void)
-{
+void uiMainSteps(void) {
 	// SDL does this and it seems to be necessary for the menubar to work (see #182)
 	[[NSApplication sharedApplication] finishLaunching];
 	isRunning = ^{
-		return stepsIsRunning;
+	  return stepsIsRunning;
 	};
 	stepsIsRunning = YES;
 }
 
-const char *uiInit()
-{
+const char *uiInit() {
 	/*@autoreleasepool {
 		app = [[uiprivApplicationClass sharedApplication] retain];
-		// don't check for a NO return; something (launch services?) causes running from application bundles to always return NO when asking to change activation policy, even if the change is to the same activation policy!
+		// don't check for a NO return; something (launch services?) causes running from application
+	bundles to always return NO when asking to change activation policy, even if the change is to
+	the same activation policy!
 		// see https://github.com/andlabs/ui/issues/6
-		[[NSApplication sharedApplication] setActivationPolicy:NSApplicationActivationPolicyRegular];
-		delegate = [uiprivAppDelegate new];
+		[[NSApplication sharedApplication]
+	setActivationPolicy:NSApplicationActivationPolicyRegular]; delegate = [uiprivAppDelegate new];
 		[[NSApplication sharedApplication] setDelegate:delegate];
 
 		uiprivInitAlloc();
@@ -258,7 +262,8 @@ const char *uiInit()
 
 		// always do this so we always have an application menu
 		uiprivAppDelegate().menuManager = [[uiprivMenuManager new] autorelease];
-		[[NSApplication sharedApplication] setMainMenu:[uiprivAppDelegate().menuManager makeMenubar]];
+		[[NSApplication sharedApplication] setMainMenu:[uiprivAppDelegate().menuManager
+	makeMenubar]];
 
 		uiprivSetupFontPanel();
 
@@ -269,7 +274,6 @@ const char *uiInit()
 */
 	return NULL;
 }
-
 
 int uiEventsPending() {
 
@@ -300,18 +304,18 @@ int waitForNodeEvents(uv_loop_t *loop, int timeout) {
 	return kevent(nodeBackendFd, NULL, 0, &event, 1, tsp);
 }
 
-
 int uiLoopWakeup() {
-	[[NSApplication sharedApplication] postEvent:[NSEvent otherEventWithType:NSEventTypeApplicationDefined
-										location:NSZeroPoint
-								   modifierFlags:0
-									   timestamp:0.0
-									windowNumber:0
-										 context:nil
-										 subtype:0
-										   data1:0
-										   data2:0]
-			 atStart:NO];
+	[[NSApplication sharedApplication]
+		postEvent:[NSEvent otherEventWithType:NSEventTypeApplicationDefined
+									 location:NSZeroPoint
+								modifierFlags:0
+									timestamp:0.0
+								 windowNumber:0
+									  context:nil
+									  subtype:0
+										data1:0
+										data2:0]
+		  atStart:NO];
 
 	return 0;
 }

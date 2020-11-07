@@ -1,4 +1,4 @@
-#include "event-loop.h"
+#include "libdesktop-host.h"
 #include "libdesktop.h"
 
 static enum ln_loop_status status = stopped;

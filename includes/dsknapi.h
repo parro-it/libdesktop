@@ -769,16 +769,30 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 napi_value dsk_new_instance(napi_env env, napi_ref class, size_t arg_c, napi_value *arg_v);
 void *dsk_unwrap(napi_env env, napi_value this);
 
-typedef void dsk_SetterI32(void *instance, const int32_t value);
-typedef int32_t dsk_GetterI32(void *instance);
+typedef void dsk_SetterI32(void *instance, const int32_t value, void **datas);
+typedef int32_t dsk_GetterI32(void *instance, void **datas);
 
-typedef void dsk_SetterF32(void *instance, const float value);
-typedef float dsk_GetterF32(void *instance);
+typedef void dsk_SetterF32(void *instance, const float value, void **datas);
+typedef float dsk_GetterF32(void *instance, void **datas);
+
+typedef void dsk_SetterSTR(void *instance, char *value, void **datas);
+typedef char *dsk_GetterSTR(void *instance, void **datas);
+
+typedef void dsk_SetterBOOL(void *instance, bool value, void **datas);
+typedef bool dsk_GetterBOOL(void *instance, void **datas);
 
 DSK_JS_FUNC(dsk_setPropI32);
 DSK_JS_FUNC(dsk_getPropI32);
+DSK_JS_FUNC(dsk_setPropBOOL);
+DSK_JS_FUNC(dsk_getPropBOOL);
 DSK_JS_FUNC(dsk_setPropF32);
 DSK_JS_FUNC(dsk_getPropF32);
+DSK_JS_FUNC(dsk_setPropSTR);
+DSK_JS_FUNC(dsk_getPropSTR);
+
+#define DSK_PROP_STR(NAME, NATIVE_GETTER, NATIVE_SETTER)                                           \
+	DSK_DEFINE_PROPERTY(libdesktop, Style, NAME, dsk_getPropSTR, dsk_setPropSTR,                   \
+						((void *[]){NATIVE_GETTER, NATIVE_SETTER}))
 
 #define DSK_PROP_I32(NAME, NATIVE_GETTER, NATIVE_SETTER)                                           \
 	DSK_DEFINE_PROPERTY(libdesktop, Style, NAME, dsk_getPropI32, dsk_setPropI32,                   \
@@ -786,6 +800,10 @@ DSK_JS_FUNC(dsk_getPropF32);
 
 #define DSK_PROP_F32(NAME, NATIVE_GETTER, NATIVE_SETTER)                                           \
 	DSK_DEFINE_PROPERTY(libdesktop, Style, NAME, dsk_getPropF32, dsk_setPropF32,                   \
+						((void *[]){NATIVE_GETTER, NATIVE_SETTER}))
+
+#define DSK_PROP_BOOL(NAME, NATIVE_GETTER, NATIVE_SETTER)                                          \
+	DSK_DEFINE_PROPERTY(libdesktop, Style, NAME, dsk_getPropBOOL, dsk_setPropBOOL,                 \
 						((void *[]){NATIVE_GETTER, NATIVE_SETTER}))
 
 bool dsk_call_cb(napi_env env, napi_ref cb_ref);
