@@ -1,9 +1,7 @@
 
 #include "libdesktop.h"
-#include "napi_utils.h"
 #import "yoga/Yoga.h"
 #import <Cocoa/Cocoa.h>
-#define MODULE "textfield"
 
 @interface DskTextField : NSTextField
 @property(nonatomic, readwrite) napi_ref wrapper;
@@ -23,8 +21,12 @@
 
 @end
 
-LIBUI_FUNCTION(textfieldNew) {
-	INIT_ARGS(2);
+
+DSK_EXTEND_MODULE(libdesktop);
+
+DSK_DEFINE_CLASS(libdesktop, Textfield) {
+	DSK_JS_FUNC_INIT();
+	DSK_EXACTLY_NARGS(2);
 
 	DskTextField *widget;
 	widget = [[DskTextField alloc] init];
@@ -39,7 +41,7 @@ LIBUI_FUNCTION(textfieldNew) {
 	}
 	return this;
 }
-
+/*
 static LIBUI_FUNCTION(setStringValue) {
 	INIT_ARGS(1);
 	ARG_STRING(val, 0)
@@ -75,4 +77,4 @@ napi_value textfield_init(napi_env env, napi_value exports) {
 						 // DSK_CHILDPROP_I32(top,"y")
 					 }));
 	return exports;
-}
+}*/

@@ -1,8 +1,5 @@
-#include "napi_utils.h"
-#define MODULE "app"
+#include "libdesktop.h"
 
-LIBUI_FUNCTION(appArch) {
-    //// printf("appArch\n");
-    
-    return make_utf8_string(env,"darwin");
+DSK_JS_FUNC(dsk_app_getArch) {
+	return make_utf8_string(env, "darwin");
 }

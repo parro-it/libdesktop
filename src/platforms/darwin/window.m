@@ -1,13 +1,11 @@
 
 #include "libdesktop.h"
-#include "napi_utils.h"
 #import <Cocoa/Cocoa.h>
 
-#define MODULE "win"
+DSK_EXTEND_MODULE(libdesktop);
+DSK_EXTEND_CLASS(libdesktop, Container);
 
-static napi_ref DSK_WindowRef;
 
-extern napi_ref ContainerRef;
 
 @interface DskWindow : NSWindow
 @property(nonatomic, readwrite) napi_ref wrapper;
@@ -20,8 +18,12 @@ extern napi_ref ContainerRef;
 }
 @end
 
-LIBUI_FUNCTION(windowNew) {
-	INIT_ARGS(2);
+
+DSK_DEFINE_CLASS(libdesktop, Window) {
+	printf("libdesktop, Window\n");
+	DSK_JS_FUNC_INIT();
+	DSK_EXACTLY_NARGS(2);
+
 
 	DskWindow *win = [[DskWindow alloc]
 		initWithContentRect:NSMakeRect(0, 0, (CGFloat)10, (CGFloat)10)
@@ -41,7 +43,7 @@ LIBUI_FUNCTION(windowNew) {
 	napi_value props;
 
 	napi_create_object(env, &props);
-	napi_get_reference_value(env, ContainerRef, &Container);
+	napi_get_reference_value(env, libdesktop_Container_ref , &Container);
 
 	bool hasStyle;
 	DSK_NAPI_CALL(napi_has_named_property(env, argv[0], "style", &hasStyle));
@@ -67,12 +69,12 @@ LIBUI_FUNCTION(windowNew) {
 
 	float w = YGNodeLayoutGetWidth(root);
 	float h = YGNodeLayoutGetHeight(root);
-	float pd = YGNodeLayoutGetPadding(root, YGEdgeRight);
+	//float pd = YGNodeLayoutGetPadding(root, YGEdgeRight);
 
 	int uw = win.frame.size.width;
 	int uh = win.frame.size.height;
 
-	// printf("window: %dx%d layout:%.0fx%.0f\n",uw,uh, w,h);
+	 printf("window: %dx%d layout:%.0fx%.0f\n",uw,uh, w,h);
 
 	[win setContentSize:NSMakeSize(w, h)];
 	[win center];
@@ -85,56 +87,5 @@ LIBUI_FUNCTION(windowNew) {
 	return this;
 }
 
-LIBUI_FUNCTION(setTitle) {
-	INIT_ARGS(1);
-	ARG_STRING(val, 0)
-
-	NSWindow *widget;
-	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&widget));
-
-	widget.title = [NSString stringWithUTF8String:val];
-
-	return NULL;
-}
-
-LIBUI_FUNCTION(getTitle) {
-	INIT_EMPTY_ARGS();
-	NSWindow *widget;
-	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&widget));
-
-	NSString *str = widget.title;
-	napi_value res;
-	DSK_NAPI_CALL(napi_create_string_utf8(env, [str cStringUsingEncoding:NSUTF8StringEncoding],
-										  NAPI_AUTO_LENGTH, &res));
-	return res;
-}
-
-#include <ApplicationServices/ApplicationServices.h>
-
-napi_value win_init(napi_env env, napi_value exports) {
-	DEFINE_MODULE()
-	ProcessSerialNumber psn = {0, kCurrentProcess};
-	TransformProcessType(&psn, kProcessTransformToForegroundApplication);
-
-	const napi_property_descriptor properties[] = {
-		{.utf8name = "title", .getter = getTitle, .setter = setTitle},
-		/*DSK_RWPROP_I32(width,"default-width"),
-		DSK_RWPROP_I32(height,"default-height"),
-		DSK_RWPROP_BOOL(visible,"visible"),*/
-	};
-
-	napi_status status;
-	napi_value Window;
-
-	status =
-		napi_define_class(env, "Window", NAPI_AUTO_LENGTH, windowNew, NULL, 1, properties, &Window);
-	CHECK_STATUS_THROW(status, napi_define_class);
-
-	status = napi_create_reference(env, Window, 1, &DSK_WindowRef);
-	CHECK_STATUS_THROW(status, napi_create_reference);
-
-	status = napi_set_named_property(env, module, "Window", Window);
-	CHECK_STATUS_THROW(status, napi_set_named_property);
-
-	return exports;
-}
+DSK_UI_PROP_S(libdesktop, Window, title, "title");
+DSK_UI_PROP_BOOL(libdesktop, Window, visible, "visible");

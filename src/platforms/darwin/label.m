@@ -1,6 +1,5 @@
 
 #include "libdesktop.h"
-#include "napi_utils.h"
 #import "yoga/Yoga.h"
 #import <Cocoa/Cocoa.h>
 #define MODULE "label"
@@ -13,8 +12,13 @@
 @implementation DskLabel
 @end
 
-LIBUI_FUNCTION(labelNew) {
-	INIT_ARGS(2);
+
+DSK_EXTEND_MODULE(libdesktop);
+
+DSK_DEFINE_CLASS(libdesktop, Label) {
+	DSK_JS_FUNC_INIT();
+	DSK_EXACTLY_NARGS(2);
+
 
 	DskLabel *widget;
 	widget = [[DskLabel alloc] init];
@@ -35,40 +39,9 @@ LIBUI_FUNCTION(labelNew) {
 	return this;
 }
 
-static LIBUI_FUNCTION(setStringValue) {
-	INIT_ARGS(1);
-	ARG_STRING(val, 0)
 
-	NSTextField *widget;
-	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&widget));
 
-	[widget setStringValue:[NSString stringWithUTF8String:val]];
-
-	return NULL;
-}
-
-static LIBUI_FUNCTION(getStringValue) {
-	INIT_EMPTY_ARGS();
-	NSTextField *widget;
-	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&widget));
-
-	NSString *str = [widget stringValue];
-	napi_value res;
-	DSK_NAPI_CALL(napi_create_string_utf8(env, [str cStringUsingEncoding:NSUTF8StringEncoding],
-										  NAPI_AUTO_LENGTH, &res));
-	return res;
-}
-
-napi_value label_init(napi_env env, napi_value exports) {
-	DEFINE_MODULE()
-
-	dsk_define_class(env, module, "Label", labelNew,
-					 ((napi_property_descriptor[]){
-						 {.utf8name = "text", .getter = getStringValue, .setter = setStringValue},
-						 // DSK_RWPROP_S(text,"stringValue"),
-						 // DSK_RWPROP_BOOL(visible,"enabled"),
-						 // DSK_CHILDPROP_I32(left,"x"),
-						 // DSK_CHILDPROP_I32(top,"y")
-					 }));
-	return exports;
-}
+DSK_UI_PROP_I32(libdesktop, Label, left, "x");
+DSK_UI_PROP_I32(libdesktop, Label, top, "y");
+DSK_UI_PROP_S(libdesktop, Label, text, "stringValue");
+DSK_UI_PROP_BOOL(libdesktop, Label, enabled, "enabled");

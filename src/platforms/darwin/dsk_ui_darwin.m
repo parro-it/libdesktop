@@ -1,5 +1,8 @@
-#include "libdesktop-host.h"
+#include "yoga.h"
 #import <Cocoa/Cocoa.h>
+
+#include "libdesktop.h"
+#include "libdesktop-host.h"
 #import <CoreFoundation/CoreFoundation.h>
 #import <dlfcn.h> // see future.m
 #include <sys/event.h>
@@ -9,6 +12,14 @@
 
 static BOOL (^isRunning)(void);
 static BOOL stepsIsRunning;
+
+	
+NAPI_C_CTOR(_dsk_init_proc) {                                      
+	ProcessSerialNumber psn = {0, kCurrentProcess};
+	TransformProcessType(&psn, kProcessTransformToForegroundApplication);
+	printf("Process initialized\n");
+}   
+
 
 /*
 static BOOL canQuit = NO;
@@ -270,8 +281,10 @@ const char *uiInit() {
 		uiprivInitUnderlineColors();
 	}
 
+
 	globalPool = [[NSAutoreleasePool alloc] init];
 */
+	
 	return NULL;
 }
 
@@ -319,3 +332,136 @@ int uiLoopWakeup() {
 
 	return 0;
 }
+
+@interface DskControl : NSView
+@property napi_ref wrapper;
+@property YGNodeRef yoganode;
+@end
+
+YGNodeRef dsk_widget_get_node(napi_env env, napi_value widget) {
+	// printf("unwrap %p\n", widget);
+	DskControl *widgetG;
+	napi_status status = napi_unwrap(env, widget, (void **)&widgetG);
+	if (status != napi_ok) {
+		// printf("non ok \n");
+		const napi_extended_error_info *result;
+		napi_get_last_error_info(env, &result);
+		// printf("napi_unwrap failed with code %d: %s\n", result->engine_error_code,
+		// result->error_message);
+		return NULL;
+	}
+	// printf("widgetG %p\n",widgetG);
+
+	return widgetG.yoganode;
+}
+
+void dsk_widget_set_node(napi_env env, napi_value widget, YGNodeRef node) {
+	DskControl *widgetG;
+	napi_status status = napi_unwrap(env, widget, (void **)&widgetG);
+	if (status != napi_ok) {
+		return;
+	}
+
+	// printf("node %p\n",node);
+
+	widgetG.yoganode = node;
+
+	napi_ref ref;
+	napi_create_reference(env, widget, 1, &ref);
+
+	// printf("ref %p\n",ref);
+	widgetG.wrapper = ref;
+}
+
+napi_value dsk_widget_wrapper(napi_env env, UIHandle widget) {
+	napi_ref ref = ((DskControl *)widget).wrapper;
+	if (ref == NULL) {
+		return NULL;
+	}
+	// printf("ref is %p\n",ref);
+	napi_value node;
+	napi_get_reference_value(env, ref, &node);
+	return node;
+}
+
+void dsk_get_preferred_sizes(UIHandle widget, int *width, int *height) {
+	NSView *view = widget;
+	NSSize sz = [view fittingSize];
+
+	*width = sz.width;
+	if (*width < 130) {
+		*width = 130;
+	}
+	*height = sz.height;
+}
+
+void dsk_connect_event(UIHandle widget, char *eventname, struct dsk_event_args *args) {}
+
+
+void dsk_ui_set_prop_s(void *instance, char *value, void **datas) {
+	NSObject *widget = instance;
+	char *propname = datas[2];
+	[widget setValue:[NSString stringWithUTF8String:value]
+			  forKey:[NSString stringWithUTF8String:propname]];
+}
+
+char *dsk_ui_get_prop_s(void *instance, void **datas) {
+	NSObject *widget = instance;
+	char *propname = datas[2];
+	NSString *ns_result = [widget valueForKey:[NSString stringWithUTF8String:propname]];
+	char *result = (char*)[ns_result UTF8String];
+	return result;
+}
+
+void dsk_ui_set_prop_i32(void *instance, int32_t value, void **datas) {
+	/*NSObject *widget = instance;
+	char *propname = datas[2];
+
+	if (strcmp(propname, "left") == 0 || strcmp(propname, "top")) {
+		GtkContainer *container = GTK_CONTAINER(gtk_widget_get_parent(widget));
+		if (container == NULL) {
+			printf("ERROR: THIS WIDGET HAS NO CONTAINER\n");
+			return;
+		}
+		GValue val = G_VALUE_INIT;
+		g_value_init(&val, G_TYPE_INT);
+		g_value_set_int(&val, value);
+		gtk_container_child_set_property(container, widget, propname, &val);
+		return;
+	}
+
+	g_object_set(widget, propname, value, NULL);*/
+}
+
+int32_t dsk_ui_get_prop_i32(void *instance, void **datas) {
+	/*NSObject *widget = instance;
+	char *propname = datas[2];
+
+	if (strcmp(propname, "left") == 0 || strcmp(propname, "top")) {
+		GtkContainer *container = GTK_CONTAINER(gtk_widget_get_parent(widget));
+		GValue value;
+		gtk_container_child_get_property(container, widget, propname, &value);
+		return g_value_get_int(&value);
+	}
+
+	int32_t result;
+	g_object_get(widget, propname, &result, NULL);
+
+	return result;*/
+	return 0;
+}
+
+void dsk_ui_set_prop_bool(void *instance, bool value, void **datas) {
+	/*NSObject *widget = instance;
+	char *propname = datas[2];
+	g_object_set(widget, propname, value, NULL);*/
+}
+bool dsk_ui_get_prop_bool(void *instance, void **datas) {
+	/*NSObject *widget = instance;
+	char *propname = datas[2];
+	bool result;
+	g_object_get(widget, propname, &result, NULL);
+	return result;*/
+	return true;
+}
+
