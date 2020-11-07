@@ -224,3 +224,46 @@ DSK_JS_FUNC(dsk_getPropF32) {
 	DSK_NAPI_CALL(napi_create_double(env, result, &ret));
 	return ret;
 }
+
+bool dsk_call_cb(napi_env env, napi_ref cb_ref) {
+	DSK_ONERROR_THROW_RET(true);
+
+	napi_value null;
+
+	napi_handle_scope handle_scope;
+	DSK_NAPI_CALL(napi_open_handle_scope(env, &handle_scope));
+
+	DSK_NAPI_CALL(napi_get_null(env, &null));
+
+	napi_value async_resource_name;
+	DSK_NAPI_CALL(napi_create_string_utf8(env, "promise", NAPI_AUTO_LENGTH, &async_resource_name));
+
+	napi_async_context async_context;
+	DSK_NAPI_CALL(napi_async_init(env, NULL, async_resource_name, &async_context));
+
+	napi_value resource_object;
+	DSK_NAPI_CALL(napi_create_object(env, &resource_object));
+
+	napi_value cb;
+	DSK_NAPI_CALL(napi_get_reference_value(env, cb_ref, &cb));
+
+	napi_value result;
+	napi_status status =
+		napi_make_callback(env, async_context, resource_object, cb, 0, NULL, &result);
+	if (status == napi_pending_exception) {
+		napi_value last_exception;
+		napi_get_and_clear_last_exception(env, &last_exception);
+		napi_fatal_exception(env, last_exception);
+		return true;
+	}
+	DSK_NAPI_CALL(status);
+
+	uint32_t new_ref_count;
+	DSK_NAPI_CALL(napi_reference_unref(env, cb_ref, &new_ref_count));
+
+	DSK_NAPI_CALL(napi_async_destroy(env, async_context));
+
+	DSK_NAPI_CALL(napi_close_handle_scope(env, handle_scope));
+
+	return false;
+}

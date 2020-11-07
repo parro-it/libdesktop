@@ -1,5 +1,9 @@
 #ifndef DSK_NAPI_H
 #define DSK_NAPI_H 1
+
+#include <string.h>
+#include <uv.h>
+
 /**
  *
  * @file dsknapi.h
@@ -783,5 +787,44 @@ DSK_JS_FUNC(dsk_getPropF32);
 #define DSK_PROP_F32(NAME, NATIVE_GETTER, NATIVE_SETTER)                                           \
 	DSK_DEFINE_PROPERTY(libdesktop, Style, NAME, dsk_getPropF32, dsk_setPropF32,                   \
 						((void *[]){NATIVE_GETTER, NATIVE_SETTER}))
+
+bool dsk_call_cb(napi_env env, napi_ref cb_ref);
+
+// debug log
+
+#define DSK_DEBUG_ON 1
+
+#if DSK_DEBUG_ON
+
+#define DSK_UNINITIALIZED 100042
+static char dsk_enabled_debug_module[100];
+static size_t dsk_env_var_size = DSK_UNINITIALIZED;
+
+static inline bool debug_enabled_for_module(const char *module) {
+	if (dsk_env_var_size == DSK_UNINITIALIZED) {
+		uv_os_getenv("DEBUG", dsk_enabled_debug_module, &dsk_env_var_size);
+	}
+
+	return (strncmp(module, dsk_enabled_debug_module, dsk_env_var_size) == 0);
+}
+
+#define DSK_DEBUG(msg)                                                                             \
+	{                                                                                              \
+		if (debug_enabled_for_module("libdesktop")) {                                              \
+			fprintf(stderr, msg "\n");                                                             \
+		}                                                                                          \
+	}
+#define DSK_DEBUG_F(msg, ...)                                                                      \
+	{                                                                                              \
+		if (debug_enabled_for_module("libdesktop")) {                                              \
+			fprintf(stderr, msg "\n", __VA_ARGS__);                                                \
+		}                                                                                          \
+	}
+#else
+
+#define DSK_DEBUG(msg) ;
+#define DSK_DEBUG_F(msg, ...) ;
+
+#endif
 
 #endif

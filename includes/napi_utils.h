@@ -240,22 +240,35 @@ NULL, &ret); \
 			return NULL;                                                                           \
 		}                                                                                          \
 	}
+
+napi_value _dsk_define_class(napi_env env, napi_value exports, const char *name,
+							 napi_callback constructor, const napi_property_descriptor properties[],
+							 size_t propertiesCount, napi_ref *ref);
+
+#define dsk_define_class(env, exports, name, constructor, properties)                              \
+	_dsk_define_class(env, exports, name, constructor, (properties),                               \
+					  sizeof((properties)) / sizeof(napi_property_descriptor), NULL)
+
+#define dsk_define_class_ref(env, exports, name, constructor, properties, ref)                     \
+	_dsk_define_class(env, exports, name, constructor, (properties),                               \
+					  sizeof((properties)) / sizeof(napi_property_descriptor), ref)
+
 // debug
 
 #define UI_NODE_DEBUG 1
 
 #if UI_NODE_DEBUG
 
-static bool debug_enabled_for_module(const char *module);
+static bool ___debug_enabled_for_module(const char *module);
 #define LIBUI_NODE_DEBUG(msg)                                                                      \
 	{                                                                                              \
-		if (debug_enabled_for_module(MODULE)) {                                                    \
+		if (___debug_enabled_for_module(MODULE)) {                                                 \
 			fprintf(stderr, msg "\n");                                                             \
 		}                                                                                          \
 	}
 #define LIBUI_NODE_DEBUG_F(msg, ...)                                                               \
 	{                                                                                              \
-		if (debug_enabled_for_module(MODULE)) {                                                    \
+		if (___debug_enabled_for_module(MODULE)) {                                                 \
 			fprintf(stderr, msg "\n", __VA_ARGS__);                                                \
 		}                                                                                          \
 	}
@@ -283,7 +296,7 @@ napi_value make_utf8_string(napi_env env, const char *char_ptr);
 
 #if UI_NODE_DEBUG
 
-static inline bool debug_enabled_for_module(const char *module) {
+static inline bool ___debug_enabled_for_module(const char *module) {
 	if (env_var_size == UNINITIALIZED) {
 		uv_os_getenv("DEBUG", enabled_debug_module, &env_var_size);
 	}

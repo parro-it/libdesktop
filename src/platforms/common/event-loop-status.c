@@ -1,5 +1,5 @@
-#include "napi_utils.h"
 #include "event-loop.h"
+#include "libdesktop.h"
 
 static enum ln_loop_status status = stopped;
 static bool main_thread_waiting = false;

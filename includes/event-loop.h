@@ -15,7 +15,6 @@ void uiQuit(void);
 
 void uiQueueMain(void (*f)(void *data), void *data);
 
-
 int waitForNodeEvents(uv_loop_t *loop, int timeout);
 // bool uiWaitForEvents(int timeout);
 
@@ -34,8 +33,6 @@ bool ln_get_background_thread_waiting();
 
 void ln_set_main_thread_quitted(bool value);
 bool ln_get_main_thread_quitted();
-
-void resolve_promise_null(napi_env env, napi_ref cb_ref, enum ln_loop_status new_status);
 
 napi_status ln_init_loop_status();
 

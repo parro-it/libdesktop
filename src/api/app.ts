@@ -1,4 +1,4 @@
-const {app, EventLoop} = require("../../build/Release/desktop.node")
+const {App: NativeApp, wakeupBackgroundThread,startEventLoop, stopEventLoop } = require("../../build/Release/desktop.node")
 import {createHook,AsyncHook} from 'async_hooks';
 
 let wakingup = false;
@@ -14,9 +14,9 @@ export interface App {
 export const App: {
     new(): App
     create(): App
-} = app.App;
+} = NativeApp;
 
-App.prototype.wakeupBackgroundThread = EventLoop.wakeupBackgroundThread
+App.prototype.wakeupBackgroundThread = wakeupBackgroundThread
 
 App.prototype.start = () => {
 	asyncHook = createHook({init: initAsyncResource});
@@ -26,7 +26,7 @@ App.prototype.start = () => {
 	// to begin executing callbacks.
 	asyncHook.enable();
 
-	return new Promise((resolve, reject) => EventLoop.start(resolve));
+	return new Promise((resolve, reject) => startEventLoop(resolve));
 };
 
 App.prototype.stop = () => {
@@ -35,7 +35,7 @@ App.prototype.stop = () => {
 	// to begin executing callbacks.
 	asyncHook.disable();
 
-	return new Promise((resolve, reject) => EventLoop.stop(resolve));
+	return new Promise((resolve, reject) => stopEventLoop(resolve));
 };
 
 
@@ -49,7 +49,7 @@ function initAsyncResource() {
 	}
 	wakingup = true;
 	setImmediate(() => {
-		EventLoop.wakeupBackgroundThread();
+		wakeupBackgroundThread();
 		wakingup = false;
 	});
 }

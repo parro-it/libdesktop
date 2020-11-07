@@ -1,54 +1,29 @@
-#include "napi_utils.h"
-#define MODULE "app"
+#include "event-loop.h"
+#include "libdesktop.h"
 
-static napi_ref AppRef;
+DSK_EXTEND_MODULE(libdesktop);
 
-LIBUI_FUNCTION(appArch);
+DSK_DEFINE_CLASS(libdesktop, App) {
+	DSK_JS_FUNC_INIT();
+	const char *err = uiInit();
+	if (err != NULL) {
+		napi_throw_error(env, NULL, err);
+		free((void *)err);
+	}
+	ln_init_loop_status();
+	return this;
+}
 
-LIBUI_FUNCTION(appVer) {
+DSK_JS_FUNC(dsk_app_getArch);
+
+static DSK_JS_FUNC(getVer) {
 	return make_utf8_string(env, "0.0.1");
 }
 
-LIBUI_FUNCTION(createApp) {
-	napi_value instance;
-	napi_value args;
+DSK_DEFINE_PROPERTY(libdesktop, App, arch, dsk_app_getArch, NULL, NULL)
+DSK_DEFINE_PROPERTY(libdesktop, App, ver, getVer, NULL, NULL)
 
-	napi_value cons;
-	napi_status status;
-	status = napi_get_reference_value(env, AppRef, &cons);
-	CHECK_STATUS_THROW(status, napi_get_reference_value);
-
-	status = napi_new_instance(env, cons, 0, &args, &instance);
-	CHECK_STATUS_THROW(status, napi_new_instance);
-
+DSK_DEFINE_STATIC_METHOD(libdesktop, App, create) {
+	napi_value instance = dsk_new_instance(env, libdesktop_App_ref, 0, NULL);
 	return instance;
-}
-
-LIBUI_FUNCTION(newApp) {
-	return NULL;
-}
-
-napi_value app_init_core(napi_env env, napi_value exports) {
-	DEFINE_MODULE()
-
-	const napi_property_descriptor properties[] = {
-		(napi_property_descriptor){.utf8name = "arch", .getter = appArch},
-		(napi_property_descriptor){.utf8name = "ver", .getter = appVer},
-		(napi_property_descriptor){
-			.utf8name = "create", .method = createApp, .attributes = napi_static},
-	};
-
-	napi_status status;
-	napi_value App;
-
-	status = napi_define_class(env, "App", NAPI_AUTO_LENGTH, newApp, NULL, 3, properties, &App);
-	CHECK_STATUS_THROW(status, napi_define_class);
-
-	status = napi_create_reference(env, App, 1, &AppRef);
-	CHECK_STATUS_THROW(status, napi_create_reference);
-
-	status = napi_set_named_property(env, module, "App", App);
-	CHECK_STATUS_THROW(status, napi_set_named_property);
-
-	return exports;
 }

@@ -1,9 +1,8 @@
+#include "event-loop.h"
+#include "libdesktop.h"
 #include <assert.h>
 #include <stdbool.h>
-#include "napi_utils.h"
-#include "event-loop.h"
 
-static const char *MODULE = "EventLoop";
 static uv_barrier_t all_threads_are_waiting;
 static uv_barrier_t all_threads_are_awaked;
 
@@ -22,11 +21,11 @@ static uv_timer_t main_thread_timer;
 */
 void wait_node_io(int timeout) {
 	int ret;
-	LIBUI_NODE_DEBUG_F("--- entering wait with timeout %d", timeout);
+	DSK_DEBUG_F("--- entering wait with timeout %d", timeout);
 	do {
 		ret = waitForNodeEvents(uv_default_loop(), timeout);
 	} while (ret == -1 && errno == EINTR);
-	LIBUI_NODE_DEBUG("--- wait done");
+	DSK_DEBUG("--- wait done");
 }
 
 /*
@@ -38,20 +37,20 @@ void wait_node_io(int timeout) {
 	thread, if it's waiting, is wake up by calling uiLoopWakeup().
 */
 static void background_thread(void *arg) {
-	LIBUI_NODE_DEBUG("--- start background_thread ");
+	DSK_DEBUG("--- start background_thread ");
 
 	while (!ln_get_main_thread_quitted()) {
-		LIBUI_NODE_DEBUG("--- wait on all_threads_are_waiting.");
+		DSK_DEBUG("--- wait on all_threads_are_waiting.");
 
 		ln_set_background_thread_waiting(true);
 
 		// wait for the main thread
 		// to be blocked waiting for GUI events
 		uv_barrier_wait(&all_threads_are_waiting);
-		LIBUI_NODE_DEBUG("--- all_threads_are_waiting passed.");
+		DSK_DEBUG("--- all_threads_are_waiting passed.");
 
 		int timeout = uv_backend_timeout(uv_default_loop());
-		LIBUI_NODE_DEBUG_F("--- uv_backend_timeout == %d", timeout);
+		DSK_DEBUG_F("--- uv_backend_timeout == %d", timeout);
 
 		// if timeout == 0, it means there are
 		// already some callback to execute, so no
@@ -62,12 +61,12 @@ static void background_thread(void *arg) {
 		// `timeout` ms
 
 		if (timeout != 0) {
-			LIBUI_NODE_DEBUG("--- wait node io");
+			DSK_DEBUG("--- wait node io");
 			wait_node_io(timeout);
-			LIBUI_NODE_DEBUG("--- done wait node io");
+			DSK_DEBUG("--- done wait node io");
 
 			if (ln_get_main_thread_waiting()) {
-				LIBUI_NODE_DEBUG("--- wake up main thread");
+				DSK_DEBUG("--- wake up main thread");
 				ln_set_background_thread_waiting(false);
 				uiLoopWakeup();
 			}
@@ -80,7 +79,7 @@ static void background_thread(void *arg) {
 		uv_barrier_wait(&all_threads_are_awaked);
 	}
 
-	LIBUI_NODE_DEBUG("--- background terminating.");
+	DSK_DEBUG("--- background terminating.");
 }
 
 /*
@@ -95,24 +94,25 @@ static void background_thread(void *arg) {
  */
 static void main_thread(uv_timer_t *handle) {
 	enum ln_loop_status status = ln_get_loop_status();
-	LIBUI_NODE_DEBUG_F("+++ start main_thread with status %d", status);
+	DSK_DEBUG_F("+++ start main_thread with status %d", status);
 	uv_timer_stop(handle);
 	if (status == starting) {
 		assert(event_loop_started_cb_ref != NULL);
 
-		LIBUI_NODE_DEBUG("🧐 LOOP STARTED");
+		DSK_DEBUG("🧐 LOOP STARTED");
 		napi_ref ref = event_loop_started_cb_ref;
 		event_loop_started_cb_ref = NULL;
-		resolve_promise_null(resolution_env, ref, started);
+		ln_set_loop_status(started);
+		dsk_call_cb(resolution_env, ref);
 	}
 
-	LIBUI_NODE_DEBUG("+++ wait on all_threads_are_waiting");
+	DSK_DEBUG("+++ wait on all_threads_are_waiting");
 
 	// wait for the background thread
 	// to be blocked waiting for node events
 	uv_barrier_wait(&all_threads_are_waiting);
 
-	LIBUI_NODE_DEBUG("+++ passed all_threads_are_waiting");
+	DSK_DEBUG("+++ passed all_threads_are_waiting");
 
 	int timeout = uv_backend_timeout(uv_default_loop());
 
@@ -120,20 +120,20 @@ static void main_thread(uv_timer_t *handle) {
 
 	if (timeout != 0) {
 
-		LIBUI_NODE_DEBUG("+++ wait GUI events");
+		DSK_DEBUG("+++ wait GUI events");
 
 		ln_set_main_thread_waiting(true);
-		LIBUI_NODE_DEBUG("+++ ln_set_main_thread_waiting true");
+		DSK_DEBUG("+++ ln_set_main_thread_waiting true");
 
 		gui_running = uiMainStep(true);
-		LIBUI_NODE_DEBUG("+++ uiWaitForEvents done");
+		DSK_DEBUG("+++ uiWaitForEvents done");
 
 		ln_set_main_thread_waiting(false);
-		LIBUI_NODE_DEBUG("+++ ln_set_main_thread_waiting false");
+		DSK_DEBUG("+++ ln_set_main_thread_waiting false");
 	}
 
 	if (ln_get_background_thread_waiting()) {
-		LIBUI_NODE_DEBUG("+++ wake up background thread");
+		DSK_DEBUG("+++ wake up background thread");
 		uv_async_send(keep_alive);
 	}
 
@@ -141,7 +141,7 @@ static void main_thread(uv_timer_t *handle) {
 	while (gui_running && uiEventsPending()) {
 		gui_running = uiMainStep(false);
 	}
-	LIBUI_NODE_DEBUG("+++ all GUI events worked.");
+	DSK_DEBUG("+++ all GUI events worked.");
 
 	if (!gui_running && ln_get_loop_status() == stopping) {
 		ln_set_main_thread_quitted(true);
@@ -149,43 +149,48 @@ static void main_thread(uv_timer_t *handle) {
 
 	// wait for the background thread
 	// to be unblocked from waiting for node events
-	LIBUI_NODE_DEBUG("+++ wait all_threads_are_awaked");
+	DSK_DEBUG("+++ wait all_threads_are_awaked");
 	uv_barrier_wait(&all_threads_are_awaked);
-	LIBUI_NODE_DEBUG("+++ passed all_threads_are_awaked");
+	DSK_DEBUG("+++ passed all_threads_are_awaked");
 
-	LIBUI_NODE_DEBUG_F("+++ libui is running: %d", gui_running);
+	DSK_DEBUG_F("+++ libui is running: %d", gui_running);
 
 	if (gui_running || ln_get_loop_status() != stopping) {
-		LIBUI_NODE_DEBUG("+++ schedule next main_thread call.");
+		DSK_DEBUG("+++ schedule next main_thread call.");
 		uv_timer_start(&main_thread_timer, main_thread, 10, 0);
 	} else {
 		// uv_close((uv_handle_t *)&main_thread_timer, NULL);
-		LIBUI_NODE_DEBUG("+++ main_thread_timer closed");
+		DSK_DEBUG("+++ main_thread_timer closed");
 
 		/* await for the background thread to finish */
-		LIBUI_NODE_DEBUG("uv_thread_join wait");
+		DSK_DEBUG("uv_thread_join wait");
 		uv_thread_join(&thread);
-		LIBUI_NODE_DEBUG("uv_thread_join done");
+		DSK_DEBUG("uv_thread_join done");
 
 		/* stop keep alive timer */
 		uv_close((uv_handle_t *)keep_alive, NULL);
-		LIBUI_NODE_DEBUG("uv_close keep_alive done");
+		DSK_DEBUG("uv_close keep_alive done");
 
 		assert(event_loop_closed_cb_ref != NULL);
 
-		LIBUI_NODE_DEBUG("🧐 LOOP STOPPED");
+		DSK_DEBUG("🧐 LOOP STOPPED");
 		napi_ref ref = event_loop_closed_cb_ref;
 		event_loop_closed_cb_ref = NULL;
-		resolve_promise_null(resolution_env, ref, stopped);
+		ln_set_loop_status(stopped);
+		dsk_call_cb(resolution_env, ref);
 
-		LIBUI_NODE_DEBUG("resolved stop promise");
+		DSK_DEBUG("resolved stop promise");
 	}
 }
 
+DSK_EXTEND_MODULE(libdesktop);
+
 /* This function start the event loop and exit immediately */
-LIBUI_FUNCTION(start) {
-	INIT_ARGS(1);
-	ARG_CB_REF(cb_ref, 0);
+DSK_DEFINE_FUNCTION(libdesktop, startEventLoop) {
+	DSK_JS_FUNC_INIT();
+	DSK_EXACTLY_NARGS(1);
+	napi_ref cb_ref;
+	DSK_NAPI_CALL(napi_create_reference(env, argv[0], 1, &cb_ref));
 
 	if (event_loop_closed_cb_ref != NULL) {
 		napi_throw_error(env, NULL, "Cannot start. A stop loop operation is pending.");
@@ -197,10 +202,10 @@ LIBUI_FUNCTION(start) {
 		return NULL;
 	}
 
-	LIBUI_NODE_DEBUG("🧐 LOOP STARTING");
+	DSK_DEBUG("🧐 LOOP STARTING");
 	uv_barrier_init(&all_threads_are_waiting, 2);
 	uv_barrier_init(&all_threads_are_awaked, 2);
-	LIBUI_NODE_DEBUG("barrier passed");
+	DSK_DEBUG("barrier passed");
 
 	event_loop_started_cb_ref = cb_ref;
 
@@ -213,11 +218,11 @@ LIBUI_FUNCTION(start) {
 
 	/* init libui event loop */
 	uiMainSteps();
-	LIBUI_NODE_DEBUG("libui loop initialized");
+	DSK_DEBUG("libui loop initialized");
 
 	/* start the background thread that check for node evnts pending */
 	uv_thread_create(&thread, background_thread, NULL);
-	LIBUI_NODE_DEBUG("background thread started...");
+	DSK_DEBUG("background thread started...");
 
 	// Add dummy handle for libuv, otherwise libuv would quit when there is
 	// nothing to do.
@@ -228,16 +233,18 @@ LIBUI_FUNCTION(start) {
 	uv_timer_init(uv_default_loop(), &main_thread_timer);
 	uv_timer_start(&main_thread_timer, main_thread, 1, 0);
 
-	LIBUI_NODE_DEBUG("startLoop async started");
+	DSK_DEBUG("startLoop async started");
 
 	return NULL;
 }
 
-LIBUI_FUNCTION(stop) {
-	INIT_ARGS(1);
-	ARG_CB_REF(cb_ref, 0);
+DSK_DEFINE_FUNCTION(libdesktop, stopEventLoop) {
+	DSK_JS_FUNC_INIT();
+	DSK_EXACTLY_NARGS(1);
+	napi_ref cb_ref;
+	DSK_NAPI_CALL(napi_create_reference(env, argv[0], 1, &cb_ref));
 
-	LIBUI_NODE_DEBUG("🧐 LOOP STOPPING");
+	DSK_DEBUG("🧐 LOOP STOPPING");
 
 	if (event_loop_closed_cb_ref != NULL) {
 		napi_throw_error(env, NULL, "Cannot start. A stop loop operation is pending.");
@@ -254,15 +261,15 @@ LIBUI_FUNCTION(stop) {
 	event_loop_closed_cb_ref = cb_ref;
 	resolution_env = env;
 
-	//destroy_all_children(env, visible_windows);
-	//clear_children(env, visible_windows);
-	//visible_windows = create_children_list();
+	// destroy_all_children(env, visible_windows);
+	// clear_children(env, visible_windows);
+	// visible_windows = create_children_list();
 
-	LIBUI_NODE_DEBUG("visible windows cleaned up");
+	DSK_DEBUG("visible windows cleaned up");
 
 	uiQuit();
 
-	LIBUI_NODE_DEBUG("uiQuit called");
+	DSK_DEBUG("uiQuit called");
 
 	return NULL;
 }
@@ -271,26 +278,9 @@ LIBUI_FUNCTION(stop) {
 // to stop awaiting node events, allowing it
 // to update the list of handles it's
 // awaiting on.
-LIBUI_FUNCTION(wakeupBackgroundThread) {
+DSK_DEFINE_FUNCTION(libdesktop, wakeupBackgroundThread) {
 	if (uv_is_active((const uv_handle_t *)keep_alive)) {
 		uv_async_send(keep_alive);
 	}
 	return NULL;
 }
-
-napi_value _libui_init_event_loop(napi_env env, napi_value exports) {
-	DEFINE_MODULE();
-	LIBUI_EXPORT(wakeupBackgroundThread);
-	LIBUI_EXPORT(start);
-	LIBUI_EXPORT(stop);
-
-	const char *err = uiInit();
-	if (err != NULL) {
-		napi_throw_error(env, NULL, err);
-		free((void*)err);
-	}
-	ln_init_loop_status();
-
-	return module;
-}
-

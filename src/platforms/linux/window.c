@@ -1,4 +1,3 @@
-#include "__widget.h"
 #include "libdesktop.h"
 #include "napi_utils.h"
 #include <gtk/gtk.h>
