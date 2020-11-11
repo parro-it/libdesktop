@@ -1,6 +1,6 @@
 #include "libdesktop.h"
 
-static void widget_reposition(napi_env env, UIHandle container, YGNodeRef root) {
+static void widget_children_reposition(napi_env env, UIHandle container, YGNodeRef root) {
 	uint32_t childrenCount = YGNodeGetChildCount(root);
 	for (uint32_t i = 0; i < childrenCount; i++) {
 		YGNodeRef childNode = YGNodeGetChild(root, i);
@@ -8,16 +8,16 @@ static void widget_reposition(napi_env env, UIHandle container, YGNodeRef root) 
 		dsk_widget_reposition(env, container, childHandle, YGNodeLayoutGetLeft(childNode),
 							  YGNodeLayoutGetTop(childNode), YGNodeLayoutGetWidth(childNode),
 							  YGNodeLayoutGetHeight(childNode));
-		widget_reposition(env, childHandle, childNode);
+		widget_children_reposition(env, childHandle, childNode);
 	}
 }
 
 void dsk_calculate_layout(napi_env env, UIHandle container, YGNodeRef root, float availableWidth,
 						  float availableHeight) {
-	YGNodePrint(root, YGPrintOptionsChildren | YGPrintOptionsStyle);
+	// YGNodePrint(root, YGPrintOptionsChildren | YGPrintOptionsStyle);
 	YGNodeCalculateLayout(root, availableWidth, availableHeight, YGDirectionInherit);
-	widget_reposition(env, container, root);
-	YGNodePrint(root, YGPrintOptionsChildren | YGPrintOptionsLayout);
+	widget_children_reposition(env, container, root);
+	// YGNodePrint(root, YGPrintOptionsChildren | YGPrintOptionsLayout);
 }
 
 void dsk_add_child(napi_env env, UIHandle parentHandle, UIHandle childHandle) {
@@ -65,60 +65,26 @@ void dsk_add_children(napi_env env, UIHandle widget, napi_value children) {
 	}
 }
 
-void widget_finalize(napi_env env, void *finalize_data, void *finalize_hint) {
+static void widget_finalize(napi_env env, void *finalize_data, void *finalize_hint) {
 	napi_value this = (napi_value)finalize_hint;
 	YGNodeRef node = dsk_widget_get_node(env, this);
 	YGNodeFree(node);
 }
 
-extern napi_ref libdesktop_Style_ref;
+DSK_EXTEND_CLASS(libdesktop, Style);
 
-void dsk_wrap_widget(napi_env env, UIHandle widget, napi_value this) {
-	assert(widget != NULL);
-	assert(this != NULL);
-	// printf("1\n");
-	napi_status status = napi_wrap(env, this, widget, widget_finalize, this, NULL);
-	assert(status == napi_ok);
-	// printf("2\n");
-	YGNodeRef node = YGNodeNew();
-
-	// printf("4 node %p\n", node);
-	dsk_widget_set_node(env, this, node);
-	// printf("5\n");
-	YGNodeSetContext(node, widget);
-	// printf("6\n");
-
-	napi_value constructor;
-	napi_value style;
-	napi_value null;
-
-	status = napi_get_reference_value(env, libdesktop_Style_ref, &constructor);
-	assert(status == napi_ok);
-	// printf("7\n");
-	status = napi_get_null(env, &null);
-	assert(status == napi_ok);
-	// printf("8 %p %p %p\n",constructor,this,null);
-	napi_value args[2] = {null, this};
-	status = napi_new_instance(env, constructor, 2, args, &style);
-	assert(status == napi_ok);
-	// printf("9\n");
-	status = napi_set_named_property(env, this, "style", style);
-	assert(status == napi_ok);
-	// printf("10\n");
-}
-
-bool dsk_set_properties(napi_env env, napi_value props, napi_value target) {
+static bool set_properties(napi_env env, napi_value props, napi_value target) {
 	char *dsk_error_msg = NULL;
-	// printf("dsk_set_properties 1 %p %p\n", props, target);
+	// printf("set_properties 1 %p %p\n", props, target);
 	napi_value names;
 	DSK_NAPI_CALL(napi_get_property_names(env, props, &names));
 	// printf("napi_get_property_names\n");
 	uint32_t len;
 	DSK_NAPI_CALL(napi_get_array_length(env, names, &len));
 
-	// printf("dsk_set_properties 2\n");
+	// printf("set_properties 2\n");
 	for (uint32_t i = 0; i < len; i++) {
-		// printf("dsk_set_properties 3 %d\n", i);
+		// printf("set_properties 3 %d\n", i);
 		napi_value idx;
 		napi_value propName;
 		bool hasProp;
@@ -143,7 +109,7 @@ bool dsk_set_properties(napi_env env, napi_value props, napi_value target) {
 				napi_value styleProp;
 				// printf("recurse on %s\n",propName_s);
 				DSK_NAPI_CALL(napi_get_property(env, target, propName, &styleProp));
-				if (dsk_set_properties(env, propValue, styleProp)) {
+				if (set_properties(env, propValue, styleProp)) {
 					goto dsk_error;
 				}
 				continue;
@@ -154,11 +120,48 @@ bool dsk_set_properties(napi_env env, napi_value props, napi_value target) {
 			DSK_NAPI_CALL(napi_set_property(env, target, propName, propValue));
 		}
 	}
-	// printf("dsk_set_properties 1000\n");
+	// printf("set_properties 1000\n");
 	return false;
 dsk_error:
-	printf("dsk_set_properties error: %s\n", dsk_error_msg);
+	napi_throw_error(env, NULL, dsk_error_msg);
 	return true;
+}
+
+napi_status dsk_wrap_widget(napi_env env, UIHandle widget, napi_value this, napi_value props) {
+	DSK_ONERROR_THROW_RET(napi_pending_exception);
+
+	assert(widget != NULL);
+	assert(this != NULL);
+
+	DSK_NAPI_CALL(napi_wrap(env, this, widget, widget_finalize, this, NULL));
+
+	YGNodeRef node = YGNodeNew();
+
+	assert(node != NULL);
+
+	dsk_widget_set_node(env, this, node);
+	YGNodeSetContext(node, widget);
+
+	;
+	napi_value null;
+	DSK_NAPI_CALL(napi_get_null(env, &null));
+
+	napi_value style = dsk_new_instance(env, libdesktop_Style_ref, 2, (napi_value[]){null, this});
+	if (style == NULL) {
+		return napi_pending_exception;
+	}
+
+	DSK_NAPI_CALL(napi_set_named_property(env, this, "style", style));
+
+	napi_value events;
+	DSK_NAPI_CALL(napi_create_object(env, &events));
+	DSK_NAPI_CALL(napi_set_named_property(env, this, "events", events));
+
+	if (set_properties(env, props, this)) {
+		return napi_pending_exception;
+	}
+
+	return napi_ok;
 }
 
 void dsk_set_children_preferred_sizes(YGNodeRef node, UIHandle widget) {

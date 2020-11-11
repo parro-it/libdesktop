@@ -1,7 +1,6 @@
 #include "libdesktop.h"
 #include <windows.h>
 
-
 static void window_finalize(napi_env env, void *finalize_data, void *finalize_hint) {}
 
 #define windowClass L"libui_uiWindowClass"
@@ -97,7 +96,7 @@ DSK_DEFINE_CLASS(libdesktop, Window) {
 						// even if it doesn't, we're adjusting it later
 						800, 600, NULL, NULL, hInstance, NULL);
 
-	dsk_wrap_widget(env, win, this);
+	DSK_NAPI_CALL(dsk_wrap_widget(env, win, this));
 
 	napi_value Container;
 	napi_value container;
@@ -126,7 +125,3 @@ DSK_DEFINE_CLASS(libdesktop, Window) {
 
 	return this;
 }
-
-
-
-	

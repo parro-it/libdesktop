@@ -21,7 +21,6 @@
 
 @end
 
-
 DSK_EXTEND_MODULE(libdesktop);
 
 DSK_DEFINE_CLASS(libdesktop, Textfield) {
@@ -33,12 +32,8 @@ DSK_DEFINE_CLASS(libdesktop, Textfield) {
 	[widget setEditable:true];
 	[widget setSelectable:true];
 	[widget setHidden:false];
-	dsk_wrap_widget(env, widget, this);
+	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this));
 
-	if (dsk_set_properties(env, argv[0], this)) {
-		napi_throw_error(env, NULL, "Error while setting widget properties.\n");
-		return NULL;
-	}
 	return this;
 }
 /*

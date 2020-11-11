@@ -71,12 +71,7 @@ DSK_DEFINE_CLASS(libdesktop, Window) {
 		return NULL;
 	}
 
-	dsk_wrap_widget(env, window, this);
-
-	if (dsk_set_properties(env, argv[0], this)) {
-		napi_throw_error(env, NULL, "Error while setting widget properties.\n");
-		return NULL;
-	}
+	DSK_NAPI_CALL(dsk_wrap_widget(env, window, this, argv[0]));
 
 	napi_value Container;
 	napi_value container;

@@ -12,13 +12,11 @@
 @implementation DskLabel
 @end
 
-
 DSK_EXTEND_MODULE(libdesktop);
 
 DSK_DEFINE_CLASS(libdesktop, Label) {
 	DSK_JS_FUNC_INIT();
 	DSK_EXACTLY_NARGS(2);
-
 
 	DskLabel *widget;
 	widget = [[DskLabel alloc] init];
@@ -30,16 +28,10 @@ DSK_DEFINE_CLASS(libdesktop, Label) {
 	[widget setBezeled:NO];
 	[widget setAlignment:NSTextAlignmentRight];
 
-	dsk_wrap_widget(env, widget, this);
+	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this));
 
-	if (dsk_set_properties(env, argv[0], this)) {
-		napi_throw_error(env, NULL, "Error while setting widget properties.\n");
-		return NULL;
-	}
 	return this;
 }
-
-
 
 DSK_UI_PROP_I32(libdesktop, Label, left, "x");
 DSK_UI_PROP_I32(libdesktop, Label, top, "y");

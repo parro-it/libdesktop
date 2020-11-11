@@ -64,14 +64,9 @@ DSK_DEFINE_CLASS(libdesktop, Label) {
 		SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
 	*/
 	// printf("done\n");
-	
-	printf("CREATED LABEL\n");
-	dsk_wrap_widget(env, widget, this);
 
-	if (dsk_set_properties(env, argv[0], this)) {
-		napi_throw_error(env, NULL, "Error while setting widget properties.\n");
-		return NULL;
-	}
+	printf("CREATED LABEL\n");
+	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this));
 
 	return this;
 }

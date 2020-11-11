@@ -43,10 +43,10 @@ void dsk_set_children_preferred_sizes(YGNodeRef node, UIHandle widget);
 
 // widget interface, implemented in common platform
 
-void dsk_wrap_widget(napi_env env, UIHandle widget, napi_value this);
+napi_status dsk_wrap_widget(napi_env env, UIHandle widget, napi_value this, napi_value props);
 UIHandle dsk_unwrap_widget(napi_env env, napi_value this);
 napi_value dsk_widget_wrapper(napi_env env, UIHandle widget);
-bool dsk_set_properties(napi_env env, napi_value props, napi_value target);
+// bool dsk_set_properties(napi_env env, napi_value props, napi_value target);
 
 // widget events, implemented in common platform
 

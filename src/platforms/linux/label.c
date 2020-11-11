@@ -10,24 +10,18 @@ DSK_DEFINE_CLASS(libdesktop, Label) {
 	DSK_EXACTLY_NARGS(2);
 
 	GtkWidget *widget = gtk_label_new("");
+	gtk_label_set_xalign(GTK_LABEL(widget), GTK_ALIGN_END);
 
 	// GdkRGBA color;
 	// gdk_rgba_parse (&color, "rgba(100,90,80,1)");
 	// gtk_widget_override_background_color(widget,GTK_STATE_FLAG_NORMAL, &color);
-	dsk_wrap_widget(env, widget, this);
-	gtk_label_set_xalign(GTK_LABEL(widget), GTK_ALIGN_END);
+	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this, argv[0]));
 
 	napi_value events;
-	DSK_NAPI_CALL(napi_create_object(env, &events));
-	DSK_NAPI_CALL(napi_set_named_property(env, this, "events", events));
+	DSK_NAPI_CALL(napi_get_named_property(env, this, "events", &events));
 
 	napi_value click = dsk_event_new_for_widget(env, "click", this);
 	DSK_NAPI_CALL(napi_set_named_property(env, events, "click", click));
-
-	if (dsk_set_properties(env, argv[0], this)) {
-		napi_throw_error(env, NULL, "Error while setting widget properties.\n");
-		return NULL;
-	}
 
 	return this;
 }

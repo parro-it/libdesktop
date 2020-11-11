@@ -35,12 +35,7 @@ DSK_DEFINE_CLASS(libdesktop, Container) {
 
 	// printf("CREATED container\n");
 
-	dsk_wrap_widget(env, widget, this);
-
-	if (dsk_set_properties(env, argv[0], this)) {
-		napi_throw_error(env, NULL, "Error while setting widget properties.\n");
-		return NULL;
-	}
+	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this));
 
 	dsk_add_children(env, widget, argv[1]);
 
