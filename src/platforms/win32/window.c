@@ -1,10 +1,6 @@
 #include "libdesktop.h"
-#include "napi_utils.h"
 #include <windows.h>
-#define MODULE "win"
 
-static napi_ref WindowRef;
-extern napi_ref ContainerRef;
 
 static void window_finalize(napi_env env, void *finalize_data, void *finalize_hint) {}
 
@@ -85,8 +81,13 @@ ATOM registerWindowClass(HICON hDefaultIcon, HCURSOR hDefaultCursor) {
 	return RegisterClassW(&wc);
 }
 
-LIBUI_FUNCTION(windowNew) {
-	INIT_ARGS(2);
+DSK_EXTEND_MODULE(libdesktop);
+DSK_EXTEND_CLASS(libdesktop, Container);
+
+DSK_DEFINE_CLASS(libdesktop, Window) {
+	DSK_JS_FUNC_INIT();
+	DSK_EXACTLY_NARGS(2);
+
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 	// printf("WIDNWOS NEW\n");
 	HWND win =
@@ -102,9 +103,13 @@ LIBUI_FUNCTION(windowNew) {
 	napi_value container;
 	napi_value null;
 
-	napi_get_reference_value(env, ContainerRef, &Container);
+	napi_get_reference_value(env, libdesktop_Container_ref, &Container);
 	napi_get_null(env, &null);
-	napi_new_instance(env, Container, 2, (napi_value[]){null, argv[1]}, &container);
+
+	napi_value props;
+	napi_create_object(env, &props);
+
+	napi_new_instance(env, Container, 2, (napi_value[]){props, argv[1]}, &container);
 	napi_set_named_property(env, this, "container", container);
 
 	HWND child_gtk;
@@ -112,6 +117,9 @@ LIBUI_FUNCTION(windowNew) {
 	SetParent(child_gtk, win);
 
 	YGNodeRef root = dsk_widget_get_node(env, container);
+
+	dsk_set_children_preferred_sizes(root, win);
+
 	dsk_calculate_layout(env, child_gtk, root, YGUndefined, YGUndefined);
 
 	ShowWindow(win, SW_SHOW);
@@ -119,35 +127,6 @@ LIBUI_FUNCTION(windowNew) {
 	return this;
 }
 
-HWND dummy;
 
-napi_value win_init(napi_env env, napi_value exports) {
-	DEFINE_MODULE()
 
-	HINSTANCE hInstance = GetModuleHandle(NULL);
-	dummy = CreateWindowExW(0, windowClass, L"", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
-							0, 0, NULL, NULL, hInstance, NULL);
-
-	registerWindowClass(NULL, NULL);
-	const napi_property_descriptor properties[1]; // = {
-												  // DSK_RWPROP_S(title),
-												  // DSK_RWPROP_I32(width,"default-width"),
-												  // DSK_RWPROP_I32(height,"default-height"),
-												  // DSK_RWPROP_BOOL(visible,"visible"),
-	//};
-
-	napi_status status;
-	napi_value Window;
-
-	status =
-		napi_define_class(env, "Window", NAPI_AUTO_LENGTH, windowNew, NULL, 0, properties, &Window);
-	CHECK_STATUS_THROW(status, napi_define_class);
-
-	status = napi_create_reference(env, Window, 1, &WindowRef);
-	CHECK_STATUS_THROW(status, napi_create_reference);
-
-	status = napi_set_named_property(env, module, "Window", Window);
-	CHECK_STATUS_THROW(status, napi_set_named_property);
-
-	return exports;
-}
+	

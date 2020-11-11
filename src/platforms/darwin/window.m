@@ -20,7 +20,7 @@ DSK_EXTEND_CLASS(libdesktop, Container);
 
 
 DSK_DEFINE_CLASS(libdesktop, Window) {
-	printf("libdesktop, Window\n");
+	//printf("libdesktop, Window\n");
 	DSK_JS_FUNC_INIT();
 	DSK_EXACTLY_NARGS(2);
 

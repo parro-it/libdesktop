@@ -214,7 +214,7 @@
 	goto dsk_error;                                                                                \
 	dsk_error : {                                                                                  \
 		napi_value err, errmsg;                                                                    \
-		napi_create_string_utf8(env, dsk_error_msg, &errmsg);                                      \
+		napi_create_string_utf8(env, dsk_error_msg, NAPI_AUTO_LENGTH, &errmsg);                    \
 		napi_create_error(env, NULL, errmsg, &err);                                                \
 		napi_fatal_exception(env, err);                                                            \
 		return WHAT;                                                                               \

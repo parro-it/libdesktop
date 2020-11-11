@@ -35,7 +35,7 @@ void dsk_modexports_def_free(dsk_modexports_def *exports) {
 	for (uint32_t i = 0; i < exports->members_count; i++) {
 		dsk_export_def *def = exports->members[i];
 		// free the properties of the export, allocated in dsk_export_def_register_member
-		printf("def: %p props:%p\n", def, def->properties);
+		//printf("def: %p props:%p\n", def, def->properties);
 		if (def->malloced) {
 			free(def->properties);
 		}

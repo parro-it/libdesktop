@@ -23,6 +23,10 @@ void dsk_calculate_layout(napi_env env, UIHandle container, YGNodeRef root, floa
 void dsk_add_child(napi_env env, UIHandle parentHandle, UIHandle childHandle) {
 	napi_value parent = dsk_widget_wrapper(env, parentHandle);
 	napi_value child = dsk_widget_wrapper(env, childHandle);
+
+	//napi_ref ref;
+	//napi_create_reference(env,child,1,&ref);
+	
 	// printf("handles: %p->%p   values: %p->%p\n",childHandle,parentHandle,child,parent);
 	// printf("dsk_platform_container_add_child 1\n");
 	dsk_platform_container_add_child(parentHandle, childHandle);
@@ -30,25 +34,32 @@ void dsk_add_child(napi_env env, UIHandle parentHandle, UIHandle childHandle) {
 	YGNodeRef node = dsk_widget_get_node(env, parent);
 	// printf("node %p\n",node);
 	YGNodeRef childNode = dsk_widget_get_node(env, child);
-	// printf("childNode %p\n",childNode);
+	// printf("YGNodeInsertChild %p %p\n",node,childNode);
 	uint32_t childrenCount = YGNodeGetChildCount(node);
 	YGNodeInsertChild(node, childNode, childrenCount);
 }
 
-void dsk_append_all_children(napi_env env, UIHandle widget, napi_value children) {
-	uint32_t len;
-	napi_get_array_length(env, children, &len);
-	// printf("len %d\n", len);
-	for (uint32_t i = 0; i < len; i++) {
-		// printf("i %d\n", i);
-		napi_value idx;
-		napi_create_uint32(env, i, &idx);
-		napi_value child;
-		napi_get_property(env, children, idx, &child);
+#define DSK_VOID()
 
-		UIHandle childHandle;
-		napi_unwrap(env, child, (void **)&childHandle);
-		// printf("childHandle %d: %p\n", i, childHandle);
+void dsk_append_all_children(napi_env env, UIHandle widget, napi_value children) {
+	DSK_ONERROR_UNCAUGHT_RET(DSK_VOID())
+	
+	uint32_t len;
+	DSK_NAPI_CALL(napi_get_array_length(env, children, &len));
+	//printf("len %d\n", len);
+	for (uint32_t i = 0; i < len; i++) {
+		//printf("i %d\n", i);
+		napi_value idx;
+		DSK_NAPI_CALL(napi_create_uint32(env, i, &idx));
+		napi_value child;
+		DSK_NAPI_CALL(napi_get_property(env, children, idx, &child));
+		napi_valuetype type;
+		DSK_NAPI_CALL(napi_typeof(env,child,&type));
+		//printf("napi_get_property %d %p\n", type==napi_null, child);
+
+		UIHandle childHandle = NULL;
+		DSK_NAPI_CALL(napi_unwrap(env, child, (void **)&childHandle));
+		//printf("napi_unwrap childHandle %d: %p\n", i, childHandle);
 
 		dsk_add_child(env, widget, childHandle);
 	}
@@ -98,16 +109,16 @@ void dsk_wrap_widget(napi_env env, UIHandle widget, napi_value this) {
 
 bool dsk_set_properties(napi_env env, napi_value props, napi_value target) {
 	char *dsk_error_msg = NULL;
-	// printf("dsk_set_properties 1 %p %p\n", props, target);
+	//printf("dsk_set_properties 1 %p %p\n", props, target);
 	napi_value names;
 	DSK_NAPI_CALL(napi_get_property_names(env, props, &names));
-	// printf("napi_get_property_names\n");
+	//printf("napi_get_property_names\n");
 	uint32_t len;
 	DSK_NAPI_CALL(napi_get_array_length(env, names, &len));
 
-	// printf("dsk_set_properties 2\n");
+	//printf("dsk_set_properties 2\n");
 	for (uint32_t i = 0; i < len; i++) {
-		// printf("dsk_set_properties 3 %d\n", i);
+		//printf("dsk_set_properties 3 %d\n", i);
 		napi_value idx;
 		napi_value propName;
 		bool hasProp;
@@ -115,10 +126,10 @@ bool dsk_set_properties(napi_env env, napi_value props, napi_value target) {
 		DSK_NAPI_CALL(napi_create_uint32(env, i, &idx));
 		DSK_NAPI_CALL(napi_get_property(env, names, idx, &propName));
 
-		// size_t len;
-		// DSK_NAPI_CALL(napi_get_value_string_utf8(env,propName,NULL,0,&len));
-		// char propName_s[len+1];
-		// DSK_NAPI_CALL(napi_get_value_string_utf8(env,propName,propName_s,len+1,NULL));
+		size_t len;
+		DSK_NAPI_CALL(napi_get_value_string_utf8(env,propName,NULL,0,&len));
+		char propName_s[1000];
+		DSK_NAPI_CALL(napi_get_value_string_utf8(env,propName,propName_s,len+1,NULL));
 
 		DSK_NAPI_CALL(napi_has_property(env, target, propName, &hasProp));
 		if (hasProp) {
@@ -130,7 +141,7 @@ bool dsk_set_properties(napi_env env, napi_value props, napi_value target) {
 
 			if (type == napi_object) {
 				napi_value styleProp;
-				// printf("recurse on %s\n",propName_s);
+				 //printf("recurse on %s\n",propName_s);
 				DSK_NAPI_CALL(napi_get_property(env, target, propName, &styleProp));
 				if (dsk_set_properties(env, propValue, styleProp)) {
 					goto dsk_error;
@@ -138,12 +149,12 @@ bool dsk_set_properties(napi_env env, napi_value props, napi_value target) {
 				continue;
 			}
 
-			// printf("set property %s\n",propName_s);
+			 //printf("set property %s\n",propName_s);
 
 			DSK_NAPI_CALL(napi_set_property(env, target, propName, propValue));
 		}
 	}
-	// printf("dsk_set_properties 1000\n");
+ //printf("dsk_set_properties 1000\n");
 	return false;
 dsk_error:
 	printf("dsk_set_properties error: %s\n", dsk_error_msg);

@@ -1,10 +1,7 @@
 #include <gtk/gtk.h>
-
 #include <assert.h>
 #include <yoga/Yoga.h>
-
 #include "libdesktop.h"
-#define MODULE "textfield"
 
 DSK_EXTEND_MODULE(libdesktop);
 

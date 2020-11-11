@@ -1,27 +1,30 @@
 
 #include "libdesktop.h"
-#include "napi_utils.h"
 #include <windows.h>
 #include <yoga/Yoga.h>
 
-#define MODULE "container"
 void dsk_widget_reposition(napi_env env, UIHandle container, UIHandle widget, float x, float y,
 						   float width, float height) {
-	// printf("SET POS %p TO %d, %d\n", widget,(int)xcoord,(int)ycoord);
+	printf("SET POS %p TO %f, %f\n", widget,x,y);
 	bool ret =
-		SetWindowPos((HWND)widget, HWND_TOP, (int)x, (int)y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+		SetWindowPos((HWND)widget, HWND_TOP, (int)x, (int)y, (int)width, (int)height, SWP_NOZORDER);
 	if (!ret) {
-		// printf("ERROR\n");
+		printf("ERROR\n");
 	}
 }
 
 void dsk_platform_container_add_child(UIHandle parent, UIHandle child) {
+	
 	SetParent((HWND)child, (HWND)parent);
 }
-extern HWND dummy;
 
-LIBUI_FUNCTION(containerNew) {
-	INIT_ARGS(2);
+extern HWND dummy;
+DSK_EXTEND_MODULE(libdesktop);
+
+DSK_DEFINE_CLASS(libdesktop, Container) {
+	DSK_JS_FUNC_INIT();
+	DSK_EXACTLY_NARGS(2);
+
 
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 	HWND widget = CreateWindowExW(WS_EX_CONTROLPARENT, L"DSKcontainerClass", L"", WS_CHILD,
@@ -31,10 +34,15 @@ LIBUI_FUNCTION(containerNew) {
 								  // even if it doesn't, we're adjusting it later
 								  800, 600, dummy, NULL, hInstance, NULL);
 
-	// printf("CREATED container\n");
+	//printf("CREATED container\n");
 
 	dsk_wrap_widget(env, widget, this);
 
+	if (dsk_set_properties(env, argv[0], this)) {
+		napi_throw_error(env, NULL, "Error while setting widget properties.\n");
+		return NULL;
+	}
+	
 	dsk_append_all_children(env, widget, argv[1]);
 
 	SetWindowPos(widget, 0, 0, 0, 0, 0,
@@ -43,17 +51,7 @@ LIBUI_FUNCTION(containerNew) {
 	return this;
 }
 
-napi_ref ContainerRef;
-ATOM initContainer();
 
-napi_value container_init(napi_env env, napi_value exports) {
-	DEFINE_MODULE()
-	initContainer();
-	// napi_property_descriptor empty[0];
-	dsk_define_class_ref(env, module, "Container", containerNew, NULL, &ContainerRef);
-
-	return exports;
-}
 
 static LRESULT CALLBACK containerWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	/*RECT r;
@@ -139,7 +137,10 @@ void dsk_get_preferred_sizes(UIHandle widget, int *width, int *height) {
 
 	*width = sz.width;
 	if (*width < 130) {
-		*width = 130;
+		
 	}
-	*height = sz.height;*/
+	*height = 30;*/
+	printf("dsk_get_preferred_sizes %p\n",widget);
+	*height = 30;
+	*width = 130;
 }

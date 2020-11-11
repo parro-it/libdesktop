@@ -1,8 +1,8 @@
-#include "napi_utils.h"
-#define MODULE "app"
+#include "libdesktop.h"
 
-LIBUI_FUNCTION(appArch) {
-    //// printf("appArch\n");
-    
-    return make_utf8_string(env,"win32");
+DSK_JS_FUNC(dsk_app_getArch) {
+	DSK_JS_FUNC_INIT();
+	napi_value ver;
+	DSK_NAPI_CALL(napi_create_string_utf8(env, "win32", NAPI_AUTO_LENGTH, &ver));
+	return ver;
 }

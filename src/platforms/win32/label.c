@@ -1,6 +1,5 @@
 
 #include "libdesktop.h"
-#include "napi_utils.h"
 #include "windows.h"
 #include "winuser.h"
 #include <strsafe.h>
@@ -29,13 +28,15 @@ void ErrorExit(LPTSTR lpszFunction) {
 	LocalFree(lpDisplayBuf);
 	ExitProcess(dw);
 }
-#define MODULE "label"
 extern HWND dummy;
 
 int icc = 0;
 
-LIBUI_FUNCTION(labelNew) {
-	INIT_ARGS(2);
+DSK_EXTEND_MODULE(libdesktop);
+
+DSK_DEFINE_CLASS(libdesktop, Label) {
+	DSK_JS_FUNC_INIT();
+	DSK_EXACTLY_NARGS(2);
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 
 	char *lbl;
@@ -63,17 +64,14 @@ LIBUI_FUNCTION(labelNew) {
 		SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
 	*/
 	// printf("done\n");
-
+	
+	printf("CREATED LABEL\n");
 	dsk_wrap_widget(env, widget, this);
 
-	// printf("wrapped done\n");
+	if (dsk_set_properties(env, argv[0], this)) {
+		napi_throw_error(env, NULL, "Error while setting widget properties.\n");
+		return NULL;
+	}
 
 	return this;
-}
-
-napi_value label_init(napi_env env, napi_value exports) {
-	DEFINE_MODULE()
-
-	dsk_define_class(env, module, "Label", labelNew, NULL);
-	return exports;
 }

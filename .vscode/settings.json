@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "*.go2": "go",
+        "array": "c",
+        "vector": "c",
+        "xstring": "c",
+        "xutility": "c"
+    }
+}
