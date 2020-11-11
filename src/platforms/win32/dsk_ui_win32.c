@@ -1,10 +1,10 @@
 
+#include "libdesktop-host.h"
 #include "libdesktop.h"
 #include "yoga.h"
 #include <WinUser.h>
-#include <windows.h>
-#include "libdesktop-host.h"
 #include <stdio.h>
+#include <windows.h>
 //#include <uv.h>
 
 // ui internal window messages
@@ -25,7 +25,7 @@ ATOM initContainer();
 HWND dummy;
 #define windowClass L"libui_uiWindowClass"
 
-const char *uiInit() {
+const char *dsk_init() {
 	if (registerWindowClass(NULL, NULL) == 0) {
 		printf("error registering uiWindow window class\n");
 	}
@@ -38,7 +38,7 @@ const char *uiInit() {
 }
 void noop(void *data) {}
 
-int uiLoopWakeup() {
+int dsk_wakeup_ui_loop() {
 	uiQueueMain(noop, NULL);
 	return 0;
 }
@@ -88,7 +88,7 @@ void unregisterMessageFilter(void)
 
 void uiMain(void)
 {
-	while (uiMainStep(1))
+	while (dsk_process_ui_event(1))
 		;
 }
 #endif
@@ -138,7 +138,7 @@ static int waitMessage(MSG *msg) {
 	return res != 0; // returns false on WM_QUIT
 }
 
-int uiMainStep(int wait) {
+int dsk_process_ui_event(int wait) {
 	MSG msg;
 
 	if (wait) {
@@ -160,7 +160,7 @@ int uiMainStep(int wait) {
 	return 1; // no message
 }
 
-void uiQuit(void) {
+void dsk_quit(void) {
 	PostQuitMessage(0);
 }
 
@@ -170,7 +170,7 @@ void uiQueueMain(void (*f)(void *data), void *data) {
 		logLastError(L"error queueing function to run on main thread");*/
 }
 
-int uiEventsPending() {
+int dsk_ui_events_pending() {
 	MSG msg;
 	return PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
 }
@@ -222,7 +222,7 @@ struct _internal_uv_loop_s {
 	*/
 };
 
-int waitForNodeEvents(void *loop, int timeout) {
+int dsk_wait_node_events(void *loop, int timeout) {
 	DWORD bytes;
 	ULONG_PTR key;
 	OVERLAPPED *overlapped;
@@ -266,7 +266,6 @@ YGNodeRef dsk_widget_get_node(napi_env env, napi_value widget) {
 		return NULL;
 	}
 	struct win32_ref *data = (void *)GetWindowLongPtr(widgetG, GWLP_USERDATA);
-	
 
 	return data->node;
 }

@@ -94,8 +94,8 @@
  */
 #define DSK_NAPI_CALL(FN)                                                                          \
 	do {                                                                                           \
-		napi_status DSK__status = (FN);                                                                 \
-		if (DSK__status != napi_ok) {                                                                   \
+		napi_status DSK__status = (FN);                                                            \
+		if (DSK__status != napi_ok) {                                                              \
 			const napi_extended_error_info *err;                                                   \
 			napi_get_last_error_info(env, &err);                                                   \
 			dsk_error_msg = (char *)err->error_message;                                            \

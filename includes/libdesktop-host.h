@@ -1,25 +1,18 @@
-#ifndef LIBUI_NODE_EVENT_LOOP_H__
-#define LIBUI_NODE_EVENT_LOOP_H__ 1
+#ifndef DSK_HOST__
+#define DSK_HOST__ 1
 
 #include <node_api.h>
 #include <uv.h>
 
-int uiEventsPending();
-int uiLoopWakeup();
+int dsk_ui_events_pending();
+int dsk_wakeup_ui_loop();
 
-const char *uiInit();
+const char *dsk_init();
 
-void uiMainSteps(void);
-int uiMainStep(int wait);
-void uiQuit(void);
+int dsk_process_ui_event(int wait);
+void dsk_quit(void);
 
-void uiQueueMain(void (*f)(void *data), void *data);
-
-int waitForNodeEvents(uv_loop_t *loop, int timeout);
-// bool uiWaitForEvents(int timeout);
-
-void stopLoop();
-void startLoop();
+int dsk_wait_node_events(uv_loop_t *loop, int timeout);
 
 enum ln_loop_status { stopped, stopping, started, starting };
 

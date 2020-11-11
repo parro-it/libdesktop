@@ -5,7 +5,7 @@ DSK_EXTEND_MODULE(libdesktop);
 
 DSK_DEFINE_CLASS(libdesktop, App) {
 	DSK_JS_FUNC_INIT();
-	const char *err = uiInit();
+	const char *err = dsk_init();
 	if (err != NULL) {
 		napi_throw_error(env, NULL, err);
 		free((void *)err);

@@ -1,8 +1,8 @@
 #include "yoga.h"
 #import <Cocoa/Cocoa.h>
 
-#include "libdesktop.h"
 #include "libdesktop-host.h"
+#include "libdesktop.h"
 #import <CoreFoundation/CoreFoundation.h>
 #import <dlfcn.h> // see future.m
 #include <sys/event.h>
@@ -13,13 +13,11 @@
 static BOOL (^isRunning)(void);
 static BOOL stepsIsRunning;
 
-	
-NAPI_C_CTOR(_dsk_init_proc) {                                      
+NAPI_C_CTOR(_dsk_init_proc) {
 	ProcessSerialNumber psn = {0, kCurrentProcess};
 	TransformProcessType(&psn, kProcessTransformToForegroundApplication);
 	printf("Process initialized\n");
-}   
-
+}
 
 /*
 static BOOL canQuit = NO;
@@ -119,7 +117,7 @@ NO)
 	NSLog(@"in applicationShouldTerminate:");
 	if (uiprivShouldQuit()) {
 		canQuit = YES;
-		// this will call terminate:, which is the same as uiQuit()
+		// this will call terminate:, which is the same as dsk_quit()
 		return NSTerminateNow;
 	}
 	return NSTerminateCancel;
@@ -132,12 +130,12 @@ NO)
 
 @end
 
-uiInitOptions uiprivOptions;
+dsk_initOptions uiprivOptions;
 
 void uiUninit(void)
 {
 	if (!globalPool)
-		uiprivUserBug("You must call uiInit() first!");
+		uiprivUserBug("You must call dsk_init() first!");
 	[globalPool release];
 
 	@autoreleasepool {
@@ -223,12 +221,12 @@ int uiprivMainStep(uiprivNextEventArgs *nea, BOOL (^interceptEvent)(NSEvent *e))
 	}
 }
 
-void uiQuit(void) {
+void dsk_quit(void) {
 	// canQuit = YES;
 	[[NSApplication sharedApplication] terminate:[NSApplication sharedApplication]];
 }
 
-int uiMainStep(int wait) {
+int dsk_process_ui_event(int wait) {
 	uiprivNextEventArgs nea;
 
 	nea.mask = NSEventMaskAny;
@@ -256,7 +254,7 @@ void uiMainSteps(void) {
 	stepsIsRunning = YES;
 }
 
-const char *uiInit() {
+const char *dsk_init() {
 	/*@autoreleasepool {
 		app = [[uiprivApplicationClass sharedApplication] retain];
 		// don't check for a NO return; something (launch services?) causes running from application
@@ -284,11 +282,11 @@ const char *uiInit() {
 
 	globalPool = [[NSAutoreleasePool alloc] init];
 */
-	
+
 	return NULL;
 }
 
-int uiEventsPending() {
+int dsk_ui_events_pending() {
 
 	NSEvent *event = [NSApp nextEventMatchingMask:NSEventMaskAny
 										untilDate:[NSDate distantPast]
@@ -297,7 +295,7 @@ int uiEventsPending() {
 	return nil != event;
 }
 
-int waitForNodeEvents(uv_loop_t *loop, int timeout) {
+int dsk_wait_node_events(uv_loop_t *loop, int timeout) {
 	int nodeBackendFd = uv_backend_fd(loop);
 	if (nodeBackendFd == -1) {
 		fprintf(stderr, "Invalid node backend fd.\n");
@@ -317,7 +315,7 @@ int waitForNodeEvents(uv_loop_t *loop, int timeout) {
 	return kevent(nodeBackendFd, NULL, 0, &event, 1, tsp);
 }
 
-int uiLoopWakeup() {
+int dsk_wakeup_ui_loop() {
 	[[NSApplication sharedApplication]
 		postEvent:[NSEvent otherEventWithType:NSEventTypeApplicationDefined
 									 location:NSZeroPoint
@@ -397,7 +395,6 @@ void dsk_get_preferred_sizes(UIHandle widget, int *width, int *height) {
 
 void dsk_connect_event(UIHandle widget, char *eventname, struct dsk_event_args *args) {}
 
-
 void dsk_ui_set_prop_s(void *instance, char *value, void **datas) {
 	NSObject *widget = instance;
 	char *propname = datas[2];
@@ -409,7 +406,7 @@ char *dsk_ui_get_prop_s(void *instance, void **datas) {
 	NSObject *widget = instance;
 	char *propname = datas[2];
 	NSString *ns_result = [widget valueForKey:[NSString stringWithUTF8String:propname]];
-	char *result = (char*)[ns_result UTF8String];
+	char *result = (char *)[ns_result UTF8String];
 	return result;
 }
 
@@ -464,4 +461,3 @@ bool dsk_ui_get_prop_bool(void *instance, void **datas) {
 	return result;*/
 	return true;
 }
-

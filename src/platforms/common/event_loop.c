@@ -23,7 +23,7 @@ void wait_node_io(int timeout) {
 	int ret;
 	DSK_DEBUG_F("--- entering wait with timeout %d", timeout);
 	do {
-		ret = waitForNodeEvents(uv_default_loop(), timeout);
+		ret = dsk_wait_node_events(uv_default_loop(), timeout);
 	} while (ret == -1 && errno == EINTR);
 	DSK_DEBUG("--- wait done");
 }
@@ -34,7 +34,7 @@ void wait_node_io(int timeout) {
 	the node backend for pending events.
 
 	When pending node events are found, the main GUI
-	thread, if it's waiting, is wake up by calling uiLoopWakeup().
+	thread, if it's waiting, is wake up by calling dsk_wakeup_ui_loop().
 */
 static void background_thread(void *arg) {
 	DSK_DEBUG("--- start background_thread ");
@@ -68,7 +68,7 @@ static void background_thread(void *arg) {
 			if (ln_get_main_thread_waiting()) {
 				DSK_DEBUG("--- wake up main thread");
 				ln_set_background_thread_waiting(false);
-				uiLoopWakeup();
+				dsk_wakeup_ui_loop();
 			}
 		} else {
 			ln_set_background_thread_waiting(false);
@@ -86,9 +86,9 @@ static void background_thread(void *arg) {
 	This function run all pending native GUI event in the loop
 	using libui calls.
 
-	It first do a blocking call to uiMainStep that
+	It first do a blocking call to dsk_process_ui_event that
 	wait for pending GUI events. This blocking call also exit
-	when there are pending node events, because uiLoopWakeup
+	when there are pending node events, because dsk_wakeup_ui_loop
 	function posts a GUI event
 	from the background thread for this purpose.
  */
@@ -125,7 +125,7 @@ static void main_thread(uv_timer_t *handle) {
 		ln_set_main_thread_waiting(true);
 		DSK_DEBUG("+++ ln_set_main_thread_waiting true");
 
-		gui_running = uiMainStep(true);
+		gui_running = dsk_process_ui_event(true);
 		DSK_DEBUG("+++ uiWaitForEvents done");
 
 		ln_set_main_thread_waiting(false);
@@ -138,8 +138,8 @@ static void main_thread(uv_timer_t *handle) {
 	}
 
 	/* dequeue and run every event pending */
-	while (gui_running && uiEventsPending()) {
-		gui_running = uiMainStep(false);
+	while (gui_running && dsk_ui_events_pending()) {
+		gui_running = dsk_process_ui_event(false);
 	}
 	DSK_DEBUG("+++ all GUI events worked.");
 
@@ -216,8 +216,6 @@ DSK_DEFINE_FUNCTION(libdesktop, startEventLoop) {
 	ln_set_background_thread_waiting(false);
 	ln_set_main_thread_quitted(false);
 
-	/* init libui event loop */
-	uiMainSteps();
 	DSK_DEBUG("libui loop initialized");
 
 	/* start the background thread that check for node evnts pending */
@@ -267,9 +265,9 @@ DSK_DEFINE_FUNCTION(libdesktop, stopEventLoop) {
 
 	DSK_DEBUG("visible windows cleaned up");
 
-	uiQuit();
+	dsk_quit();
 
-	DSK_DEBUG("uiQuit called");
+	DSK_DEBUG("dsk_quit called");
 
 	return NULL;
 }
