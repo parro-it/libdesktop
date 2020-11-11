@@ -35,7 +35,7 @@ void dsk_modexports_def_free(dsk_modexports_def *exports) {
 	for (uint32_t i = 0; i < exports->members_count; i++) {
 		dsk_export_def *def = exports->members[i];
 		// free the properties of the export, allocated in dsk_export_def_register_member
-		//printf("def: %p props:%p\n", def, def->properties);
+		// printf("def: %p props:%p\n", def, def->properties);
 		if (def->malloced) {
 			free(def->properties);
 		}
@@ -259,17 +259,28 @@ DSK_JS_FUNC(dsk_getPropBOOL) {
 	return ret;
 }
 
-DSK_JS_FUNC(dsk_setPropSTR) {
-	DSK_JS_FUNC_INIT();
-	DSK_AT_LEAST_NARGS(1);
-	char *value;
+napi_status dsk_get_utf8_cstr(napi_env env, napi_value str, char **result) {
+	DSK_ONERROR_THROW_RET(napi_pending_exception);
+
 	size_t value_len;
-	DSK_NAPI_CALL(napi_get_value_string_utf8(env, argv[0], NULL, 0, &value_len));
-	value = malloc(value_len + 1);
+	DSK_NAPI_CALL(napi_get_value_string_utf8(env, str, NULL, 0, &value_len));
+	char *value = malloc(value_len + 1);
 	if (value == NULL) {
 		DSK_FAILURE("out of memory");
 	}
-	DSK_NAPI_CALL(napi_get_value_string_utf8(env, argv[0], value, value_len, &value_len));
+	DSK_NAPI_CALL(napi_get_value_string_utf8(env, str, value, value_len + 1, &value_len));
+
+	*result = value;
+
+	return napi_ok;
+}
+
+DSK_JS_FUNC(dsk_setPropSTR) {
+	DSK_JS_FUNC_INIT();
+	DSK_AT_LEAST_NARGS(1);
+
+	char *value;
+	DSK_NAPI_CALL(dsk_get_utf8_cstr(env, argv[0], &value));
 
 	void *instance;
 	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&instance));

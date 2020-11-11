@@ -145,6 +145,7 @@ void dsk_connect_event(UIHandle widget, char *eventname, struct dsk_event_args *
 void dsk_ui_set_prop_s(void *instance, char *value, void **datas) {
 	GtkWidget *widget = instance;
 	char *propname = datas[2];
+	printf("propname %s=%s\n", propname, value);
 	g_object_set(widget, propname, value, NULL);
 }
 
