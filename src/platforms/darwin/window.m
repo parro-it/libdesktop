@@ -27,7 +27,7 @@ DSK_DEFINE_CLASS(libdesktop, Window) {
 							NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskResizable
 					backing:NSBackingStoreBuffered
 					  defer:NO];
-	DSK_NAPI_CALL(dsk_wrap_widget(env, win, this));
+	DSK_NAPI_CALL(dsk_wrap_widget(env, win, this, argv[0]));
 
 	napi_value Container;
 	napi_value container;

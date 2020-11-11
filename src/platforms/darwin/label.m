@@ -28,7 +28,7 @@ DSK_DEFINE_CLASS(libdesktop, Label) {
 	[widget setBezeled:NO];
 	[widget setAlignment:NSTextAlignmentRight];
 
-	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this));
+	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this, argv[0]));
 
 	return this;
 }
