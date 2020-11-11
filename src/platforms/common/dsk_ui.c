@@ -41,7 +41,7 @@ void dsk_add_child(napi_env env, UIHandle parentHandle, UIHandle childHandle) {
 
 #define DSK_VOID()
 
-void dsk_append_all_children(napi_env env, UIHandle widget, napi_value children) {
+void dsk_add_children(napi_env env, UIHandle widget, napi_value children) {
 	DSK_ONERROR_UNCAUGHT_RET(DSK_VOID());
 
 	uint32_t len;
@@ -53,8 +53,8 @@ void dsk_append_all_children(napi_env env, UIHandle widget, napi_value children)
 		DSK_NAPI_CALL(napi_create_uint32(env, i, &idx));
 		napi_value child;
 		DSK_NAPI_CALL(napi_get_property(env, children, idx, &child));
-		napi_valuetype type;
-		DSK_NAPI_CALL(napi_typeof(env, child, &type));
+		// napi_valuetype type;
+		// DSK_NAPI_CALL(napi_typeof(env, child, &type));
 		// printf("napi_get_property %d %p\n", type==napi_null, child);
 
 		UIHandle childHandle = NULL;

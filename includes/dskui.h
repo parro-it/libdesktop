@@ -5,12 +5,28 @@
 
 typedef void *UIHandle;
 
+typedef struct DskControlInterface {
+	napi_status (*get_prop)(napi_env env, UIHandle control, const char *prop_name,
+							void **prop_value);
+	napi_status (*set_prop)(napi_env env, UIHandle control, const char *prop_name,
+							void *prop_value);
+	napi_status (*preferred_size)(napi_env env, UIHandle control, int *width, int *height);
+	napi_status (*reposition)(napi_env env, UIHandle control, int x, int y, int width, int height);
+
+} DskControlInterface;
+
+typedef struct DskContainerInterface {
+	DskControlInterface controlInterface;
+	napi_status (*add_child)(napi_env env, UIHandle container, UIHandle child);
+	napi_status (*remove_child)(napi_env env, UIHandle container, UIHandle child);
+} DskContainerInterface;
+
 // widget interface, implemented in every native platform
 
 YGNodeRef dsk_widget_get_node(napi_env env, napi_value widget);
 void dsk_widget_set_node(napi_env env, napi_value widget, YGNodeRef node);
 void dsk_get_preferred_sizes(UIHandle widget, int *width, int *height);
-void widget_finalize(napi_env env, void *finalize_data, void *finalize_hint);
+// void widget_finalize(napi_env env, void *finalize_data, void *finalize_hint);
 
 void dsk_platform_container_add_child(UIHandle parent, UIHandle child);
 void dsk_widget_reposition(napi_env env, UIHandle container, UIHandle widget, float x, float y,
@@ -20,7 +36,7 @@ void dsk_widget_reposition(napi_env env, UIHandle container, UIHandle widget, fl
 
 void dsk_add_child(napi_env env, UIHandle parentHandle, UIHandle childHandle);
 
-void dsk_append_all_children(napi_env env, UIHandle widget, napi_value children);
+void dsk_add_children(napi_env env, UIHandle widget, napi_value children);
 void dsk_calculate_layout(napi_env env, UIHandle container, YGNodeRef root, float availableWidth,
 						  float availableHeight);
 void dsk_set_children_preferred_sizes(YGNodeRef node, UIHandle widget);

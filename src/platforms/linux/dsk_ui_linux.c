@@ -198,6 +198,7 @@ void dsk_ui_set_prop_bool(void *instance, bool value, void **datas) {
 	char *propname = datas[2];
 	g_object_set(widget, propname, value, NULL);
 }
+
 bool dsk_ui_get_prop_bool(void *instance, void **datas) {
 	GtkWidget *widget = instance;
 	char *propname = datas[2];

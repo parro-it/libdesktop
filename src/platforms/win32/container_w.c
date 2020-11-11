@@ -5,7 +5,7 @@
 
 void dsk_widget_reposition(napi_env env, UIHandle container, UIHandle widget, float x, float y,
 						   float width, float height) {
-	printf("SET POS %p TO %f, %f\n", widget,x,y);
+	printf("SET POS %p TO %f, %f\n", widget, x, y);
 	bool ret =
 		SetWindowPos((HWND)widget, HWND_TOP, (int)x, (int)y, (int)width, (int)height, SWP_NOZORDER);
 	if (!ret) {
@@ -14,7 +14,7 @@ void dsk_widget_reposition(napi_env env, UIHandle container, UIHandle widget, fl
 }
 
 void dsk_platform_container_add_child(UIHandle parent, UIHandle child) {
-	
+
 	SetParent((HWND)child, (HWND)parent);
 }
 
@@ -25,7 +25,6 @@ DSK_DEFINE_CLASS(libdesktop, Container) {
 	DSK_JS_FUNC_INIT();
 	DSK_EXACTLY_NARGS(2);
 
-
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 	HWND widget = CreateWindowExW(WS_EX_CONTROLPARENT, L"DSKcontainerClass", L"", WS_CHILD,
 								  CW_USEDEFAULT, CW_USEDEFAULT,
@@ -34,7 +33,7 @@ DSK_DEFINE_CLASS(libdesktop, Container) {
 								  // even if it doesn't, we're adjusting it later
 								  800, 600, dummy, NULL, hInstance, NULL);
 
-	//printf("CREATED container\n");
+	// printf("CREATED container\n");
 
 	dsk_wrap_widget(env, widget, this);
 
@@ -42,16 +41,14 @@ DSK_DEFINE_CLASS(libdesktop, Container) {
 		napi_throw_error(env, NULL, "Error while setting widget properties.\n");
 		return NULL;
 	}
-	
-	dsk_append_all_children(env, widget, argv[1]);
+
+	dsk_add_children(env, widget, argv[1]);
 
 	SetWindowPos(widget, 0, 0, 0, 0, 0,
 				 SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
 
 	return this;
 }
-
-
 
 static LRESULT CALLBACK containerWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	/*RECT r;
@@ -137,10 +134,10 @@ void dsk_get_preferred_sizes(UIHandle widget, int *width, int *height) {
 
 	*width = sz.width;
 	if (*width < 130) {
-		
+
 	}
 	*height = 30;*/
-	printf("dsk_get_preferred_sizes %p\n",widget);
+	printf("dsk_get_preferred_sizes %p\n", widget);
 	*height = 30;
 	*width = 130;
 }

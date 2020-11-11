@@ -35,7 +35,7 @@ DSK_DEFINE_CLASS(libdesktop, Container) {
 		return NULL;
 	}
 
-	dsk_append_all_children(env, widget, argv[1]);
+	dsk_add_children(env, widget, argv[1]);
 
 	return this;
 }
