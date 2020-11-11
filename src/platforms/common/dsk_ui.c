@@ -39,58 +39,24 @@ void dsk_add_child(napi_env env, UIHandle parentHandle, UIHandle childHandle) {
 	YGNodeInsertChild(node, childNode, childrenCount);
 }
 
-#define DSK_VOID()
-
-void dsk_add_children(napi_env env, UIHandle widget, napi_value children) {
-	DSK_ONERROR_UNCAUGHT_RET(DSK_VOID());
-
-	uint32_t len;
-	DSK_NAPI_CALL(napi_get_array_length(env, children, &len));
-	// printf("len %d\n", len);
-	for (uint32_t i = 0; i < len; i++) {
-		// printf("i %d\n", i);
-		napi_value idx;
-		DSK_NAPI_CALL(napi_create_uint32(env, i, &idx));
-		napi_value child;
-		DSK_NAPI_CALL(napi_get_property(env, children, idx, &child));
-		// napi_valuetype type;
-		// DSK_NAPI_CALL(napi_typeof(env, child, &type));
-		// printf("napi_get_property %d %p\n", type==napi_null, child);
-
+static bool add_children(napi_env env, UIHandle widget, napi_value children) {
+	DSK_ONERROR_THROW_RET(true);
+	DSK_ARRAY_FOREACH(children, {
 		UIHandle childHandle = NULL;
-		DSK_NAPI_CALL(napi_unwrap(env, child, (void **)&childHandle));
-		// printf("napi_unwrap childHandle %d: %p\n", i, childHandle);
-
+		DSK_NAPI_CALL(napi_unwrap(env, dsk_iter_item, (void **)&childHandle));
 		dsk_add_child(env, widget, childHandle);
-	}
+	});
+	return false;
 }
-
-static void widget_finalize(napi_env env, void *finalize_data, void *finalize_hint) {
-	napi_value this = (napi_value)finalize_hint;
-	YGNodeRef node = dsk_widget_get_node(env, this);
-	YGNodeFree(node);
-}
-
-DSK_EXTEND_CLASS(libdesktop, Style);
 
 static bool set_properties(napi_env env, napi_value props, napi_value target) {
-	char *dsk_error_msg = NULL;
+	DSK_ONERROR_THROW_RET(true);
 	// printf("set_properties 1 %p %p\n", props, target);
 	napi_value names;
 	DSK_NAPI_CALL(napi_get_property_names(env, props, &names));
-	// printf("napi_get_property_names\n");
-	uint32_t len;
-	DSK_NAPI_CALL(napi_get_array_length(env, names, &len));
-
-	// printf("set_properties 2\n");
-	for (uint32_t i = 0; i < len; i++) {
-		// printf("set_properties 3 %d\n", i);
-		napi_value idx;
-		napi_value propName;
+	DSK_ARRAY_FOREACH(names, {
+		napi_value propName = dsk_iter_item;
 		bool hasProp;
-
-		DSK_NAPI_CALL(napi_create_uint32(env, i, &idx));
-		DSK_NAPI_CALL(napi_get_property(env, names, idx, &propName));
 
 		size_t len;
 		DSK_NAPI_CALL(napi_get_value_string_utf8(env, propName, NULL, 0, &len));
@@ -107,7 +73,6 @@ static bool set_properties(napi_env env, napi_value props, napi_value target) {
 
 			if (type == napi_object) {
 				napi_value styleProp;
-				// printf("recurse on %s\n",propName_s);
 				DSK_NAPI_CALL(napi_get_property(env, target, propName, &styleProp));
 				if (set_properties(env, propValue, styleProp)) {
 					goto dsk_error;
@@ -115,23 +80,29 @@ static bool set_properties(napi_env env, napi_value props, napi_value target) {
 				continue;
 			}
 
-			// printf("set property %s\n",propName_s);
-
 			DSK_NAPI_CALL(napi_set_property(env, target, propName, propValue));
 		}
-	}
-	// printf("set_properties 1000\n");
+	});
 	return false;
-dsk_error:
-	napi_throw_error(env, NULL, dsk_error_msg);
-	return true;
 }
 
-napi_status dsk_wrap_widget(napi_env env, UIHandle widget, napi_value this, napi_value props) {
+static void widget_finalize(napi_env env, void *finalize_data, void *finalize_hint) {
+	napi_value this = (napi_value)finalize_hint;
+	YGNodeRef node = dsk_widget_get_node(env, this);
+	YGNodeFree(node);
+}
+
+DSK_EXTEND_CLASS(libdesktop, Style);
+
+napi_status dsk_wrap_widget(napi_env env, UIHandle widget, napi_value this, napi_value *argv) {
 	DSK_ONERROR_THROW_RET(napi_pending_exception);
 
+	assert(argv != NULL);
 	assert(widget != NULL);
 	assert(this != NULL);
+
+	napi_value props = argv[0];
+	napi_value children = argv[1];
 
 	DSK_NAPI_CALL(napi_wrap(env, this, widget, widget_finalize, this, NULL));
 
@@ -158,6 +129,10 @@ napi_status dsk_wrap_widget(napi_env env, UIHandle widget, napi_value this, napi
 	DSK_NAPI_CALL(napi_set_named_property(env, this, "events", events));
 
 	if (set_properties(env, props, this)) {
+		return napi_pending_exception;
+	}
+
+	if (add_children(env, widget, children)) {
 		return napi_pending_exception;
 	}
 

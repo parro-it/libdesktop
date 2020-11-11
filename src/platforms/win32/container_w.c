@@ -35,9 +35,7 @@ DSK_DEFINE_CLASS(libdesktop, Container) {
 
 	// printf("CREATED container\n");
 
-	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this, argv[0]));
-
-	dsk_add_children(env, widget, argv[1]);
+	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this, argv));
 
 	SetWindowPos(widget, 0, 0, 0, 0, 0,
 				 SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);

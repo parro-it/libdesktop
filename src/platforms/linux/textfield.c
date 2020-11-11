@@ -11,7 +11,7 @@ DSK_DEFINE_CLASS(libdesktop, Textfield) {
 
 	GtkWidget *widget = gtk_entry_new();
 	/////
-	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this, argv[0]));
+	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this, argv));
 	gtk_widget_add_events(widget, GDK_BUTTON_PRESS_MASK);
 
 	napi_value events;

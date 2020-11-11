@@ -27,9 +27,7 @@ DSK_DEFINE_CLASS(libdesktop, Container) {
 	DSK_EXACTLY_NARGS(2);
 
 	GtkWidget *widget = gtk_fixed_new();
-	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this, argv[0]));
-
-	dsk_add_children(env, widget, argv[1]);
+	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this, argv));
 
 	return this;
 }

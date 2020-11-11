@@ -13,10 +13,6 @@ typedef struct DskControlInterface {
 	napi_status (*preferred_size)(napi_env env, UIHandle control, int *width, int *height);
 	napi_status (*reposition)(napi_env env, UIHandle control, int x, int y, int width, int height);
 
-} DskControlInterface;
-
-typedef struct DskContainerInterface {
-	DskControlInterface controlInterface;
 	napi_status (*add_child)(napi_env env, UIHandle container, UIHandle child);
 	napi_status (*remove_child)(napi_env env, UIHandle container, UIHandle child);
 } DskContainerInterface;
@@ -26,27 +22,24 @@ typedef struct DskContainerInterface {
 YGNodeRef dsk_widget_get_node(napi_env env, napi_value widget);
 void dsk_widget_set_node(napi_env env, napi_value widget, YGNodeRef node);
 void dsk_get_preferred_sizes(UIHandle widget, int *width, int *height);
-// void widget_finalize(napi_env env, void *finalize_data, void *finalize_hint);
 
 void dsk_platform_container_add_child(UIHandle parent, UIHandle child);
 void dsk_widget_reposition(napi_env env, UIHandle container, UIHandle widget, float x, float y,
 						   float width, float height);
 
 // container interface, implemented in common platform
-
 void dsk_add_child(napi_env env, UIHandle parentHandle, UIHandle childHandle);
 
-void dsk_add_children(napi_env env, UIHandle widget, napi_value children);
+// void dsk_add_children(napi_env env, UIHandle widget, napi_value children);
 void dsk_calculate_layout(napi_env env, UIHandle container, YGNodeRef root, float availableWidth,
 						  float availableHeight);
 void dsk_set_children_preferred_sizes(YGNodeRef node, UIHandle widget);
 
 // widget interface, implemented in common platform
 
-napi_status dsk_wrap_widget(napi_env env, UIHandle widget, napi_value this, napi_value props);
+napi_status dsk_wrap_widget(napi_env env, UIHandle widget, napi_value this, napi_value *argv);
 UIHandle dsk_unwrap_widget(napi_env env, napi_value this);
 napi_value dsk_widget_wrapper(napi_env env, UIHandle widget);
-// bool dsk_set_properties(napi_env env, napi_value props, napi_value target);
 
 // widget events, implemented in common platform
 

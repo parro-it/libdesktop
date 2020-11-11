@@ -81,40 +81,29 @@ DSK_DEFINE_METHOD(libdesktop, Event, invoke) {
 
 	DSK_NAPI_CALL(napi_get_named_property(env, this, "listeners", &listeners));
 
-	uint32_t len;
-	DSK_NAPI_CALL(napi_get_array_length(env, listeners, &len));
-
 	napi_value null;
 	DSK_NAPI_CALL(napi_get_null(env, &null));
+
 	napi_value result;
 
-	for (uint32_t i = 0; i < len; i++) {
-		napi_value idx;
-		napi_value listener;
-		DSK_NAPI_CALL(napi_create_uint32(env, i, &idx));
-		DSK_NAPI_CALL(napi_get_property(env, listeners, idx, &listener));
+	DSK_ARRAY_FOREACH(listeners, {
+		napi_value listener = dsk_iter_item;
 		DSK_NAPI_CALL(napi_call_function(env, null, listener, 0, NULL, &result));
-	}
+	})
+
 	return NULL;
 }
 
 napi_value dsk_event_new_for_widget(napi_env env, const char *eventname, napi_value sender) {
-	char *dsk_error_msg;
+	DSK_ONERROR_THROW_RET(NULL);
 
-	napi_value constructor;
-	napi_value event;
 	napi_value eventNameJs;
-
 	DSK_NAPI_CALL(napi_create_string_utf8(env, eventname, NAPI_AUTO_LENGTH, &eventNameJs));
-	DSK_NAPI_CALL(napi_get_reference_value(env, libdesktop_Event_ref, &constructor));
 
 	napi_value args[2] = {eventNameJs, sender};
-	DSK_NAPI_CALL(napi_new_instance(env, constructor, 2, args, &event));
+	napi_value event = dsk_new_instance(env, libdesktop_Event_ref, 2, args);
 
 	return event;
-dsk_error:
-	napi_throw_error(env, NULL, dsk_error_msg);
-	return NULL;
 }
 
 void dsk_on_event(UIHandle *uihandle, void *data) {

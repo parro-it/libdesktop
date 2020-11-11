@@ -23,7 +23,7 @@ DSK_DEFINE_CLASS(libdesktop, Textfield) {
 					 // even if it doesn't, we're adjusting it later
 					 100, 20, dummy, NULL, hInstance, NULL);
 
-	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this, argv[0]));
+	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this, argv));
 
 	return NULL;
 }

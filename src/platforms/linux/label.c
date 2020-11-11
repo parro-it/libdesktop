@@ -15,7 +15,7 @@ DSK_DEFINE_CLASS(libdesktop, Label) {
 	// GdkRGBA color;
 	// gdk_rgba_parse (&color, "rgba(100,90,80,1)");
 	// gtk_widget_override_background_color(widget,GTK_STATE_FLAG_NORMAL, &color);
-	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this, argv[0]));
+	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this, argv));
 
 	napi_value events;
 	DSK_NAPI_CALL(napi_get_named_property(env, this, "events", &events));

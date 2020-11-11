@@ -50,9 +50,7 @@ DSK_DEFINE_CLASS(libdesktop, Container) {
 	// widget.translatesAutoresizingMaskIntoConstraints = true;
 	// widget.frame = NSMakeRect(0,0,800,600);
 	//[widget setHidden:NO];
-	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this, argv[0]));
-
-	dsk_add_children(env, widget, argv[1]);
+	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this, argv));
 
 	return this;
 }

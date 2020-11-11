@@ -32,44 +32,9 @@ DSK_DEFINE_CLASS(libdesktop, Textfield) {
 	[widget setEditable:true];
 	[widget setSelectable:true];
 	[widget setHidden:false];
-	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this, argv[0]));
+	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this, argv));
 
 	return this;
 }
-/*
-static LIBUI_FUNCTION(setStringValue) {
-	INIT_ARGS(1);
-	ARG_STRING(val, 0)
 
-	NSTextField *widget;
-	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&widget));
-
-	[widget setStringValue:[NSString stringWithUTF8String:val]];
-
-	return NULL;
-}
-
-static LIBUI_FUNCTION(getStringValue) {
-	INIT_EMPTY_ARGS();
-	NSTextField *widget;
-	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&widget));
-
-	NSString *str = [widget stringValue];
-	napi_value res;
-	DSK_NAPI_CALL(napi_create_string_utf8(env, [str cStringUsingEncoding:NSUTF8StringEncoding],
-										  NAPI_AUTO_LENGTH, &res));
-	return res;
-}
-
-napi_value textfield_init(napi_env env, napi_value exports) {
-	DEFINE_MODULE()
-
-	dsk_define_class(env, module, "Textfield", textfieldNew,
-					 ((napi_property_descriptor[]){
-						 {.utf8name = "text", .getter = getStringValue, .setter = setStringValue},
-						 // DSK_RWPROP_BOOL(visible,"enabled"),
-						 // DSK_CHILDPROP_I32(left,"x"),
-						 // DSK_CHILDPROP_I32(top,"y")
-					 }));
-	return exports;
-}*/
+DSK_UI_PROP_S(libdesktop, Textfield, text, "stringValue");

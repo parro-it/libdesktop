@@ -158,7 +158,7 @@
  */
 #define DSK_ONERROR_THROW_RET(WHAT)                                                                \
 	/* error handler */                                                                            \
-	char *dsk_error_msg;                                                                           \
+	char *dsk_error_msg = NULL;                                                                    \
 	goto dsk_continue;                                                                             \
 	goto dsk_error;                                                                                \
 	dsk_error:                                                                                     \
@@ -185,7 +185,7 @@
  */
 #define DSK_ONERROR_FATAL_RET(WHAT)                                                                \
 	/* error handler */                                                                            \
-	char *dsk_error_msg;                                                                           \
+	char *dsk_error_msg = NULL;                                                                    \
 	goto dsk_continue;                                                                             \
 	goto dsk_error;                                                                                \
 	dsk_error:                                                                                     \
@@ -209,7 +209,7 @@
  */
 #define DSK_ONERROR_UNCAUGHT_RET(WHAT)                                                             \
 	/* error handler */                                                                            \
-	char *dsk_error_msg;                                                                           \
+	char *dsk_error_msg = NULL;                                                                    \
 	goto dsk_continue;                                                                             \
 	goto dsk_error;                                                                                \
 	dsk_error : {                                                                                  \
@@ -807,6 +807,19 @@ DSK_JS_FUNC(dsk_getPropSTR);
 						((void *[]){NATIVE_GETTER, NATIVE_SETTER}))
 
 bool dsk_call_cb(napi_env env, napi_ref cb_ref);
+
+// other utilities
+
+#define DSK_ARRAY_FOREACH(ARR, BLOCK)                                                              \
+	uint32_t dsk_iter_len;                                                                         \
+	DSK_NAPI_CALL(napi_get_array_length(env, ARR, &dsk_iter_len));                                 \
+	for (uint32_t dsk_iter_i = 0; dsk_iter_i < dsk_iter_len; dsk_iter_i++) {                       \
+		napi_value dsk_iter_item;                                                                  \
+		napi_value dsk_iter_idx;                                                                   \
+		DSK_NAPI_CALL(napi_create_uint32(env, dsk_iter_i, &dsk_iter_idx));                         \
+		DSK_NAPI_CALL(napi_get_property(env, ARR, dsk_iter_idx, &dsk_iter_item));                  \
+		BLOCK;                                                                                     \
+	}
 
 // debug log
 
