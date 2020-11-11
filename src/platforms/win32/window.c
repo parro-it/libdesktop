@@ -97,7 +97,7 @@ DSK_DEFINE_CLASS(libdesktop, Window) {
 						800, 600, NULL, NULL, hInstance, NULL);
 
 	napi_value nochildren;
-	DSK_NAPI_CALL(napi_create_array_with_length(env,0,&nochildren);
+	DSK_NAPI_CALL(napi_create_array_with_length(env, 0, &nochildren));
 	DSK_NAPI_CALL(dsk_wrap_widget(env, win, this, (napi_value[]){argv[0], nochildren}));
 
 	napi_value Container;
