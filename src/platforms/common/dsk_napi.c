@@ -262,6 +262,14 @@ DSK_JS_FUNC(dsk_getPropBOOL) {
 napi_status dsk_get_utf8_cstr(napi_env env, napi_value str, char **result) {
 	DSK_ONERROR_THROW_RET(napi_pending_exception);
 
+	napi_valuetype type;
+	DSK_NAPI_CALL(napi_typeof(env, str, &type));
+
+	if (type == napi_null) {
+		*result = NULL;
+		return napi_ok;
+	}
+
 	size_t value_len;
 	DSK_NAPI_CALL(napi_get_value_string_utf8(env, str, NULL, 0, &value_len));
 	char *value = malloc(value_len + 1);
@@ -272,6 +280,54 @@ napi_status dsk_get_utf8_cstr(napi_env env, napi_value str, char **result) {
 
 	*result = value;
 
+	return napi_ok;
+}
+
+napi_status dsk_get_utf8_napistr(napi_env env, const char *str, napi_value *result) {
+	DSK_ONERROR_THROW_RET(napi_pending_exception);
+
+	if (str == NULL) {
+		DSK_NAPI_CALL(napi_get_null(env, result));
+		return napi_ok;
+	}
+
+	DSK_NAPI_CALL(napi_create_string_utf8(env, str, NAPI_AUTO_LENGTH, result));
+	return napi_ok;
+}
+
+napi_status dsk_get_utf16_cstr(napi_env env, napi_value str, char16_t **result) {
+	DSK_ONERROR_THROW_RET(napi_pending_exception);
+
+	napi_valuetype type;
+	DSK_NAPI_CALL(napi_typeof(env, str, &type));
+
+	if (type == napi_null) {
+		*result = NULL;
+		return napi_ok;
+	}
+
+	size_t value_len;
+	DSK_NAPI_CALL(napi_get_value_string_utf16(env, str, NULL, 0, &value_len));
+	char16_t *value = malloc(sizeof(char16_t) * (value_len + 1));
+	if (value == NULL) {
+		DSK_FAILURE("out of memory");
+	}
+	DSK_NAPI_CALL(napi_get_value_string_utf16(env, str, value, 2 * (value_len + 1), &value_len));
+
+	*result = value;
+
+	return napi_ok;
+}
+
+napi_status dsk_get_utf16_napistr(napi_env env, const char16_t *str, napi_value *result) {
+	DSK_ONERROR_THROW_RET(napi_pending_exception);
+
+	if (str == NULL) {
+		DSK_NAPI_CALL(napi_get_null(env, result));
+		return napi_ok;
+	}
+
+	DSK_NAPI_CALL(napi_create_string_utf16(env, str, NAPI_AUTO_LENGTH, result));
 	return napi_ok;
 }
 
@@ -307,56 +363,32 @@ DSK_JS_FUNC(dsk_getPropSTR) {
 
 	dsk_GetterSTR *getter = datas[0];
 	char *result = getter(instance, datas);
-	if (result == NULL) {
-		napi_value ret;
-		DSK_NAPI_CALL(napi_get_null(env, &ret));
-		return ret;
-	}
-
 	napi_value ret;
-	DSK_NAPI_CALL(napi_create_string_utf8(env, result, NAPI_AUTO_LENGTH, &ret));
+	DSK_NAPI_CALL(dsk_get_utf8_napistr(env, result, &ret));
 	return ret;
 }
 
-bool dsk_call_cb(napi_env env, napi_ref cb_ref) {
-	DSK_ONERROR_THROW_RET(true);
-
-	napi_value null;
+napi_status dsk_call_cb_async(napi_env env, napi_value cb, size_t argc, const napi_value *argv) {
+	DSK_ONERROR_THROW_RET(napi_pending_exception);
 
 	napi_handle_scope handle_scope;
 	DSK_NAPI_CALL(napi_open_handle_scope(env, &handle_scope));
 
-	DSK_NAPI_CALL(napi_get_null(env, &null));
-
-	napi_value async_resource_name;
-	DSK_NAPI_CALL(napi_create_string_utf8(env, "promise", NAPI_AUTO_LENGTH, &async_resource_name));
+	napi_value res_name;
+	DSK_NAPI_CALL(napi_create_string_utf8(env, "libdesktop", NAPI_AUTO_LENGTH, &res_name));
 
 	napi_async_context async_context;
-	DSK_NAPI_CALL(napi_async_init(env, NULL, async_resource_name, &async_context));
+	DSK_NAPI_CALL(napi_async_init(env, NULL, res_name, &async_context));
 
 	napi_value resource_object;
 	DSK_NAPI_CALL(napi_create_object(env, &resource_object));
 
-	napi_value cb;
-	DSK_NAPI_CALL(napi_get_reference_value(env, cb_ref, &cb));
-
 	napi_value result;
-	napi_status status =
-		napi_make_callback(env, async_context, resource_object, cb, 0, NULL, &result);
-	if (status == napi_pending_exception) {
-		napi_value last_exception;
-		napi_get_and_clear_last_exception(env, &last_exception);
-		napi_fatal_exception(env, last_exception);
-		return true;
-	}
-	DSK_NAPI_CALL(status);
-
-	uint32_t new_ref_count;
-	DSK_NAPI_CALL(napi_reference_unref(env, cb_ref, &new_ref_count));
+	DSK_NAPI_CALL(napi_make_callback(env, async_context, resource_object, cb, argc, argv, &result));
 
 	DSK_NAPI_CALL(napi_async_destroy(env, async_context));
 
 	DSK_NAPI_CALL(napi_close_handle_scope(env, handle_scope));
 
-	return false;
+	return napi_ok;
 }

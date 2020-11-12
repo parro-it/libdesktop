@@ -109,7 +109,7 @@ napi_value dsk_event_new_for_widget(napi_env env, const char *eventname, napi_va
 void dsk_on_event(UIHandle *uihandle, void *data) {
 	struct dsk_event_args *args = data;
 	napi_env env = args->env;
-	char *dsk_error_msg;
+	DSK_ONERROR_UNCAUGHT_RET(;);
 
 	napi_handle_scope handle_scope;
 	DSK_NAPI_CALL(napi_open_handle_scope(env, &handle_scope));
@@ -120,38 +120,10 @@ void dsk_on_event(UIHandle *uihandle, void *data) {
 	DSK_NAPI_CALL(napi_get_reference_value(env, args->sender, &sender));
 	DSK_NAPI_CALL(napi_get_reference_value(env, args->event, &event));
 
-	napi_value resource_object;
-	DSK_NAPI_CALL(napi_create_object(env, &resource_object));
-
-	napi_value async_resource_name;
-	DSK_NAPI_CALL(
-		napi_create_string_utf8(env, "libdesktop", NAPI_AUTO_LENGTH, &async_resource_name));
-
-	napi_async_context async_context;
-	DSK_NAPI_CALL(napi_async_init(env, NULL, async_resource_name, &async_context));
-
 	napi_value invoke;
 	DSK_NAPI_CALL(napi_get_named_property(env, event, "invoke", &invoke));
 
-	napi_value result;
-	napi_status res_status =
-		napi_make_callback(env, async_context, event, invoke, 1, (napi_value[]){sender}, &result);
-	if (res_status == napi_pending_exception) {
-		napi_value last_exception;
-		napi_get_and_clear_last_exception(env, &last_exception);
-		napi_fatal_exception(env, last_exception);
-		return;
-	}
-	DSK_NAPI_CALL(res_status);
+	dsk_call_cb_async(env, invoke, 1, (napi_value[]){sender});
 
 	DSK_NAPI_CALL(napi_close_handle_scope(env, handle_scope));
-
-	return;
-dsk_error:;
-	napi_value uncErr;
-	napi_value err_msg;
-	napi_create_string_utf8(env, dsk_error_msg, NAPI_AUTO_LENGTH, &err_msg);
-	napi_create_error(env, NULL, err_msg, &uncErr);
-	napi_fatal_exception(env, uncErr);
-	return;
 }

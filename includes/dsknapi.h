@@ -98,7 +98,25 @@
 		if (DSK__status != napi_ok) {                                                              \
 			const napi_extended_error_info *err;                                                   \
 			napi_get_last_error_info(env, &err);                                                   \
-			dsk_error_msg = (char *)err->error_message;                                            \
+                                                                                                   \
+			bool DSK__exception_pending;                                                           \
+			if (DSK__status == napi_pending_exception) {                                           \
+				printf("DSK__status == napi_pending_exception\n");                                 \
+				DSK__exception_pending = true;                                                     \
+			} else {                                                                               \
+				printf("DSK__status != napi_pending_exception\n");                                 \
+				napi_is_exception_pending(env, &DSK__exception_pending);                           \
+			}                                                                                      \
+			if (DSK__exception_pending) {                                                          \
+				napi_value last_exception, last_exception_msg;                                     \
+				napi_get_and_clear_last_exception(env, &last_exception);                           \
+				napi_coerce_to_string(env, last_exception, &last_exception_msg);                   \
+				dsk_get_utf8_cstr(env, last_exception_msg, &dsk_error_msg);                        \
+			} else {                                                                               \
+				dsk_error_msg = (char *)err->error_message;                                        \
+			}                                                                                      \
+			printf("err %s\n", dsk_error_msg);                                                     \
+                                                                                                   \
 			goto dsk_error;                                                                        \
 		}                                                                                          \
 	} while (0)
@@ -806,7 +824,7 @@ DSK_JS_FUNC(dsk_getPropSTR);
 	DSK_DEFINE_PROPERTY(libdesktop, Style, NAME, dsk_getPropBOOL, dsk_setPropBOOL,                 \
 						((void *[]){NATIVE_GETTER, NATIVE_SETTER}))
 
-bool dsk_call_cb(napi_env env, napi_ref cb_ref);
+napi_status dsk_call_cb_async(napi_env env, napi_value cb, size_t argc, const napi_value *argv);
 
 // other utilities
 
@@ -820,6 +838,12 @@ bool dsk_call_cb(napi_env env, napi_ref cb_ref);
 		DSK_NAPI_CALL(napi_get_property(env, ARR, dsk_iter_idx, &dsk_iter_item));                  \
 		BLOCK;                                                                                     \
 	}
+
+napi_status dsk_array_push(napi_env env, napi_value arr, napi_value item);
+napi_status dsk_get_utf8_cstr(napi_env env, napi_value str, char **result);
+napi_status dsk_get_utf8_napistr(napi_env env, const char *str, napi_value *result);
+napi_status dsk_get_utf16_cstr(napi_env env, napi_value str, char16_t **result);
+napi_status dsk_get_utf16_napistr(napi_env env, const char16_t *str, napi_value *result);
 
 // debug log
 

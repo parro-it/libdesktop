@@ -103,7 +103,12 @@ static void main_thread(uv_timer_t *handle) {
 		napi_ref ref = event_loop_started_cb_ref;
 		event_loop_started_cb_ref = NULL;
 		ln_set_loop_status(started);
-		dsk_call_cb(resolution_env, ref);
+		napi_handle_scope handle_scope;
+		napi_open_handle_scope(resolution_env, &handle_scope);
+		napi_value val;
+		napi_get_reference_value(resolution_env, ref, &val);
+		dsk_call_cb_async(resolution_env, val, 0, NULL);
+		napi_close_handle_scope(resolution_env, handle_scope);
 	}
 
 	DSK_DEBUG("+++ wait on all_threads_are_waiting");
@@ -177,7 +182,12 @@ static void main_thread(uv_timer_t *handle) {
 		napi_ref ref = event_loop_closed_cb_ref;
 		event_loop_closed_cb_ref = NULL;
 		ln_set_loop_status(stopped);
-		dsk_call_cb(resolution_env, ref);
+		napi_handle_scope handle_scope;
+		napi_open_handle_scope(resolution_env, &handle_scope);
+		napi_value val;
+		napi_get_reference_value(resolution_env, ref, &val);
+		dsk_call_cb_async(resolution_env, val, 0, NULL);
+		napi_close_handle_scope(resolution_env, handle_scope);
 
 		DSK_DEBUG("resolved stop promise");
 	}
