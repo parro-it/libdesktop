@@ -21,8 +21,8 @@ void dsk_calculate_layout(napi_env env, UIHandle container, YGNodeRef root, floa
 }
 
 void dsk_add_child(napi_env env, UIHandle parentHandle, UIHandle childHandle) {
-	napi_value parent = dsk_widget_wrapper(env, parentHandle);
-	napi_value child = dsk_widget_wrapper(env, childHandle);
+	napi_value parent = dsk_widget_get_wrapper(env, parentHandle);
+	napi_value child = dsk_widget_get_wrapper(env, childHandle);
 
 	// napi_ref ref;
 	// napi_create_reference(env,child,1,&ref);

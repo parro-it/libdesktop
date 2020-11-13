@@ -5,43 +5,47 @@
 
 typedef void *UIHandle;
 
-typedef struct DskControlInterface {
-	napi_status (*get_prop)(napi_env env, UIHandle control, const char *prop_name,
-							void **prop_value);
-	napi_status (*set_prop)(napi_env env, UIHandle control, const char *prop_name,
-							void *prop_value);
-	napi_status (*preferred_size)(napi_env env, UIHandle control, int *width, int *height);
-	napi_status (*reposition)(napi_env env, UIHandle control, int x, int y, int width, int height);
-
-	napi_status (*add_child)(napi_env env, UIHandle container, UIHandle child);
-	napi_status (*remove_child)(napi_env env, UIHandle container, UIHandle child);
-} DskContainerInterface;
-
 // widget interface, implemented in every native platform
+// reimplemented on top of DskCtrlI
 
-YGNodeRef dsk_widget_get_node(napi_env env, napi_value widget);
-void dsk_widget_set_node(napi_env env, napi_value widget, YGNodeRef node);
-void dsk_get_preferred_sizes(UIHandle widget, int *width, int *height);
+/*           */ YGNodeRef dsk_widget_get_node(napi_env env, napi_value widget);
+/*           */ void dsk_widget_set_node(napi_env env, napi_value widget, YGNodeRef node);
+/*           */ void dsk_get_preferred_sizes(UIHandle widget, int *width, int *height);
 
-void dsk_platform_container_add_child(UIHandle parent, UIHandle child);
-void dsk_widget_reposition(napi_env env, UIHandle container, UIHandle widget, float x, float y,
-						   float width, float height);
+/*           */ void dsk_platform_container_add_child(UIHandle parent, UIHandle child);
+/*           */ void dsk_widget_reposition(napi_env env, UIHandle container, UIHandle widget,
+										   float x, float y, float width, float height);
 
-// container interface, implemented in common platform
-void dsk_add_child(napi_env env, UIHandle parentHandle, UIHandle childHandle);
+// native properties, implemented in every native platform
+// reimplemented on top of DskCtrlI get_prop & set_prop
 
-// void dsk_add_children(napi_env env, UIHandle widget, napi_value children);
-void dsk_calculate_layout(napi_env env, UIHandle container, YGNodeRef root, float availableWidth,
-						  float availableHeight);
-void dsk_set_children_preferred_sizes(YGNodeRef node, UIHandle widget);
+/*           */ void dsk_ui_set_prop_s(void *instance, char *value, void **datas);
+/*           */ char *dsk_ui_get_prop_s(void *instance, void **datas);
+/*           */ void dsk_ui_set_prop_i32(void *instance, int32_t value, void **datas);
+/*           */ int32_t dsk_ui_get_prop_i32(void *instance, void **datas);
+/*           */ void dsk_ui_set_prop_bool(void *instance, bool value, void **datas);
+/*           */ bool dsk_ui_get_prop_bool(void *instance, void **datas);
 
-// widget interface, implemented in common platform
+// yoga specific container interface, implemented in common platform
 
-napi_status dsk_wrap_widget(napi_env env, UIHandle widget, napi_value this, napi_value *argv);
-UIHandle dsk_unwrap_widget(napi_env env, napi_value this);
-napi_value dsk_widget_wrapper(napi_env env, UIHandle widget);
+// dsk_add_child reimpl as a yoga container specific add_child DskCtrlI method. also customize
+// DskCtrlI remove_child method to remove child from yoga nodes graph
+/*           */ void dsk_add_child(napi_env env, UIHandle parentHandle, UIHandle childHandle);
 
-// widget events, implemented in common platform
+// this 2 reimpl as custom reposition method on DskCtrlI
+/*           */ void dsk_calculate_layout(napi_env env, UIHandle container, YGNodeRef root,
+										  float availableWidth, float availableHeight);
+/*           */ void dsk_set_children_preferred_sizes(YGNodeRef node, UIHandle widget);
+
+// widget helpers, implemented in common platform
+// change to use DskCtrlI object
+// reimplemented on top of DskCtrlI
+/*           */ napi_status dsk_wrap_widget(napi_env env, UIHandle widget, napi_value this,
+											napi_value *argv);
+/*           */ UIHandle dsk_unwrap_widget(napi_env env, napi_value this);
+/*           */ napi_value dsk_widget_get_wrapper(napi_env env, UIHandle widget);
+
+/* reimplemented on top of DskCtrlI ???????? */
 
 napi_value dsk_event_new_for_widget(napi_env env, const char *eventname, napi_value sender);
 
@@ -50,17 +54,7 @@ struct dsk_event_args {
 	napi_ref sender;
 	napi_ref event;
 };
-
 void dsk_connect_event(UIHandle widget, char *eventname, struct dsk_event_args *args);
-
-// native properties, implemented in every native platform
-
-void dsk_ui_set_prop_s(void *instance, char *value, void **datas);
-char *dsk_ui_get_prop_s(void *instance, void **datas);
-void dsk_ui_set_prop_i32(void *instance, int32_t value, void **datas);
-int32_t dsk_ui_get_prop_i32(void *instance, void **datas);
-void dsk_ui_set_prop_bool(void *instance, bool value, void **datas);
-bool dsk_ui_get_prop_bool(void *instance, void **datas);
 
 #define DSK_UI_PROP_S(MODNAME, CLASSNAME, PROPNAME, UI_NAME)                                       \
 	DSK_DEFINE_PROPERTY(MODNAME, CLASSNAME, PROPNAME, dsk_getPropSTR, dsk_setPropSTR,              \

@@ -24,7 +24,7 @@ static bool on_window_resize(GtkWindow *window, GdkEvent *event, gpointer data) 
 	napi_handle_scope handle_scope;
 	DSK_NAPI_CALL(napi_open_handle_scope(env, &handle_scope));
 
-	napi_value wrapper = dsk_widget_wrapper(env, args->container);
+	napi_value wrapper = dsk_widget_get_wrapper(env, args->container);
 
 	YGNodeRef root = dsk_widget_get_node(args->env, wrapper);
 

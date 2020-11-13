@@ -208,7 +208,7 @@ void dsk_widget_set_node(napi_env env, napi_value widget, YGNodeRef node) {
 	widgetG.wrapper = ref;
 }
 
-napi_value dsk_widget_wrapper(napi_env env, UIHandle widget) {
+napi_value dsk_widget_get_wrapper(napi_env env, UIHandle widget) {
 	napi_ref ref = ((DskControl *)widget).wrapper;
 	if (ref == NULL) {
 		return NULL;

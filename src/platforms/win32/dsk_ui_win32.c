@@ -288,7 +288,7 @@ void dsk_widget_set_node(napi_env env, napi_value widget, YGNodeRef node) {
 	SetWindowLongPtr(widgetG, GWLP_USERDATA, (LONG_PTR)data);
 }
 
-napi_value dsk_widget_wrapper(napi_env env, UIHandle widget) {
+napi_value dsk_widget_get_wrapper(napi_env env, UIHandle widget) {
 	struct win32_ref *data = (void *)GetWindowLongPtr((HWND)widget, GWLP_USERDATA);
 	napi_ref ref = data->wrapper;
 	if (ref == NULL) {

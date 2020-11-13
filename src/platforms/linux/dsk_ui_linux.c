@@ -112,7 +112,7 @@ void dsk_widget_set_node(napi_env env, napi_value widget, YGNodeRef node) {
 	g_object_set_data(widgetG, "wrapper", ref);
 }
 
-napi_value dsk_widget_wrapper(napi_env env, UIHandle widget) {
+napi_value dsk_widget_get_wrapper(napi_env env, UIHandle widget) {
 	napi_ref ref = g_object_get_data(G_OBJECT(widget), "wrapper");
 	if (ref == NULL) {
 		return NULL;
