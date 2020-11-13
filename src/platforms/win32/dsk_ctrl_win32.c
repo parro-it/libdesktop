@@ -2,17 +2,13 @@
 #include <windows.h>
 #include <winuser.h>
 
-void dsk_initui_for_test() {
-	gtk_init(0, NULL);
-}
+void dsk_initui_for_test() {}
 
 void *dsk_new_test_widget() {
-	return CreateWindow("STATIC", lbl, WS_CHILD | WS_VISIBLE | WS_BORDER, CW_USEDEFAULT,
-						CW_USEDEFAULT,
-						// use the raw width and height for now
-						// this will get CW_USEDEFAULT (hopefully) predicting well
-						// even if it doesn't, we're adjusting it later
-						100, 20, dummy, NULL, hInstance, NULL);
+	HINSTANCE hInstance = GetModuleHandle(NULL);
+
+	return CreateWindow("STATIC", "this is a test control", WS_BORDER, CW_USEDEFAULT, CW_USEDEFAULT,
+						0, 0, NULL, NULL, hInstance, NULL);
 }
 
 napi_status dsk_CtrlI_set_UIHandle(UIHandle UI_ctrl, DskCtrlI *ctrl) {
