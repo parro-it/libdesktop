@@ -10,7 +10,7 @@ void *dsk_new_test_widget() {
 	return gtk_label_new("this is a test control");
 }
 
-napi_status dsk_CtrlI_set_UIHandle(UIHandle UI_ctrl, DskCtrlI *ctrl) {
+napi_status dsk_CtrlI_link_UIHandle(UIHandle UI_ctrl, DskCtrlI *ctrl) {
 	g_object_set_data(G_OBJECT(UI_ctrl), "DskCtrlI", ctrl);
 	return napi_ok;
 }

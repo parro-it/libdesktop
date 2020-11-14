@@ -13,7 +13,7 @@ void dsk_initui_for_test() {}
 
 void *dsk_new_test_widget() { return [[DskTestCtrl alloc] init]; }
 
-napi_status dsk_CtrlI_set_UIHandle(UIHandle UI_ctrl, DskCtrlI *ctrl) {
+napi_status dsk_CtrlI_link_UIHandle(UIHandle UI_ctrl, DskCtrlI *ctrl) {
 	DskTestCtrl *ns_ctrl = UI_ctrl;
 	ns_ctrl.DskCtrlI = ctrl;
 	return napi_ok;

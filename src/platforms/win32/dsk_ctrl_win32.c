@@ -11,7 +11,7 @@ void *dsk_new_test_widget() {
 						0, 0, NULL, NULL, hInstance, NULL);
 }
 
-napi_status dsk_CtrlI_set_UIHandle(UIHandle UI_ctrl, DskCtrlI *ctrl) {
+napi_status dsk_CtrlI_link_UIHandle(UIHandle UI_ctrl, DskCtrlI *ctrl) {
 	SetWindowLongPtr(UI_ctrl, GWLP_USERDATA, (LONG_PTR)ctrl);
 
 	return napi_ok;

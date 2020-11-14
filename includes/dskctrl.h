@@ -17,6 +17,7 @@ typedef napi_status reposition_t(struct DskCtrlI *self, int x, int y, int width,
 typedef napi_status add_child_t(struct DskCtrlI *self, UIHandle child);
 typedef napi_status remove_child_t(struct DskCtrlI *self, UIHandle child);
 typedef napi_status free_t(struct DskCtrlI *self);
+
 typedef napi_status wrap_t(struct DskCtrlIProto *proto, napi_env env, UIHandle ctrl_handle,
 						   napi_value js_wrapper, napi_value props, napi_value children,
 						   struct DskCtrlI **ctrl);
@@ -28,7 +29,6 @@ typedef struct DskCtrlIProto {
 	reposition_t *reposition;
 	add_child_t *add_child;
 	remove_child_t *remove_child;
-	free_t *free;
 	wrap_t *wrap;
 } DskCtrlIProto;
 
@@ -49,8 +49,7 @@ extern DskCtrlIProto DskCtrlDefaultProto;
 	DSK_NAPI_CALL((INSTANCE)->METHOD((INSTANCE), __VA_ARGS__))
 
 napi_status dsk_CtrlI_get_wrapper(DskCtrlI *ctrl, napi_value *wrapper);
-
-napi_status dsk_CtrlI_set_UIHandle(UIHandle UI_ctrl, DskCtrlI *ctrl);
+napi_status dsk_CtrlI_link_UIHandle(UIHandle UI_ctrl, DskCtrlI *ctrl);
 
 napi_status dsk_CtrlI_from_UIHandle(UIHandle UI_ctrl, DskCtrlI **ctrl);
 napi_status dsk_CtrlI_from_YGNode(YGNodeRef node_ref, DskCtrlI **ctrl);
