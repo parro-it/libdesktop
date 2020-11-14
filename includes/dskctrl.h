@@ -17,10 +17,11 @@ typedef napi_status reposition_t(struct DskCtrlI *self, int x, int y, int width,
 typedef napi_status add_child_t(struct DskCtrlI *self, UIHandle child);
 typedef napi_status remove_child_t(struct DskCtrlI *self, UIHandle child);
 typedef napi_status free_t(struct DskCtrlI *self);
+typedef napi_status init_t(struct DskCtrlIProto *proto, napi_env env, UIHandle ctrl_handle,
+						   napi_value js_wrapper, struct DskCtrlI **ctrl);
 
-typedef napi_status wrap_t(struct DskCtrlIProto *proto, napi_env env, UIHandle ctrl_handle,
-						   napi_value js_wrapper, napi_value props, napi_value children,
-						   struct DskCtrlI **ctrl);
+typedef napi_status assign_props_t(struct DskCtrlI *self, napi_value props);
+typedef napi_status add_children_t(struct DskCtrlI *self, napi_value children);
 
 typedef struct DskCtrlIProto {
 	get_prop_t *get_prop;
@@ -29,7 +30,9 @@ typedef struct DskCtrlIProto {
 	reposition_t *reposition;
 	add_child_t *add_child;
 	remove_child_t *remove_child;
-	wrap_t *wrap;
+	init_t *init;
+	assign_props_t *assign_props;
+	add_children_t *add_children;
 } DskCtrlIProto;
 
 typedef struct DskCtrlI {

@@ -39,7 +39,9 @@ napi_status dsk_end_test(napi_env env, napi_value t) {
 #define DSK_ASSERT(ASSERTION) DSK_NAPI_CALL(dsk_assert(env, t, ASSERTION))
 #define DSK_END_TEST() DSK_NAPI_CALL(dsk_end_test(env, t))
 
-#define DSK_TEST_CLOSE }
+#define DSK_TEST_CLOSE                                                                             \
+	return NULL;                                                                                   \
+	}
 
 #define DSK_DEFINE_TEST(NAME)                                                                      \
 	DSK_DEFINE_STATIC_METHOD(libdesktop, NativeTests, NAME) {                                      \
@@ -104,9 +106,12 @@ static void widget_finalize(napi_env env, void *finalize_data, void *finalize_hi
 	YGNodeFree(node);*/
 }
 
-static napi_status def_wrap_t(DskCtrlIProto *proto, napi_env env, UIHandle ctrl_handle,
-							  napi_value js_wrapper, napi_value props, napi_value children,
-							  struct DskCtrlI **ctrl) {
+static napi_status def_add_children_t(struct DskCtrlI *self, napi_value children) {
+	return napi_ok;
+}
+
+static napi_status def_init_t(DskCtrlIProto *proto, napi_env env, UIHandle ctrl_handle,
+							  napi_value js_wrapper, struct DskCtrlI **ctrl) {
 	DSK_ONERROR_THROW_RET(napi_pending_exception);
 
 	struct DskCtrlI *instance = calloc(1, sizeof(struct DskCtrlI));
@@ -129,6 +134,52 @@ static napi_status def_wrap_t(DskCtrlIProto *proto, napi_env env, UIHandle ctrl_
 	return napi_ok;
 }
 
+static napi_status set_properties(napi_env env, napi_value props, napi_value target) {
+	DSK_ONERROR_THROW_RET(napi_pending_exception);
+
+	napi_value names;
+	DSK_NAPI_CALL(napi_get_property_names(env, props, &names));
+	DSK_ARRAY_FOREACH(names, {
+		napi_value propName = dsk_iter_item;
+		bool hasProp;
+
+		size_t len;
+		DSK_NAPI_CALL(napi_get_value_string_utf8(env, propName, NULL, 0, &len));
+		char propName_s[1000];
+		DSK_NAPI_CALL(napi_get_value_string_utf8(env, propName, propName_s, len + 1, NULL));
+
+		DSK_NAPI_CALL(napi_has_property(env, target, propName, &hasProp));
+		if (hasProp) {
+			napi_value propValue;
+			DSK_NAPI_CALL(napi_get_property(env, props, propName, &propValue));
+
+			napi_valuetype type;
+			DSK_NAPI_CALL(napi_typeof(env, propValue, &type));
+
+			if (type == napi_object) {
+				napi_value styleProp;
+				DSK_NAPI_CALL(napi_get_property(env, target, propName, &styleProp));
+				DSK_NAPI_CALL(set_properties(env, propValue, styleProp));
+				continue;
+			}
+
+			DSK_NAPI_CALL(napi_set_property(env, target, propName, propValue));
+		}
+	});
+
+	return napi_ok;
+}
+
+static napi_status def_assign_props_t(struct DskCtrlI *self, napi_value props) {
+	napi_env env = self->env;
+	DSK_ONERROR_THROW_RET(napi_pending_exception);
+
+	napi_value target;
+	DSK_NAPI_CALL(dsk_CtrlI_get_wrapper(self, &target));
+
+	return set_properties(env, props, target);
+}
+
 DskCtrlIProto DskCtrlDefaultProto = {
 	.get_prop = def_get_prop_t,
 	.set_prop = def_set_prop_t,
@@ -136,7 +187,9 @@ DskCtrlIProto DskCtrlDefaultProto = {
 	.reposition = def_reposition_t,
 	.add_child = def_add_child_t,
 	.remove_child = def_remove_child_t,
-	.wrap = def_wrap_t,
+	.init = def_init_t,
+	.assign_props = def_assign_props_t,
+	.add_children = def_add_children_t,
 };
 
 static napi_status new_wrapped_Ctrl(napi_env env, DskCtrlI **ctrl, UIHandle *widget,
@@ -144,16 +197,44 @@ static napi_status new_wrapped_Ctrl(napi_env env, DskCtrlI **ctrl, UIHandle *wid
 	DSK_ONERROR_THROW_RET(napi_pending_exception);
 
 	DSK_NAPI_CALL(napi_create_object(env, wrapper));
+	napi_value num;
+	DSK_NAPI_CALL(napi_create_uint32(env, 42, &num));
+	DSK_NAPI_CALL(napi_set_named_property(env, *wrapper, "num", num));
+
 	dsk_initui_for_test();
 
 	*widget = dsk_new_test_widget();
 
-	DSK_CTRLI_CALL_STATIC(&DskCtrlDefaultProto, wrap, env, *widget, *wrapper, NULL, NULL, ctrl);
+	DSK_CTRLI_CALL_STATIC(&DskCtrlDefaultProto, init, env, *widget, *wrapper, ctrl);
 	return napi_ok;
 }
 
-DSK_DEFINE_TEST(tests_dsk_CtrlIFuncs_mk_default) {
-	DSK_ASSERT(DskCtrlDefaultProto.wrap != NULL);
+DSK_DEFINE_TEST(tests_def_assign_props_t) {
+	DskCtrlI *ctrl = NULL;
+	UIHandle widget;
+	napi_value wrapper;
+	DSK_NAPI_CALL(new_wrapped_Ctrl(env, &ctrl, &widget, &wrapper));
+
+	napi_value num, props;
+	DSK_NAPI_CALL(napi_create_uint32(env, 4242, &num));
+	DSK_NAPI_CALL(napi_create_object(env, &props));
+	DSK_NAPI_CALL(napi_set_named_property(env, props, "num", num));
+
+	def_assign_props_t(ctrl, props);
+
+	napi_value num2;
+	DSK_NAPI_CALL(napi_get_named_property(env, wrapper, "num", &num2));
+
+	uint32_t res;
+	DSK_NAPI_CALL(napi_get_value_uint32(env, num2, &res));
+	DSK_ASSERT(res == 4242);
+
+	DSK_END_TEST();
+}
+DSK_TEST_CLOSE
+
+DSK_DEFINE_TEST(tests_dsk_CtrlIFuncs_init) {
+	DSK_ASSERT(DskCtrlDefaultProto.init != NULL);
 	DskCtrlI *ctrl = NULL;
 	UIHandle widget;
 	napi_value wrapper;
@@ -216,6 +297,32 @@ DSK_DEFINE_TEST(tests_dsk_CtrlI_from_wrapper) {
 	DskCtrlI *ctrl_from_wrapper = NULL;
 	DSK_NAPI_CALL(dsk_CtrlI_from_wrapper(env, wrapper, &ctrl_from_wrapper));
 	DSK_ASSERT(ctrl == ctrl_from_wrapper);
+
+	DSK_END_TEST();
+	return NULL;
+}
+DSK_TEST_CLOSE
+
+napi_status dsk_CtrlI_get_wrapper(DskCtrlI *ctrl, napi_value *wrapper) {
+	return napi_get_reference_value(ctrl->env, ctrl->js_wrapper_ref, wrapper);
+}
+
+DSK_DEFINE_TEST(tests_dsk_CtrlI_get_wrapper) {
+	DskCtrlI *ctrl = NULL;
+	UIHandle widget;
+	napi_value wrapper;
+	DSK_NAPI_CALL(new_wrapped_Ctrl(env, &ctrl, &widget, &wrapper));
+
+	napi_value wrapper2;
+	DSK_NAPI_CALL(dsk_CtrlI_get_wrapper(ctrl, &wrapper2));
+	DSK_ASSERT(wrapper2 != NULL);
+
+	napi_value num;
+	DSK_NAPI_CALL(napi_get_named_property(env, wrapper2, "num", &num));
+
+	uint32_t res;
+	DSK_NAPI_CALL(napi_get_value_uint32(env, num, &res));
+	DSK_ASSERT(res == 42);
 
 	DSK_END_TEST();
 	return NULL;
