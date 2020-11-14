@@ -143,11 +143,6 @@ static napi_status set_properties(napi_env env, napi_value props, napi_value tar
 		napi_value propName = dsk_iter_item;
 		bool hasProp;
 
-		size_t len;
-		DSK_NAPI_CALL(napi_get_value_string_utf8(env, propName, NULL, 0, &len));
-		char propName_s[1000];
-		DSK_NAPI_CALL(napi_get_value_string_utf8(env, propName, propName_s, len + 1, NULL));
-
 		DSK_NAPI_CALL(napi_has_property(env, target, propName, &hasProp));
 		if (hasProp) {
 			napi_value propValue;
@@ -197,9 +192,12 @@ static napi_status new_wrapped_Ctrl(napi_env env, DskCtrlI **ctrl, UIHandle *wid
 	DSK_ONERROR_THROW_RET(napi_pending_exception);
 
 	DSK_NAPI_CALL(napi_create_object(env, wrapper));
-	napi_value num;
+	napi_value num, style;
 	DSK_NAPI_CALL(napi_create_uint32(env, 42, &num));
 	DSK_NAPI_CALL(napi_set_named_property(env, *wrapper, "num", num));
+	DSK_NAPI_CALL(napi_create_object(env, &style));
+	DSK_NAPI_CALL(napi_set_named_property(env, style, "stylenum", num));
+	DSK_NAPI_CALL(napi_set_named_property(env, *wrapper, "style", style));
 
 	dsk_initui_for_test();
 
@@ -213,22 +211,62 @@ DSK_DEFINE_TEST(tests_def_assign_props_t) {
 	DskCtrlI *ctrl = NULL;
 	UIHandle widget;
 	napi_value wrapper;
-	DSK_NAPI_CALL(new_wrapped_Ctrl(env, &ctrl, &widget, &wrapper));
+	{ // setup
+		DSK_NAPI_CALL(new_wrapped_Ctrl(env, &ctrl, &widget, &wrapper));
 
-	napi_value num, props;
-	DSK_NAPI_CALL(napi_create_uint32(env, 4242, &num));
-	DSK_NAPI_CALL(napi_create_object(env, &props));
-	DSK_NAPI_CALL(napi_set_named_property(env, props, "num", num));
+		napi_value num, props, style;
+		DSK_NAPI_CALL(napi_create_uint32(env, 4242, &num));
+		DSK_NAPI_CALL(napi_create_object(env, &props));
+		DSK_NAPI_CALL(napi_create_object(env, &style));
+		DSK_NAPI_CALL(napi_set_named_property(env, style, "stylenum", num));
+		DSK_NAPI_CALL(napi_set_named_property(env, props, "num", num));
+		DSK_NAPI_CALL(napi_set_named_property(env, props, "style", style));
+		DSK_NAPI_CALL(napi_set_named_property(env, props, "nonexistent", num));
+		DSK_NAPI_CALL(napi_set_named_property(env, style, "nonexistent", num));
 
-	def_assign_props_t(ctrl, props);
+		def_assign_props_t(ctrl, props);
+	}
 
-	napi_value num2;
-	DSK_NAPI_CALL(napi_get_named_property(env, wrapper, "num", &num2));
+	{ // already existing props are setted in wrapper
+		napi_value num;
+		DSK_NAPI_CALL(napi_get_named_property(env, wrapper, "num", &num));
 
-	uint32_t res;
-	DSK_NAPI_CALL(napi_get_value_uint32(env, num2, &res));
-	DSK_ASSERT(res == 4242);
+		uint32_t res;
+		DSK_NAPI_CALL(napi_get_value_uint32(env, num, &res));
+		DSK_ASSERT(res == 4242);
+	}
 
+	{ // non already existing props are not setted in wrapper
+		napi_value num;
+		DSK_NAPI_CALL(napi_get_named_property(env, wrapper, "nonexistent", &num));
+		napi_valuetype res;
+		DSK_NAPI_CALL(napi_typeof(env, num, &res));
+		DSK_ASSERT(res == napi_undefined);
+	}
+
+	{ // props of sub-objects are deeply assigned
+		napi_value style;
+		DSK_NAPI_CALL(napi_get_named_property(env, wrapper, "style", &style));
+
+		napi_value stylenum;
+		DSK_NAPI_CALL(napi_get_named_property(env, style, "stylenum", &stylenum));
+
+		uint32_t res;
+		DSK_NAPI_CALL(napi_get_value_uint32(env, stylenum, &res));
+		DSK_ASSERT(res == 4242);
+	}
+
+	{ // non already existing props are not setted in sub-objects
+		napi_value style;
+		DSK_NAPI_CALL(napi_get_named_property(env, wrapper, "style", &style));
+
+		napi_value stylenum;
+		DSK_NAPI_CALL(napi_get_named_property(env, style, "nonexistent", &stylenum));
+
+		napi_valuetype res;
+		DSK_NAPI_CALL(napi_typeof(env, stylenum, &res));
+		DSK_ASSERT(res == napi_undefined);
+	}
 	DSK_END_TEST();
 }
 DSK_TEST_CLOSE

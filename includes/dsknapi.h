@@ -833,9 +833,7 @@ napi_status dsk_call_cb_async(napi_env env, napi_value cb, size_t argc, const na
 	DSK_NAPI_CALL(napi_get_array_length(env, ARR, &dsk_iter_len));                                 \
 	for (uint32_t dsk_iter_i = 0; dsk_iter_i < dsk_iter_len; dsk_iter_i++) {                       \
 		napi_value dsk_iter_item;                                                                  \
-		napi_value dsk_iter_idx;                                                                   \
-		DSK_NAPI_CALL(napi_create_uint32(env, dsk_iter_i, &dsk_iter_idx));                         \
-		DSK_NAPI_CALL(napi_get_property(env, ARR, dsk_iter_idx, &dsk_iter_item));                  \
+		DSK_NAPI_CALL(napi_get_element(env, ARR, dsk_iter_i, &dsk_iter_item));                     \
 		BLOCK;                                                                                     \
 	}
 
