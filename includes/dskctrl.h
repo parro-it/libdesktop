@@ -53,7 +53,7 @@ napi_status dsk_CtrlI_link_UIHandle(UIHandle UI_ctrl, DskCtrlI *ctrl);
 
 napi_status dsk_CtrlI_from_UIHandle(UIHandle UI_ctrl, DskCtrlI **ctrl);
 napi_status dsk_CtrlI_from_YGNode(YGNodeRef node_ref, DskCtrlI **ctrl);
-napi_status dsk_CtrlI_from_wrapper(napi_value wrapper, DskCtrlI **ctrl);
+napi_status dsk_CtrlI_from_wrapper(napi_env env, napi_value wrapper, DskCtrlI **ctrl);
 
 /* reimplemented on top of DskCtrlI ???????? */
 /*

@@ -39,6 +39,19 @@ napi_status dsk_end_test(napi_env env, napi_value t) {
 #define DSK_ASSERT(ASSERTION) DSK_NAPI_CALL(dsk_assert(env, t, ASSERTION))
 #define DSK_END_TEST() DSK_NAPI_CALL(dsk_end_test(env, t))
 
+#define DSK_TEST_CLOSE }
+
+#define DSK_DEFINE_TEST(NAME)                                                                      \
+	DSK_DEFINE_STATIC_METHOD(libdesktop, NativeTests, NAME) {                                      \
+		DSK_JS_FUNC_INIT();                                                                        \
+		DSK_EXACTLY_NARGS(1);                                                                      \
+		napi_value t = argv[0];
+
+void *dsk_new_test_widget();
+
+// test functions
+void dsk_initui_for_test();
+
 /////////////////////////////////////////
 // END TESTS FN
 /////////////////////////////////////////
@@ -126,11 +139,6 @@ DskCtrlIProto DskCtrlDefaultProto = {
 	.wrap = def_wrap_t,
 };
 
-void *dsk_new_test_widget();
-
-// test functions
-void dsk_initui_for_test();
-
 static napi_status new_wrapped_Ctrl(napi_env env, DskCtrlI **ctrl, UIHandle *widget,
 									napi_value *wrapper) {
 	DSK_ONERROR_THROW_RET(napi_pending_exception);
@@ -144,11 +152,7 @@ static napi_status new_wrapped_Ctrl(napi_env env, DskCtrlI **ctrl, UIHandle *wid
 	return napi_ok;
 }
 
-DSK_DEFINE_STATIC_METHOD(libdesktop, NativeTests, tests_dsk_CtrlIFuncs_mk_default) {
-	DSK_JS_FUNC_INIT();
-	DSK_EXACTLY_NARGS(1);
-	napi_value t = argv[0];
-
+DSK_DEFINE_TEST(tests_dsk_CtrlIFuncs_mk_default) {
 	DSK_ASSERT(DskCtrlDefaultProto.wrap != NULL);
 	DskCtrlI *ctrl = NULL;
 	UIHandle widget;
@@ -177,3 +181,43 @@ DSK_DEFINE_STATIC_METHOD(libdesktop, NativeTests, tests_dsk_CtrlIFuncs_mk_defaul
 	DSK_END_TEST();
 	return NULL;
 }
+DSK_TEST_CLOSE
+
+napi_status dsk_CtrlI_from_YGNode(YGNodeRef node_ref, DskCtrlI **ctrl) {
+	*ctrl = YGNodeGetContext(node_ref);
+	return napi_ok;
+}
+
+DSK_DEFINE_TEST(tests_dsk_CtrlI_from_UIHandle) {
+	DskCtrlI *ctrl = NULL;
+	UIHandle widget;
+	napi_value wrapper;
+	DSK_NAPI_CALL(new_wrapped_Ctrl(env, &ctrl, &widget, &wrapper));
+
+	DskCtrlI *ctrl_from_YGNode = NULL;
+	DSK_NAPI_CALL(dsk_CtrlI_from_YGNode(ctrl->yg_node, &ctrl_from_YGNode));
+	DSK_ASSERT(ctrl == ctrl_from_YGNode);
+
+	DSK_END_TEST();
+	return NULL;
+}
+DSK_TEST_CLOSE
+
+napi_status dsk_CtrlI_from_wrapper(napi_env env, napi_value wrapper, DskCtrlI **ctrl) {
+	return napi_unwrap(env, wrapper, (void **)ctrl);
+}
+
+DSK_DEFINE_TEST(tests_dsk_CtrlI_from_wrapper) {
+	DskCtrlI *ctrl = NULL;
+	UIHandle widget;
+	napi_value wrapper;
+	DSK_NAPI_CALL(new_wrapped_Ctrl(env, &ctrl, &widget, &wrapper));
+
+	DskCtrlI *ctrl_from_wrapper = NULL;
+	DSK_NAPI_CALL(dsk_CtrlI_from_wrapper(env, wrapper, &ctrl_from_wrapper));
+	DSK_ASSERT(ctrl == ctrl_from_wrapper);
+
+	DSK_END_TEST();
+	return NULL;
+}
+DSK_TEST_CLOSE
