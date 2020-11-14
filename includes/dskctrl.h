@@ -81,4 +81,5 @@ void dsk_connect_event(UIHandle widget, char *eventname, struct dsk_event_args *
 	DSK_DEFINE_PROPERTY(MODNAME, CLASSNAME, PROPNAME, dsk_getPropBOOL, dsk_setPropBOOL,            \
 						((void *[]){dsk_ui_get_prop_bool, dsk_ui_set_prop_bool, UI_NAME}))
 */
+
 #endif

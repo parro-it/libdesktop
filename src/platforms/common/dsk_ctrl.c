@@ -58,48 +58,6 @@ void dsk_initui_for_test();
 // END TESTS FN
 /////////////////////////////////////////
 
-static napi_status def_get_prop_t(struct DskCtrlI *self, const char *prop_name, void **prop_value) {
-	napi_env env = self->env;
-	DSK_ONERROR_THROW_RET(napi_pending_exception);
-	DSK_NAPI_CALL(napi_throw_error(env, NULL, "Not implemented"));
-	return napi_pending_exception;
-}
-
-static napi_status def_set_prop_t(struct DskCtrlI *self, const char *prop_name, void *prop_value) {
-	napi_env env = self->env;
-	DSK_ONERROR_THROW_RET(napi_pending_exception);
-	DSK_NAPI_CALL(napi_throw_error(env, NULL, "Not implemented"));
-	return napi_pending_exception;
-}
-
-static napi_status def_get_preferred_size_t(struct DskCtrlI *self, int *width, int *height) {
-	napi_env env = self->env;
-	DSK_ONERROR_THROW_RET(napi_pending_exception);
-	DSK_NAPI_CALL(napi_throw_error(env, NULL, "Not implemented"));
-	return napi_pending_exception;
-}
-
-static napi_status def_reposition_t(struct DskCtrlI *self, int x, int y, int width, int height) {
-	napi_env env = self->env;
-	DSK_ONERROR_THROW_RET(napi_pending_exception);
-	DSK_NAPI_CALL(napi_throw_error(env, NULL, "Not implemented"));
-	return napi_pending_exception;
-}
-
-static napi_status def_add_child_t(struct DskCtrlI *self, UIHandle child) {
-	napi_env env = self->env;
-	DSK_ONERROR_THROW_RET(napi_pending_exception);
-	DSK_NAPI_CALL(napi_throw_error(env, NULL, "Not implemented"));
-	return napi_pending_exception;
-}
-
-static napi_status def_remove_child_t(struct DskCtrlI *self, UIHandle child) {
-	napi_env env = self->env;
-	DSK_ONERROR_THROW_RET(napi_pending_exception);
-	DSK_NAPI_CALL(napi_throw_error(env, NULL, "Not implemented"));
-	return napi_pending_exception;
-}
-
 static void widget_finalize(napi_env env, void *finalize_data, void *finalize_hint) {
 	/*napi_value this = (napi_value)finalize_data;
 	YGNodeRef node = dsk_widget_get_node(env, this);
@@ -184,13 +142,22 @@ static napi_status def_add_children_t(struct DskCtrlI *self, napi_value children
 	return napi_ok;
 }
 
+// implemented by each platform
+napi_status dsk_platform_get_prop_t(struct DskCtrlI *self, const char *prop_name,
+									void **prop_value);
+napi_status dsk_platform_set_prop_t(struct DskCtrlI *self, const char *prop_name, void *prop_value);
+napi_status dsk_platform_get_preferred_size_t(struct DskCtrlI *self, int *width, int *height);
+napi_status dsk_platform_reposition_t(struct DskCtrlI *self, int x, int y, int width, int height);
+napi_status dsk_platform_add_child_t(struct DskCtrlI *self, UIHandle child);
+napi_status dsk_platform_remove_child_t(struct DskCtrlI *self, UIHandle child);
+
 DskCtrlIProto DskCtrlDefaultProto = {
-	.get_prop = def_get_prop_t,
-	.set_prop = def_set_prop_t,
-	.get_preferred_size = def_get_preferred_size_t,
-	.reposition = def_reposition_t,
-	.add_child = def_add_child_t,
-	.remove_child = def_remove_child_t,
+	.get_prop = dsk_platform_get_prop_t,
+	.set_prop = dsk_platform_set_prop_t,
+	.get_preferred_size = dsk_platform_get_preferred_size_t,
+	.reposition = dsk_platform_reposition_t,
+	.add_child = dsk_platform_add_child_t,
+	.remove_child = dsk_platform_remove_child_t,
 	.init = def_init_t,
 	.assign_props = def_assign_props_t,
 	.add_children = def_add_children_t,

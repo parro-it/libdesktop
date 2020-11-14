@@ -21,3 +21,47 @@ napi_status dsk_CtrlI_from_UIHandle(UIHandle UI_ctrl, DskCtrlI **ctrl) {
 	*ctrl = (void *)GetWindowLongPtr(UI_ctrl, GWLP_USERDATA);
 	return napi_ok;
 }
+
+napi_status dsk_platform_get_prop_t(struct DskCtrlI *self, const char *prop_name,
+									void **prop_value) {
+	napi_env env = self->env;
+	DSK_ONERROR_THROW_RET(napi_pending_exception);
+	DSK_NAPI_CALL(napi_throw_error(env, NULL, "Not implemented"));
+	return napi_pending_exception;
+}
+
+napi_status dsk_platform_set_prop_t(struct DskCtrlI *self, const char *prop_name,
+									void *prop_value) {
+	napi_env env = self->env;
+	DSK_ONERROR_THROW_RET(napi_pending_exception);
+	DSK_NAPI_CALL(napi_throw_error(env, NULL, "Not implemented"));
+	return napi_pending_exception;
+}
+
+napi_status dsk_platform_get_preferred_size_t(struct DskCtrlI *self, int *width, int *height) {
+	napi_env env = self->env;
+	DSK_ONERROR_THROW_RET(napi_pending_exception);
+	DSK_NAPI_CALL(napi_throw_error(env, NULL, "Not implemented"));
+	return napi_pending_exception;
+}
+
+napi_status dsk_platform_reposition_t(struct DskCtrlI *self, int x, int y, int width, int height) {
+	napi_env env = self->env;
+	DSK_ONERROR_THROW_RET(napi_pending_exception);
+	DSK_NAPI_CALL(napi_throw_error(env, NULL, "Not implemented"));
+	return napi_pending_exception;
+}
+
+napi_status dsk_platform_add_child_t(struct DskCtrlI *self, UIHandle child) {
+	napi_env env = self->env;
+	DSK_ONERROR_THROW_RET(napi_pending_exception);
+	DSK_NAPI_CALL(napi_throw_error(env, NULL, "Not implemented"));
+	return napi_pending_exception;
+}
+
+napi_status dsk_platform_remove_child_t(struct DskCtrlI *self, UIHandle child) {
+	napi_env env = self->env;
+	DSK_ONERROR_THROW_RET(napi_pending_exception);
+	DSK_NAPI_CALL(napi_throw_error(env, NULL, "Not implemented"));
+	return napi_pending_exception;
+}
