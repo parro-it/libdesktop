@@ -76,7 +76,7 @@ DSK_DEFINE_TEST(tests_dsk_platform_get_preferred_size_t) {
 
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 	int width, height;
-	HWND win =
+	HWND window =
 		CreateWindowExW(0, windowClass, L"prova", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
 						// use the raw width and height for now
 						// this will get CW_USEDEFAULT (hopefully) predicting well
