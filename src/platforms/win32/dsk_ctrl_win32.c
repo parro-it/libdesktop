@@ -67,6 +67,7 @@ napi_status dsk_platform_get_preferred_size_t(struct DskCtrlI *self, int *width,
 	*width = 130;
 	return napi_ok;
 }
+#define windowClass L"libui_uiWindowClass"
 
 DSK_DEFINE_TEST(tests_dsk_platform_get_preferred_size_t) {
 	DskCtrlI *ctrl = NULL;
