@@ -55,8 +55,23 @@ napi_status dsk_platform_get_preferred_size_t(struct DskCtrlI *self, int *width,
 napi_status dsk_platform_reposition_t(struct DskCtrlI *self, int x, int y, int width, int height) {
 	napi_env env = self->env;
 	DSK_ONERROR_THROW_RET(napi_pending_exception);
-	DSK_NAPI_CALL(napi_throw_error(env, NULL, "Not implemented"));
-	return napi_pending_exception;
+
+	GtkWidget *widget = GTK_WIDGET(self->ctrl_handle);
+	GtkContainer *container = gtk_widget_get_parent(widget);
+
+	GValue x = G_VALUE_INIT;
+	g_value_init(&x, G_TYPE_INT);
+	g_value_set_int(&x, x);
+
+	GValue y = G_VALUE_INIT;
+	g_value_init(&y, G_TYPE_INT);
+	g_value_set_int(&y, y);
+
+	gtk_container_child_set_property(container, widget, "x", &x);
+	gtk_container_child_set_property(container, widget, "y", &y);
+	gtk_widget_set_size_request(widget, (int)width, (int)height);
+
+	return napi_ok;
 }
 
 #include "dsktest.h"

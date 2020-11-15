@@ -14,7 +14,7 @@ void dsk_initui_for_test() {}
 
 void *dsk_new_test_widget() {
 	DskTestCtrl *ctrl = [[DskTestCtrl alloc] init];
-	ctrl.stringValue = "Hello world";
+	ctrl.stringValue = [NSString stringWithUTF8String:"Hello world"];
 	return ctrl;
 }
 
