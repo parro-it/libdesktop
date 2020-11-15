@@ -33,8 +33,33 @@ NAPI_C_CTOR(init) {
 	DskLayoutContainerProto.add_children = DskControlProto.add_children;
 }
 
+napi_status new_wrapped_Ctrl(DskCtrlIProto *proto, napi_env env, DskCtrlI **ctrl, UIHandle *widget,
+							 napi_value *wrapper);
+
 DSK_DEFINE_TEST(tests_DskLayoutContainerProto) {
-	DSK_ASSERT(DskLayoutContainerProto.add_child != DskControlProto.add_child);
+	DSK_ASSERT(DskLayoutContainerProto.add_child == add_child);
+
+	DskCtrlI *ctrl_parent, *ctrl_child1, *ctrl_child2;
+	UIHandle ui_parent, ui_child1, ui_child2;
+	napi_value wrapper_parent, wrapper_child1, wrapper_child2;
+	{ // setup
+		DSK_NAPI_CALL(new_wrapped_Ctrl(&DskLayoutContainerProto, env, &ctrl_parent, &ui_parent,
+									   &wrapper_parent));
+		DSK_NAPI_CALL(
+			new_wrapped_Ctrl(&DskControlProto, env, &ctrl_child1, &ui_child1, &wrapper_child1));
+		DSK_NAPI_CALL(
+			new_wrapped_Ctrl(&DskControlProto, env, &ctrl_child2, &ui_child2, &wrapper_child2));
+
+		napi_value children;
+		DSK_NAPI_CALL(napi_create_array_with_length(env, 2, &children));
+		DSK_NAPI_CALL(napi_set_element(env, children, 0, wrapper_child1));
+		DSK_NAPI_CALL(napi_set_element(env, children, 1, wrapper_child2));
+
+		DSK_NAPI_CALL(DskLayoutContainerProto.add_children(ctrl_parent, children));
+	}
+	{ // yoga child node added
+		DSK_ASSERT(YGNodeGetChildCount(ctrl_parent->yg_node) == 2);
+	}
 	DSK_END_TEST();
 }
 DSK_TEST_CLOSE

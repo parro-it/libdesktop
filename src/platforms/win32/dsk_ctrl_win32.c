@@ -59,7 +59,8 @@ napi_status dsk_platform_remove_child_t(struct DskCtrlI *self, UIHandle child) {
 }
 
 #include "dsktest.h"
-napi_status new_wrapped_Ctrl(napi_env env, DskCtrlI **ctrl, UIHandle *widget, napi_value *wrapper);
+napi_status new_wrapped_Ctrl(DskCtrlIProto *proto, napi_env env, DskCtrlI **ctrl, UIHandle *widget,
+							 napi_value *wrapper);
 
 napi_status dsk_platform_get_preferred_size_t(struct DskCtrlI *self, int *width, int *height) {
 	*height = 30;
@@ -72,7 +73,7 @@ DSK_DEFINE_TEST(tests_dsk_platform_get_preferred_size_t) {
 	DskCtrlI *ctrl = NULL;
 	UIHandle widget;
 	napi_value wrapper;
-	DSK_NAPI_CALL(new_wrapped_Ctrl(env, &ctrl, &widget, &wrapper));
+	DSK_NAPI_CALL(new_wrapped_Ctrl(&DskControlProto, env, &ctrl, &widget, &wrapper));
 
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 	int width, height;

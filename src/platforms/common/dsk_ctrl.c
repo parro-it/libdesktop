@@ -82,6 +82,7 @@ static napi_status def_add_children_t(struct DskCtrlI *self, napi_value children
 	DSK_ARRAY_FOREACH(children, {
 		struct DskCtrlI *child;
 		DSK_NAPI_CALL(dsk_CtrlI_from_wrapper(env, dsk_iter_item, &child));
+		printf("add_Child %p\n", self->proto->add_child);
 		DSK_CTRLI_CALL(self, add_child, child->ctrl_handle);
 	});
 	return napi_ok;
@@ -108,7 +109,8 @@ DskCtrlIProto DskControlProto = {
 	.add_children = def_add_children_t,
 };
 
-napi_status new_wrapped_Ctrl(napi_env env, DskCtrlI **ctrl, UIHandle *widget, napi_value *wrapper) {
+napi_status new_wrapped_Ctrl(DskCtrlIProto *proto, napi_env env, DskCtrlI **ctrl, UIHandle *widget,
+							 napi_value *wrapper) {
 	DSK_ONERROR_THROW_RET(napi_pending_exception);
 
 	DSK_NAPI_CALL(napi_create_object(env, wrapper));
@@ -123,7 +125,7 @@ napi_status new_wrapped_Ctrl(napi_env env, DskCtrlI **ctrl, UIHandle *widget, na
 
 	*widget = dsk_new_test_widget();
 
-	DSK_CTRLI_CALL_STATIC(&DskControlProto, init, env, *widget, *wrapper, ctrl);
+	DSK_CTRLI_CALL_STATIC(proto, init, env, *widget, *wrapper, ctrl);
 	return napi_ok;
 }
 
@@ -137,9 +139,12 @@ DSK_DEFINE_TEST(tests_def_add_children_t) {
 	UIHandle ui_parent, ui_child1, ui_child2;
 	napi_value wrapper_parent, wrapper_child1, wrapper_child2;
 	{ // setup
-		DSK_NAPI_CALL(new_wrapped_Ctrl(env, &ctrl_parent, &ui_parent, &wrapper_parent));
-		DSK_NAPI_CALL(new_wrapped_Ctrl(env, &ctrl_child1, &ui_child1, &wrapper_child1));
-		DSK_NAPI_CALL(new_wrapped_Ctrl(env, &ctrl_child2, &ui_child2, &wrapper_child2));
+		DSK_NAPI_CALL(
+			new_wrapped_Ctrl(&DskControlProto, env, &ctrl_parent, &ui_parent, &wrapper_parent));
+		DSK_NAPI_CALL(
+			new_wrapped_Ctrl(&DskControlProto, env, &ctrl_child1, &ui_child1, &wrapper_child1));
+		DSK_NAPI_CALL(
+			new_wrapped_Ctrl(&DskControlProto, env, &ctrl_child2, &ui_child2, &wrapper_child2));
 
 		napi_value children;
 		DSK_NAPI_CALL(napi_create_array_with_length(env, 2, &children));
@@ -167,7 +172,7 @@ DSK_DEFINE_TEST(tests_def_assign_props_t) {
 	UIHandle widget;
 	napi_value wrapper;
 	{ // setup
-		DSK_NAPI_CALL(new_wrapped_Ctrl(env, &ctrl, &widget, &wrapper));
+		DSK_NAPI_CALL(new_wrapped_Ctrl(&DskControlProto, env, &ctrl, &widget, &wrapper));
 
 		napi_value num, props, style;
 		DSK_NAPI_CALL(napi_create_uint32(env, 4242, &num));
@@ -231,7 +236,7 @@ DSK_DEFINE_TEST(tests_dsk_CtrlIFuncs_init) {
 	DskCtrlI *ctrl = NULL;
 	UIHandle widget;
 	napi_value wrapper;
-	DSK_NAPI_CALL(new_wrapped_Ctrl(env, &ctrl, &widget, &wrapper));
+	DSK_NAPI_CALL(new_wrapped_Ctrl(&DskControlProto, env, &ctrl, &widget, &wrapper));
 
 	DSK_ASSERT(ctrl != NULL);
 	DSK_ASSERT(ctrl->env == env);
@@ -266,7 +271,7 @@ DSK_DEFINE_TEST(tests_dsk_CtrlI_from_UIHandle) {
 	DskCtrlI *ctrl = NULL;
 	UIHandle widget;
 	napi_value wrapper;
-	DSK_NAPI_CALL(new_wrapped_Ctrl(env, &ctrl, &widget, &wrapper));
+	DSK_NAPI_CALL(new_wrapped_Ctrl(&DskControlProto, env, &ctrl, &widget, &wrapper));
 
 	DskCtrlI *ctrl_from_YGNode = NULL;
 	DSK_NAPI_CALL(dsk_CtrlI_from_YGNode(ctrl->yg_node, &ctrl_from_YGNode));
@@ -285,7 +290,7 @@ DSK_DEFINE_TEST(tests_dsk_CtrlI_from_wrapper) {
 	DskCtrlI *ctrl = NULL;
 	UIHandle widget;
 	napi_value wrapper;
-	DSK_NAPI_CALL(new_wrapped_Ctrl(env, &ctrl, &widget, &wrapper));
+	DSK_NAPI_CALL(new_wrapped_Ctrl(&DskControlProto, env, &ctrl, &widget, &wrapper));
 
 	DskCtrlI *ctrl_from_wrapper = NULL;
 	DSK_NAPI_CALL(dsk_CtrlI_from_wrapper(env, wrapper, &ctrl_from_wrapper));
@@ -304,7 +309,7 @@ DSK_DEFINE_TEST(tests_dsk_CtrlI_get_wrapper) {
 	DskCtrlI *ctrl = NULL;
 	UIHandle widget;
 	napi_value wrapper;
-	DSK_NAPI_CALL(new_wrapped_Ctrl(env, &ctrl, &widget, &wrapper));
+	DSK_NAPI_CALL(new_wrapped_Ctrl(&DskControlProto, env, &ctrl, &widget, &wrapper));
 
 	napi_value wrapper2;
 	DSK_NAPI_CALL(dsk_CtrlI_get_wrapper(ctrl, &wrapper2));

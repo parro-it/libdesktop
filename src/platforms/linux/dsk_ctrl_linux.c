@@ -75,13 +75,17 @@ napi_status dsk_platform_reposition_t(struct DskCtrlI *self, int x, int y, int w
 }
 
 #include "dsktest.h"
-napi_status new_wrapped_Ctrl(napi_env env, DskCtrlI **ctrl, UIHandle *widget, napi_value *wrapper);
+extern DskCtrlIProto DskControlProto;
+napi_status new_wrapped_Ctrl(DskCtrlIProto *proto, napi_env env, DskCtrlI **ctrl, UIHandle *widget,
+							 napi_value *wrapper);
+
+extern DskCtrlIProto DskControlProto;
 
 DSK_DEFINE_TEST(tests_dsk_platform_get_preferred_size_t) {
 	DskCtrlI *ctrl = NULL;
 	UIHandle widget;
 	napi_value wrapper;
-	DSK_NAPI_CALL(new_wrapped_Ctrl(env, &ctrl, &widget, &wrapper));
+	DSK_NAPI_CALL(new_wrapped_Ctrl(&DskControlProto, env, &ctrl, &widget, &wrapper));
 
 	int width, height;
 	GtkWindow *window = (GtkWindow *)gtk_window_new(GTK_WINDOW_TOPLEVEL);
