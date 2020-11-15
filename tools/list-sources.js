@@ -25,11 +25,11 @@ function listCPPDir(dir) {
 	}
 }
 
-listCPPDir('yoga/yoga');
-listDir('src/platforms/common');
-listDir(`src/platforms/${platform()}`);
+listCPPDir(join('yoga','yoga'));
+listDir(join('src','platforms','common'));
+listDir(join('src','platforms',platform()));
 if (process.env.LIBDESKTOP_TARGET === 'test') {
-	listDir('tests/internals');
+	listDir(join('tests','internals'));
 } /*else {
 	console.log('tools/test_main_stub.c');
 }*/

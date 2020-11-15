@@ -3,6 +3,7 @@
 
 DSK_EXTEND_MODULE(libdesktop);
 extern DskCtrlIProto DskControlProto;
+DskCtrlIProto DskLayoutContainerProto;
 
 static napi_status add_child(struct DskCtrlI *self, UIHandle child_ui) {
 	napi_env env = self->env;
@@ -18,8 +19,6 @@ static napi_status add_child(struct DskCtrlI *self, UIHandle child_ui) {
 
 	return napi_ok;
 }
-
-DskCtrlIProto DskLayoutContainerProto;
 
 NAPI_C_CTOR(init) {
 	DskLayoutContainerProto.get_prop = DskControlProto.get_prop;
