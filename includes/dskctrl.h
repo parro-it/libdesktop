@@ -26,8 +26,8 @@ typedef napi_status add_children_t(struct DskCtrlI *self, napi_value children);
 typedef struct DskCtrlIProto {
 	get_prop_t *get_prop;
 	set_prop_t *set_prop;
-	add_child_t *add_child;
 	remove_child_t *remove_child;
+	add_child_t *add_child;
 
 	get_preferred_size_t *get_preferred_size;
 	reposition_t *reposition;
