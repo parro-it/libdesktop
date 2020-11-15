@@ -56,7 +56,7 @@ napi_status reposition(struct DskCtrlI *self, int x, int y, int width, int heigh
 	return napi_ok;
 }
 
-NAPI_C_CTOR(init) {
+NAPI_C_CTOR(init_root_ctrn) {
 	DskRootContainerProto.get_prop = DskLayoutContainerProto.get_prop;
 	DskRootContainerProto.set_prop = DskLayoutContainerProto.set_prop;
 	DskRootContainerProto.get_preferred_size = DskLayoutContainerProto.get_preferred_size;

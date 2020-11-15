@@ -20,7 +20,7 @@ static napi_status add_child(struct DskCtrlI *self, UIHandle child_ui) {
 	return napi_ok;
 }
 
-NAPI_C_CTOR(init) {
+NAPI_C_CTOR(init_layout_cntr) {
 	DskLayoutContainerProto.get_prop = DskControlProto.get_prop;
 	DskLayoutContainerProto.set_prop = DskControlProto.set_prop;
 	DskLayoutContainerProto.get_preferred_size = DskControlProto.get_preferred_size;
