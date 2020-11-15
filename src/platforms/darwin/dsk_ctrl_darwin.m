@@ -72,6 +72,8 @@ napi_status dsk_platform_get_preferred_size_t(struct DskCtrlI *self, int *width,
 	return napi_ok;
 }
 
+napi_status new_wrapped_Ctrl(napi_env env, DskCtrlI **ctrl, UIHandle *widget, napi_value *wrapper);
+
 DSK_DEFINE_TEST(tests_dsk_platform_get_preferred_size_t) {
 	DskCtrlI *ctrl = NULL;
 	UIHandle widget;
