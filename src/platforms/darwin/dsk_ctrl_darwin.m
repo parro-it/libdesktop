@@ -57,10 +57,11 @@ napi_status dsk_platform_reposition_t(struct DskCtrlI *self, int x, int y, int w
 }
 
 napi_status dsk_platform_add_child_t(struct DskCtrlI *self, UIHandle child) {
-	napi_env env = self->env;
-	DSK_ONERROR_THROW_RET(napi_pending_exception);
-	DSK_NAPI_CALL(napi_throw_error(env, NULL, "Not implemented"));
-	return napi_pending_exception;
+
+	NSView *parent = (NSView *)self->ctrl_handle;
+	[parent addSubview:(NSView *)child];
+
+	return napi_ok;
 }
 
 napi_status dsk_platform_remove_child_t(struct DskCtrlI *self, UIHandle child) {
