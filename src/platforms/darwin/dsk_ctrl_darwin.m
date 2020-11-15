@@ -71,7 +71,6 @@ napi_status dsk_platform_remove_child_t(struct DskCtrlI *self, UIHandle child) {
 
 napi_status dsk_platform_get_preferred_size_t(struct DskCtrlI *self, int *width, int *height) {
 	NSView *view = self->ctrl_handle;
-	self.aTextField.preferredMaxLayoutWidth = self.aTextField.frame.size.width;
 
 	NSSize sz = [view fittingSize];
 
