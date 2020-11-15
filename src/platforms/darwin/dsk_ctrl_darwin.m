@@ -47,10 +47,10 @@ napi_status dsk_platform_set_prop_t(struct DskCtrlI *self, const char *prop_name
 }
 
 napi_status dsk_platform_reposition_t(struct DskCtrlI *self, int x, int y, int width, int height) {
-	napi_env env = self->env;
-	DSK_ONERROR_THROW_RET(napi_pending_exception);
-	DSK_NAPI_CALL(napi_throw_error(env, NULL, "Not implemented"));
-	return napi_pending_exception;
+	NSView *view = self->ctrl_handle;
+	[view setFrame:NSMakeRect(x, y, width, height)];
+
+	return napi_ok;
 }
 
 napi_status dsk_platform_add_child_t(struct DskCtrlI *self, UIHandle child) {
@@ -92,8 +92,8 @@ DSK_DEFINE_TEST(tests_dsk_platform_get_preferred_size_t) {
 					backing:NSBackingStoreBuffered
 					  defer:NO];
 
-	win.contentView = child_gtk;
-	[win makeKeyAndOrderFront:win];
+	window.contentView = child_gtk;
+	[window makeKeyAndOrderFront:window];
 
 	dsk_platform_get_preferred_size_t(ctrl, &width, &height);
 	printf("%d x %d\n", width, height);
