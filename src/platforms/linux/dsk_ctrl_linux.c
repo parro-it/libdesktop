@@ -57,18 +57,18 @@ napi_status dsk_platform_reposition_t(struct DskCtrlI *self, int x, int y, int w
 	DSK_ONERROR_THROW_RET(napi_pending_exception);
 
 	GtkWidget *widget = GTK_WIDGET(self->ctrl_handle);
-	GtkContainer *container = gtk_widget_get_parent(widget);
+	GtkContainer *container = GTK_CONTAINER(gtk_widget_get_parent(widget));
 
-	GValue x = G_VALUE_INIT;
-	g_value_init(&x, G_TYPE_INT);
-	g_value_set_int(&x, x);
+	GValue gx = G_VALUE_INIT;
+	g_value_init(&gx, G_TYPE_INT);
+	g_value_set_int(&gx, x);
 
-	GValue y = G_VALUE_INIT;
-	g_value_init(&y, G_TYPE_INT);
-	g_value_set_int(&y, y);
+	GValue gy = G_VALUE_INIT;
+	g_value_init(&gy, G_TYPE_INT);
+	g_value_set_int(&gy, y);
 
-	gtk_container_child_set_property(container, widget, "x", &x);
-	gtk_container_child_set_property(container, widget, "y", &y);
+	gtk_container_child_set_property(container, widget, "x", &gx);
+	gtk_container_child_set_property(container, widget, "y", &gy);
 	gtk_widget_set_size_request(widget, (int)width, (int)height);
 
 	return napi_ok;
@@ -90,8 +90,8 @@ DSK_DEFINE_TEST(tests_dsk_platform_get_preferred_size_t) {
 
 	dsk_platform_get_preferred_size_t(ctrl, &width, &height);
 	printf("%d x %d\n", width, height);
-	DSK_ASSERT(width == 129);
-	DSK_ASSERT(height == 17);
+	DSK_ASSERT(width == 129 /*ubuntu*/ || width == 134 /*deepin*/);
+	DSK_ASSERT(height == 17 /*ubuntu*/ || height == 22 /*deepin*/);
 
 	gtk_window_close(window);
 
