@@ -6,7 +6,7 @@ function listDir(dir) {
 	if (existsSync(dir)) {
 		readdirSync(dir)
 			.filter(f => f.endsWith('.c') || f.endsWith('.m'))
-			.forEach(f => console.log(`${dir}/${f}`));
+			.forEach(f => console.log(join(dir,f)));
 		
 		readdirSync(dir,{withFileTypes:true})
 			.filter(f => f.isDirectory())
@@ -18,16 +18,14 @@ function listCPPDir(dir) {
 	if (existsSync(dir)) {
 		readdirSync(dir)
 			.filter(f => f.endsWith('.cc') || f.endsWith('.cpp'))
-			.forEach(f => console.log(`${dir}/${f}`));
+			.forEach(f => console.log(join(dir,f)));
 		readdirSync(dir,{withFileTypes:true})
 			.filter(f => f.isDirectory())
-			.forEach(f => listDir(f.name));
+			.forEach(f => listDir(join(dir,f.name)));
 	}
 }
 
 listCPPDir('yoga/yoga');
-listCPPDir('yoga/yoga/event');
-listCPPDir('yoga/yoga/internal');
 listDir('src/platforms/common');
 listDir(`src/platforms/${platform()}`);
 if (process.env.LIBDESKTOP_TARGET === 'test') {
