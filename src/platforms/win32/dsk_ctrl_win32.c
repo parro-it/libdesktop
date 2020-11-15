@@ -39,10 +39,9 @@ napi_status dsk_platform_set_prop_t(struct DskCtrlI *self, const char *prop_name
 }
 
 napi_status dsk_platform_reposition_t(struct DskCtrlI *self, int x, int y, int width, int height) {
-	napi_env env = self->env;
-	DSK_ONERROR_THROW_RET(napi_pending_exception);
-	DSK_NAPI_CALL(napi_throw_error(env, NULL, "Not implemented"));
-	return napi_pending_exception;
+	HWND widget = (HWND)self->ctrl_handle;
+	SetWindowPos((HWND)widget, HWND_TOP, x, y, width, height, SWP_NOZORDER);
+	return napi_ok;
 }
 
 napi_status dsk_platform_add_child_t(struct DskCtrlI *self, UIHandle child) {
