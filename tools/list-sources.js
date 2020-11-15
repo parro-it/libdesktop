@@ -1,6 +1,11 @@
 const {readdirSync, existsSync} = require('fs');
 const {platform} = require('os');
-const {join} = require('path');
+
+function join(...args) {
+	return args.join('/');
+}
+
+
 
 function listDir(dir) {
 	if (existsSync(dir)) {
