@@ -100,7 +100,7 @@ DSK_DEFINE_TEST(tests_dsk_platform_get_preferred_size_t) {
 	DSK_ASSERT(width == 129);
 	DSK_ASSERT(height == 17);
 
-	[win close];
+	[window close];
 
 	DSK_END_TEST();
 	return NULL;
