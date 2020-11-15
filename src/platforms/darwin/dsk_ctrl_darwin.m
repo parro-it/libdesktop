@@ -85,7 +85,7 @@ DSK_DEFINE_TEST(tests_dsk_platform_get_preferred_size_t) {
 	DSK_NAPI_CALL(new_wrapped_Ctrl(env, &ctrl, &widget, &wrapper));
 
 	int width, height;
-	DskWindow *window = [[DskWindow alloc]
+	NSWindow *window = [[NSWindow alloc]
 		initWithContentRect:NSMakeRect(0, 0, (CGFloat)10, (CGFloat)10)
 				  styleMask:NSWindowStyleMaskTitled | NSWindowStyleMaskClosable |
 							NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskResizable
