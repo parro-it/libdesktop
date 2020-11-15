@@ -8,3 +8,5 @@ test('dsk_CtrlI_from_wrapper',NativeTests.tests_dsk_CtrlI_from_wrapper);
 test('dsk_CtrlI_get_wrapper',NativeTests.tests_dsk_CtrlI_get_wrapper);
 test('def_assign_props_t',NativeTests.tests_def_assign_props_t);
 test('def_add_children_t',NativeTests.tests_def_add_children_t);
+test('def_add_children_t',NativeTests.tests_def_add_children_t);
+test('dsk_platform_get_preferred_size_t',NativeTests.tests_dsk_platform_get_preferred_size_t);

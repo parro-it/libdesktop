@@ -1,62 +1,7 @@
+#include "dsktest.h"
 #include "libdesktop.h"
 
 DSK_EXTEND_MODULE(libdesktop);
-
-/////////////////////////////////////////
-//  TESTS
-/////////////////////////////////////////
-
-DSK_DEFINE_CLASS(libdesktop, NativeTests) {
-	DSK_JS_FUNC_INIT();
-	DSK_EXACTLY_NARGS(0);
-	return this;
-}
-
-napi_status dsk_assert(napi_env env, napi_value t, bool assertion) {
-	DSK_ONERROR_THROW_RET(napi_pending_exception);
-
-	napi_value assertTrue;
-	DSK_NAPI_CALL(napi_get_named_property(env, t, "true", &assertTrue));
-	napi_value ignored;
-	napi_value assertion_res;
-	DSK_NAPI_CALL(napi_get_boolean(env, assertion, &assertion_res));
-	DSK_NAPI_CALL(napi_call_function(env, t, assertTrue, 1, &assertion_res, &ignored));
-
-	return napi_ok;
-}
-
-napi_status dsk_end_test(napi_env env, napi_value t) {
-	DSK_ONERROR_THROW_RET(napi_pending_exception);
-
-	napi_value end;
-	napi_value ignored;
-	DSK_NAPI_CALL(napi_get_named_property(env, t, "end", &end));
-	DSK_NAPI_CALL(napi_call_function(env, t, end, 0, NULL, &ignored));
-
-	return napi_ok;
-}
-
-#define DSK_ASSERT(ASSERTION) DSK_NAPI_CALL(dsk_assert(env, t, ASSERTION))
-#define DSK_END_TEST() DSK_NAPI_CALL(dsk_end_test(env, t))
-
-#define DSK_TEST_CLOSE                                                                             \
-	return NULL;                                                                                   \
-	}
-
-#define DSK_DEFINE_TEST(NAME)                                                                      \
-	DSK_DEFINE_STATIC_METHOD(libdesktop, NativeTests, NAME) {                                      \
-		DSK_JS_FUNC_INIT();                                                                        \
-		DSK_EXACTLY_NARGS(1);                                                                      \
-		napi_value t = argv[0];
-
-void *dsk_new_test_widget();
-
-// test functions
-void dsk_initui_for_test();
-
-/////////////////////////////////////////
-// END TESTS FN
-/////////////////////////////////////////
 
 static void widget_finalize(napi_env env, void *finalize_data, void *finalize_hint) {
 	/*napi_value this = (napi_value)finalize_data;
@@ -163,8 +108,7 @@ DskCtrlIProto DskCtrlDefaultProto = {
 	.add_children = def_add_children_t,
 };
 
-static napi_status new_wrapped_Ctrl(napi_env env, DskCtrlI **ctrl, UIHandle *widget,
-									napi_value *wrapper) {
+napi_status new_wrapped_Ctrl(napi_env env, DskCtrlI **ctrl, UIHandle *widget, napi_value *wrapper) {
 	DSK_ONERROR_THROW_RET(napi_pending_exception);
 
 	DSK_NAPI_CALL(napi_create_object(env, wrapper));

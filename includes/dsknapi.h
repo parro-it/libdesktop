@@ -661,7 +661,8 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 
 #define _DSK_USE_CLASS(MODNAME, CLASSNAME)                                                         \
 	/* reference to class constructor function napi_value */                                       \
-	napi_ref MODNAME##_##CLASSNAME##_ref
+	napi_ref MODNAME##_##CLASSNAME##_ref;                                                          \
+	dsk_export_def _DSK_CLASS_DEFS(MODNAME, CLASSNAME);
 
 /**
  * @name DSK_DEFINE_FUNCTION
