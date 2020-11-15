@@ -92,7 +92,7 @@ DSK_DEFINE_TEST(tests_dsk_platform_get_preferred_size_t) {
 					backing:NSBackingStoreBuffered
 					  defer:NO];
 
-	window.contentView = child_gtk;
+	window.contentView = widget;
 	[window makeKeyAndOrderFront:window];
 
 	dsk_platform_get_preferred_size_t(ctrl, &width, &height);
