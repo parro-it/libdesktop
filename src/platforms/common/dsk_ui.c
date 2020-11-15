@@ -20,6 +20,25 @@ void dsk_calculate_layout(napi_env env, UIHandle container, YGNodeRef root, floa
 	// YGNodePrint(root, YGPrintOptionsChildren | YGPrintOptionsLayout);
 }
 
+void dsk_set_children_preferred_sizes(YGNodeRef node, UIHandle widget) {
+	uint32_t childrenCount = YGNodeGetChildCount(node);
+
+	if (childrenCount == 0) {
+		int width, height;
+		dsk_get_preferred_sizes(widget, &width, &height);
+
+		YGNodeStyleSetWidth(node, width);
+		YGNodeStyleSetHeight(node, height);
+	} else {
+
+		for (uint32_t i = 0; i < childrenCount; i++) {
+			YGNodeRef child = YGNodeGetChild(node, i);
+			UIHandle child_ui = YGNodeGetContext(child);
+			dsk_set_children_preferred_sizes(child, child_ui);
+		}
+	}
+}
+
 void dsk_add_child(napi_env env, UIHandle parentHandle, UIHandle childHandle) {
 	napi_value parent = dsk_widget_get_wrapper(env, parentHandle);
 	napi_value child = dsk_widget_get_wrapper(env, childHandle);
@@ -137,23 +156,4 @@ napi_status dsk_wrap_widget(napi_env env, UIHandle widget, napi_value this, napi
 	}
 
 	return napi_ok;
-}
-
-void dsk_set_children_preferred_sizes(YGNodeRef node, UIHandle widget) {
-	uint32_t childrenCount = YGNodeGetChildCount(node);
-
-	if (childrenCount == 0) {
-		int width, height;
-		dsk_get_preferred_sizes(widget, &width, &height);
-
-		YGNodeStyleSetWidth(node, width);
-		YGNodeStyleSetHeight(node, height);
-	} else {
-
-		for (uint32_t i = 0; i < childrenCount; i++) {
-			YGNodeRef child = YGNodeGetChild(node, i);
-			UIHandle child_ui = YGNodeGetContext(child);
-			dsk_set_children_preferred_sizes(child, child_ui);
-		}
-	}
 }

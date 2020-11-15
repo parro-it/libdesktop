@@ -11,3 +11,4 @@ test('def_add_children_t',NativeTests.tests_def_add_children_t);
 test('def_add_children_t',NativeTests.tests_def_add_children_t);
 test('dsk_platform_get_preferred_size_t',NativeTests.tests_dsk_platform_get_preferred_size_t);
 test('DskLayoutContainerProto',NativeTests.tests_DskLayoutContainerProto);
+test('DskRootContainerProto',NativeTests.tests_DskRootContainerProto);
