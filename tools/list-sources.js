@@ -26,7 +26,7 @@ function listCPPDir(dir) {
 			.forEach(f => console.log(join(dir,f)));
 		readdirSync(dir,{withFileTypes:true})
 			.filter(f => f.isDirectory())
-			.forEach(f => listDir(join(dir,f.name)));
+			.forEach(f => listCPPDir(join(dir,f.name)));
 	}
 }
 
