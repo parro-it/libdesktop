@@ -74,18 +74,23 @@ DSK_DEFINE_TEST(tests_dsk_platform_get_preferred_size_t) {
 	napi_value wrapper;
 	DSK_NAPI_CALL(new_wrapped_Ctrl(env, &ctrl, &widget, &wrapper));
 
+	HINSTANCE hInstance = GetModuleHandle(NULL);
 	int width, height;
-	GtkWindow *window = (GtkWindow *)gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(widget));
-	gtk_widget_show_all(GTK_WIDGET(window));
+	HWND win =
+		CreateWindowExW(0, windowClass, L"prova", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
+						// use the raw width and height for now
+						// this will get CW_USEDEFAULT (hopefully) predicting well
+						// even if it doesn't, we're adjusting it later
+						800, 600, NULL, NULL, hInstance, NULL);
+	SetParent(widget, window);
+	ShowWindow(window, SW_SHOW);
 
 	dsk_platform_get_preferred_size_t(ctrl, &width, &height);
 	printf("%d x %d\n", width, height);
 	DSK_ASSERT(width == 130);
 	DSK_ASSERT(height == 30);
 
-	gtk_window_close(window);
-
+	CloseWindow(window);
 	DSK_END_TEST();
 	return NULL;
 }

@@ -78,16 +78,22 @@ DSK_DEFINE_TEST(tests_dsk_platform_get_preferred_size_t) {
 	DSK_NAPI_CALL(new_wrapped_Ctrl(env, &ctrl, &widget, &wrapper));
 
 	int width, height;
-	GtkWindow *window = (GtkWindow *)gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(widget));
-	gtk_widget_show_all(GTK_WIDGET(window));
+	DskWindow *window = [[DskWindow alloc]
+		initWithContentRect:NSMakeRect(0, 0, (CGFloat)10, (CGFloat)10)
+				  styleMask:NSWindowStyleMaskTitled | NSWindowStyleMaskClosable |
+							NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskResizable
+					backing:NSBackingStoreBuffered
+					  defer:NO];
+
+	win.contentView = child_gtk;
+	[win makeKeyAndOrderFront:win];
 
 	dsk_platform_get_preferred_size_t(ctrl, &width, &height);
 	printf("%d x %d\n", width, height);
 	DSK_ASSERT(width == 129);
 	DSK_ASSERT(height == 17);
 
-	gtk_window_close(window);
+	[win close];
 
 	DSK_END_TEST();
 	return NULL;
