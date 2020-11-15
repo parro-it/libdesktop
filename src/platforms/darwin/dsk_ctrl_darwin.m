@@ -15,6 +15,7 @@ void dsk_initui_for_test() {}
 void *dsk_new_test_widget() {
 	DskTestCtrl *ctrl = [[DskTestCtrl alloc] init];
 	ctrl.preferredMaxLayoutWidth = 100000;
+	[ctrl setEditable:NO];
 
 	ctrl.stringValue = [NSString stringWithUTF8String:"Hello world"];
 	return ctrl;
