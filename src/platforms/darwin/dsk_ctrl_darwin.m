@@ -85,7 +85,7 @@ DSK_DEFINE_TEST(tests_dsk_platform_get_preferred_size_t) {
 	DSK_NAPI_CALL(new_wrapped_Ctrl(env, &ctrl, &widget, &wrapper));
 
 	int width, height;
-	/*DskWindow *window = [[DskWindow alloc]
+	DskWindow *window = [[DskWindow alloc]
 		initWithContentRect:NSMakeRect(0, 0, (CGFloat)10, (CGFloat)10)
 				  styleMask:NSWindowStyleMaskTitled | NSWindowStyleMaskClosable |
 							NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskResizable
@@ -93,14 +93,14 @@ DSK_DEFINE_TEST(tests_dsk_platform_get_preferred_size_t) {
 					  defer:NO];
 
 	win.contentView = child_gtk;
-	[win makeKeyAndOrderFront:win];*/
+	[win makeKeyAndOrderFront:win];
 
 	dsk_platform_get_preferred_size_t(ctrl, &width, &height);
 	printf("%d x %d\n", width, height);
 	DSK_ASSERT(width == 129);
 	DSK_ASSERT(height == 17);
 
-	//[win close];
+	[win close];
 
 	DSK_END_TEST();
 	return NULL;
