@@ -103,8 +103,9 @@ DSK_TEST_CLOSE
 napi_status dsk_platform_add_child_t(struct DskCtrlI *self, UIHandle child) {
 	napi_env env = self->env;
 	DSK_ONERROR_THROW_RET(napi_pending_exception);
-	DSK_NAPI_CALL(napi_throw_error(env, NULL, "Not implemented"));
-	return napi_pending_exception;
+
+	gtk_container_add(GTK_CONTAINER(self->ctrl_handle), GTK_WIDGET(child));
+	return napi_ok;
 }
 
 napi_status dsk_platform_remove_child_t(struct DskCtrlI *self, UIHandle child) {

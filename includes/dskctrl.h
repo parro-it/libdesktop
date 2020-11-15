@@ -44,7 +44,7 @@ typedef struct DskCtrlI {
 	DskCtrlIProto *proto;
 } DskCtrlI;
 
-extern DskCtrlIProto DskCtrlDefaultProto;
+extern DskCtrlIProto DskControlProto;
 
 #define DSK_CTRLI_CALL(INSTANCE, METHOD, ...)                                                      \
 	DSK_NAPI_CALL((INSTANCE)->proto->METHOD((INSTANCE), __VA_ARGS__))

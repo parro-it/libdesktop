@@ -1,11 +1,16 @@
 const {readdirSync, existsSync} = require('fs');
-const {platform} = require('os')
+const {platform} = require('os');
+const {join} = require('path');
 
 function listDir(dir) {
 	if (existsSync(dir)) {
 		readdirSync(dir)
 			.filter(f => f.endsWith('.c') || f.endsWith('.m'))
 			.forEach(f => console.log(`${dir}/${f}`));
+		
+		readdirSync(dir,{withFileTypes:true})
+			.filter(f => f.isDirectory())
+			.forEach(f => listDir(join(dir,f.name)));
 	}
 }
 
@@ -14,6 +19,9 @@ function listCPPDir(dir) {
 		readdirSync(dir)
 			.filter(f => f.endsWith('.cc') || f.endsWith('.cpp'))
 			.forEach(f => console.log(`${dir}/${f}`));
+		readdirSync(dir,{withFileTypes:true})
+			.filter(f => f.isDirectory())
+			.forEach(f => listDir(f.name));
 	}
 }
 

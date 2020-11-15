@@ -96,7 +96,7 @@ napi_status dsk_platform_reposition_t(struct DskCtrlI *self, int x, int y, int w
 napi_status dsk_platform_add_child_t(struct DskCtrlI *self, UIHandle child);
 napi_status dsk_platform_remove_child_t(struct DskCtrlI *self, UIHandle child);
 
-DskCtrlIProto DskCtrlDefaultProto = {
+DskCtrlIProto DskControlProto = {
 	.get_prop = dsk_platform_get_prop_t,
 	.set_prop = dsk_platform_set_prop_t,
 	.get_preferred_size = dsk_platform_get_preferred_size_t,
@@ -123,7 +123,7 @@ napi_status new_wrapped_Ctrl(napi_env env, DskCtrlI **ctrl, UIHandle *widget, na
 
 	*widget = dsk_new_test_widget();
 
-	DSK_CTRLI_CALL_STATIC(&DskCtrlDefaultProto, init, env, *widget, *wrapper, ctrl);
+	DSK_CTRLI_CALL_STATIC(&DskControlProto, init, env, *widget, *wrapper, ctrl);
 	return napi_ok;
 }
 
@@ -227,7 +227,7 @@ DSK_DEFINE_TEST(tests_def_assign_props_t) {
 DSK_TEST_CLOSE
 
 DSK_DEFINE_TEST(tests_dsk_CtrlIFuncs_init) {
-	DSK_ASSERT(DskCtrlDefaultProto.init != NULL);
+	DSK_ASSERT(DskControlProto.init != NULL);
 	DskCtrlI *ctrl = NULL;
 	UIHandle widget;
 	napi_value wrapper;
@@ -237,7 +237,7 @@ DSK_DEFINE_TEST(tests_dsk_CtrlIFuncs_init) {
 	DSK_ASSERT(ctrl->env == env);
 	DSK_ASSERT(ctrl->ctrl_handle == widget);
 	DSK_ASSERT(ctrl->js_wrapper_ref != NULL);
-	DSK_ASSERT(ctrl->proto == &DskCtrlDefaultProto);
+	DSK_ASSERT(ctrl->proto == &DskControlProto);
 
 	void *ctrl_from_wrapper;
 	DSK_NAPI_CALL(napi_unwrap(env, wrapper, &ctrl_from_wrapper));
