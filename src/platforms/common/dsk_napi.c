@@ -368,25 +368,49 @@ DSK_JS_FUNC(dsk_getPropSTR) {
 	return ret;
 }
 
-napi_status dsk_call_cb_async(napi_env env, napi_value cb, size_t argc, const napi_value *argv) {
+napi_status dsk_call_cb_async(napi_env env, napi_value recv, napi_value cb, size_t argc,
+							  const napi_value *argv) {
 	DSK_ONERROR_THROW_RET(napi_pending_exception);
+
+	printf("1 dsk_call_cb_async\n");
 
 	napi_handle_scope handle_scope;
 	DSK_NAPI_CALL(napi_open_handle_scope(env, &handle_scope));
 
+	printf("2 dsk_call_cb_async\n");
+
 	napi_value res_name;
 	DSK_NAPI_CALL(napi_create_string_utf8(env, "libdesktop", NAPI_AUTO_LENGTH, &res_name));
+
+	printf("3 dsk_call_cb_async\n");
 
 	napi_async_context async_context;
 	DSK_NAPI_CALL(napi_async_init(env, NULL, res_name, &async_context));
 
+	printf("4 dsk_call_cb_async\n");
+
 	napi_value resource_object;
 	DSK_NAPI_CALL(napi_create_object(env, &resource_object));
 
+	// napi_callback_scope cb_scope;
+	// DSK_NAPI_CALL(napi_open_callback_scope(env, resource_object, async_context, &cb_scope));
+
+	if (argc > 0) {
+		printf("5 dsk_call_cb_async %p %p\n", async_context, resource_object);
+	}
 	napi_value result;
-	DSK_NAPI_CALL(napi_make_callback(env, async_context, resource_object, cb, argc, argv, &result));
+	if (recv == NULL) {
+		recv = resource_object;
+	}
+	DSK_NAPI_CALL(napi_make_callback(env, async_context, recv, cb, argc, argv, &result));
+
+	// DSK_NAPI_CALL(napi_close_callback_scope(env, cb_scope));
+
+	printf("6 dsk_call_cb_async\n");
 
 	DSK_NAPI_CALL(napi_async_destroy(env, async_context));
+
+	printf("7 dsk_call_cb_async\n");
 
 	DSK_NAPI_CALL(napi_close_handle_scope(env, handle_scope));
 

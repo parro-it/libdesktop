@@ -107,7 +107,7 @@ static void main_thread(uv_timer_t *handle) {
 		napi_open_handle_scope(resolution_env, &handle_scope);
 		napi_value val;
 		napi_get_reference_value(resolution_env, ref, &val);
-		dsk_call_cb_async(resolution_env, val, 0, NULL);
+		dsk_call_cb_async(resolution_env, NULL, val, 0, NULL);
 		napi_close_handle_scope(resolution_env, handle_scope);
 	}
 
@@ -186,7 +186,7 @@ static void main_thread(uv_timer_t *handle) {
 		napi_open_handle_scope(resolution_env, &handle_scope);
 		napi_value val;
 		napi_get_reference_value(resolution_env, ref, &val);
-		dsk_call_cb_async(resolution_env, val, 0, NULL);
+		dsk_call_cb_async(resolution_env, NULL, val, 0, NULL);
 		napi_close_handle_scope(resolution_env, handle_scope);
 
 		DSK_DEBUG("resolved stop promise");

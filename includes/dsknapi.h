@@ -115,7 +115,6 @@
 			} else {                                                                               \
 				dsk_error_msg = (char *)err->error_message;                                        \
 			}                                                                                      \
-			printf("err %s\n", dsk_error_msg);                                                     \
                                                                                                    \
 			goto dsk_error;                                                                        \
 		}                                                                                          \
@@ -825,8 +824,8 @@ DSK_JS_FUNC(dsk_getPropSTR);
 	DSK_DEFINE_PROPERTY(libdesktop, Style, NAME, dsk_getPropBOOL, dsk_setPropBOOL,                 \
 						((void *[]){NATIVE_GETTER, NATIVE_SETTER}))
 
-napi_status dsk_call_cb_async(napi_env env, napi_value cb, size_t argc, const napi_value *argv);
-
+napi_status dsk_call_cb_async(napi_env env, napi_value recv, napi_value cb, size_t argc,
+							  const napi_value *argv);
 // other utilities
 
 #define DSK_ARRAY_FOREACH(ARR, BLOCK)                                                              \
