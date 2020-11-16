@@ -90,8 +90,9 @@ static napi_status def_add_children_t(struct DskCtrlI *self, napi_value children
 
 // implemented by each platform
 napi_status dsk_platform_get_prop_t(struct DskCtrlI *self, const char *prop_name,
-									void **prop_value);
-napi_status dsk_platform_set_prop_t(struct DskCtrlI *self, const char *prop_name, void *prop_value);
+									dsk_prop_types prop_type, ...);
+napi_status dsk_platform_set_prop_t(struct DskCtrlI *self, const char *prop_name,
+									dsk_prop_types prop_type, ...);
 napi_status dsk_platform_get_preferred_size_t(struct DskCtrlI *self, int *width, int *height);
 napi_status dsk_platform_reposition_t(struct DskCtrlI *self, int x, int y, int width, int height);
 napi_status dsk_platform_add_child_t(struct DskCtrlI *self, UIHandle child);

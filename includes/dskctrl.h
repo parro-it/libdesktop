@@ -10,8 +10,19 @@ struct DskCtrlIProto;
 
 typedef void *UIHandle;
 
-typedef napi_status get_prop_t(struct DskCtrlI *self, const char *prop_name, void **prop_value);
-typedef napi_status set_prop_t(struct DskCtrlI *self, const char *prop_name, void *prop_value);
+typedef enum dsk_prop_types {
+	dsk_prop_i32,
+	dsk_prop_str,
+	dsk_prop_f64,
+	dsk_prop_bool,
+	dsk_prop_date,
+} dsk_prop_types;
+
+typedef napi_status get_prop_t(struct DskCtrlI *self, const char *prop_name,
+							   dsk_prop_types prop_type, ...);
+typedef napi_status set_prop_t(struct DskCtrlI *self, const char *prop_name,
+							   dsk_prop_types prop_type, ...);
+
 typedef napi_status get_preferred_size_t(struct DskCtrlI *self, int *width, int *height);
 typedef napi_status reposition_t(struct DskCtrlI *self, int x, int y, int width, int height);
 typedef napi_status add_child_t(struct DskCtrlI *self, UIHandle child);

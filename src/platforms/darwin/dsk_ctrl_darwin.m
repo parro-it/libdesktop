@@ -34,7 +34,7 @@ napi_status dsk_CtrlI_from_UIHandle(UIHandle UI_ctrl, DskCtrlI **ctrl) {
 }
 
 napi_status dsk_platform_get_prop_t(struct DskCtrlI *self, const char *prop_name,
-									void **prop_value) {
+									dsk_prop_types prop_type, ...) {
 	napi_env env = self->env;
 	DSK_ONERROR_THROW_RET(napi_pending_exception);
 	DSK_NAPI_CALL(napi_throw_error(env, NULL, "Not implemented"));
@@ -42,7 +42,7 @@ napi_status dsk_platform_get_prop_t(struct DskCtrlI *self, const char *prop_name
 }
 
 napi_status dsk_platform_set_prop_t(struct DskCtrlI *self, const char *prop_name,
-									void *prop_value) {
+									dsk_prop_types prop_type, ...) {
 	napi_env env = self->env;
 	DSK_ONERROR_THROW_RET(napi_pending_exception);
 	DSK_NAPI_CALL(napi_throw_error(env, NULL, "Not implemented"));

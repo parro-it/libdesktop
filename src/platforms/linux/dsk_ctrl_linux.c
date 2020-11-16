@@ -1,5 +1,6 @@
 #include "libdesktop.h"
 #include <gtk/gtk.h>
+#include <stdarg.h>
 
 void dsk_initui_for_test() {
 	gtk_init(0, NULL);
@@ -17,22 +18,6 @@ napi_status dsk_CtrlI_link_UIHandle(UIHandle UI_ctrl, DskCtrlI *ctrl) {
 napi_status dsk_CtrlI_from_UIHandle(UIHandle UI_ctrl, DskCtrlI **ctrl) {
 	*ctrl = g_object_get_data(G_OBJECT(UI_ctrl), "DskCtrlI");
 	return napi_ok;
-}
-
-napi_status dsk_platform_get_prop_t(struct DskCtrlI *self, const char *prop_name,
-									void **prop_value) {
-	napi_env env = self->env;
-	DSK_ONERROR_THROW_RET(napi_pending_exception);
-	DSK_NAPI_CALL(napi_throw_error(env, NULL, "Not implemented"));
-	return napi_pending_exception;
-}
-
-napi_status dsk_platform_set_prop_t(struct DskCtrlI *self, const char *prop_name,
-									void *prop_value) {
-	napi_env env = self->env;
-	DSK_ONERROR_THROW_RET(napi_pending_exception);
-	DSK_NAPI_CALL(napi_throw_error(env, NULL, "Not implemented"));
-	return napi_pending_exception;
 }
 
 napi_status dsk_platform_get_preferred_size_t(struct DskCtrlI *self, int *width, int *height) {
@@ -118,3 +103,100 @@ napi_status dsk_platform_remove_child_t(struct DskCtrlI *self, UIHandle child) {
 	DSK_NAPI_CALL(napi_throw_error(env, NULL, "Not implemented"));
 	return napi_pending_exception;
 }
+
+napi_status dsk_platform_get_prop_t(struct DskCtrlI *self, const char *prop_name,
+									dsk_prop_types prop_type, ...) {
+	napi_env env = self->env;
+	DSK_ONERROR_THROW_RET(napi_pending_exception);
+
+	va_list value_valist;
+
+	va_start(value_valist, prop_type);
+
+	void *value = va_arg(value_valist, void *);
+	g_object_get(self->ctrl_handle, prop_name, value, NULL);
+
+	va_end(value_valist); /* Clean up. */
+
+	return napi_ok;
+}
+/*
+
+*/
+napi_status dsk_platform_set_prop_t(struct DskCtrlI *self, const char *prop_name,
+									dsk_prop_types prop_type, ...) {
+	napi_env env = self->env;
+	DSK_ONERROR_THROW_RET(napi_pending_exception);
+
+	va_list value_valist;
+
+	va_start(value_valist, prop_type);
+
+	switch (prop_type) {
+	case dsk_prop_i32: {
+		int32_t value = va_arg(value_valist, int32_t);
+		g_object_set(self->ctrl_handle, prop_name, value, NULL);
+		break;
+	}
+	case dsk_prop_str: {
+		char *value = va_arg(value_valist, char *);
+		g_object_set(self->ctrl_handle, prop_name, value, NULL);
+		break;
+	}
+	case dsk_prop_f64: {
+		double value = va_arg(value_valist, double);
+		g_object_set(self->ctrl_handle, prop_name, value, NULL);
+		break;
+	}
+	case dsk_prop_bool: {
+		int value = va_arg(value_valist, int);
+		g_object_set(self->ctrl_handle, prop_name, (bool)value, NULL);
+		break;
+	}
+	case dsk_prop_date: {
+		break;
+	}
+	}
+
+	va_end(value_valist); /* Clean up. */
+
+	return napi_ok;
+}
+
+DSK_DEFINE_TEST(tests_dsk_platform_set_prop_t) {
+	DskCtrlI *ctrl = NULL;
+	UIHandle widget;
+	napi_value wrapper;
+	DSK_NAPI_CALL(new_wrapped_Ctrl(&DskControlProto, env, &ctrl, &widget, &wrapper));
+
+	DSK_CTRLI_CALL(ctrl, set_prop, "label", dsk_prop_str, "ciao mondo");
+
+	char *str;
+	DSK_CTRLI_CALL(ctrl, get_prop, "label", dsk_prop_str, &str);
+	DSK_ASSERT(strcmp(str, "ciao mondo") == 0);
+
+	// how to throw here????
+	napi_status res = ctrl->proto->set_prop(ctrl, "non-existent", dsk_prop_str, "ciao mondo");
+	DSK_NAPI_CALL(res);
+
+	DSK_CTRLI_CALL(ctrl, set_prop, "angle", dsk_prop_f64, 42.42);
+
+	double dval;
+	DSK_CTRLI_CALL(ctrl, get_prop, "angle", dsk_prop_f64, &dval);
+	DSK_ASSERT(dval == 42.42);
+
+	DSK_CTRLI_CALL(ctrl, set_prop, "width-chars", dsk_prop_i32, 42);
+
+	int32_t i32val;
+	DSK_CTRLI_CALL(ctrl, get_prop, "width-chars", dsk_prop_i32, &i32val);
+	DSK_ASSERT(i32val == 42);
+
+	DSK_CTRLI_CALL(ctrl, set_prop, "wrap", dsk_prop_bool, true);
+
+	bool bval;
+	DSK_CTRLI_CALL(ctrl, get_prop, "wrap", dsk_prop_bool, &bval);
+	DSK_ASSERT(bval == true);
+
+	DSK_END_TEST();
+}
+DSK_TEST_CLOSE
