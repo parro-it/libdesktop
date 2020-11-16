@@ -62,6 +62,81 @@ DSK_JS_FUNC(getPropYGValue) {
 	return NULL;
 }
 
+typedef void dsk_SetterI32(void *instance, const int32_t value, void **datas);
+typedef int32_t dsk_GetterI32(void *instance, void **datas);
+
+typedef void dsk_SetterF32(void *instance, const float value, void **datas);
+typedef float dsk_GetterF32(void *instance, void **datas);
+
+DSK_JS_FUNC(dsk_setPropI32) {
+	DSK_JS_FUNC_INIT();
+	DSK_AT_LEAST_NARGS(1);
+	int32_t value;
+	DSK_NAPI_CALL(napi_get_value_int32(env, argv[0], &value));
+
+	void *instance;
+	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&instance));
+
+	void **datas;
+	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&datas));
+
+	dsk_SetterI32 *setter = datas[1];
+
+	setter(instance, value, datas);
+	return NULL;
+}
+
+DSK_JS_FUNC(dsk_getPropI32) {
+	DSK_JS_FUNC_INIT()
+
+	void *instance;
+	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&instance));
+
+	void **datas;
+
+	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&datas));
+
+	dsk_GetterI32 *getter = datas[0];
+	int32_t result = getter(instance, datas);
+	napi_value ret;
+	DSK_NAPI_CALL(napi_create_int32(env, result, &ret));
+	return ret;
+}
+
+DSK_JS_FUNC(dsk_setPropF32) {
+	DSK_JS_FUNC_INIT()
+	DSK_AT_LEAST_NARGS(1)
+	double value;
+	DSK_NAPI_CALL(napi_get_value_double(env, argv[0], &value));
+
+	void *instance;
+	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&instance));
+
+	void **datas;
+	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&datas));
+
+	dsk_SetterF32 *setter = datas[1];
+	setter(instance, (float)value, datas);
+	return NULL;
+}
+
+DSK_JS_FUNC(dsk_getPropF32) {
+	DSK_JS_FUNC_INIT()
+
+	void *instance;
+	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&instance));
+
+	void **datas;
+	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&datas));
+
+	dsk_GetterF32 *getter = datas[0];
+	float result = getter(instance, datas);
+
+	napi_value ret;
+	DSK_NAPI_CALL(napi_create_double(env, result, &ret));
+	return ret;
+}
+
 #define PROP_YGVALUE_F32(NAME, UNIT, NATIVE_GETTER, NATIVE_SETTER)                                 \
 	DSK_DEFINE_PROPERTY(libdesktop, Style, NAME, getPropYGValue, dsk_setPropF32,                   \
 						((void *[]){NATIVE_GETTER, NATIVE_SETTER, #UNIT}))
@@ -135,6 +210,35 @@ static void set_style_auto(const YGNodeRef node, float _) {
 	YGNodeStyleSetFlexBasisAuto(node);
 }
 
+typedef void dsk_SetterI32(void *instance, const int32_t value, void **datas);
+typedef int32_t dsk_GetterI32(void *instance, void **datas);
+
+typedef void dsk_SetterF32(void *instance, const float value, void **datas);
+typedef float dsk_GetterF32(void *instance, void **datas);
+
+typedef void dsk_SetterSTR(void *instance, char *value, void **datas);
+typedef char *dsk_GetterSTR(void *instance, void **datas);
+
+typedef void dsk_SetterBOOL(void *instance, bool value, void **datas);
+typedef bool dsk_GetterBOOL(void *instance, void **datas);
+
+DSK_JS_FUNC(dsk_setPropI32);
+DSK_JS_FUNC(dsk_getPropI32);
+DSK_JS_FUNC(dsk_setPropBOOL);
+DSK_JS_FUNC(dsk_getPropBOOL);
+DSK_JS_FUNC(dsk_setPropF32);
+DSK_JS_FUNC(dsk_getPropF32);
+DSK_JS_FUNC(dsk_setPropSTR);
+DSK_JS_FUNC(dsk_getPropSTR);
+
+#define PROP_I32(NAME, NATIVE_GETTER, NATIVE_SETTER)                                               \
+	DSK_DEFINE_PROPERTY(libdesktop, Style, NAME, dsk_getPropI32, dsk_setPropI32,                   \
+						((void *[]){NATIVE_GETTER, NATIVE_SETTER}))
+
+#define PROP_F32(NAME, NATIVE_GETTER, NATIVE_SETTER)                                               \
+	DSK_DEFINE_PROPERTY(libdesktop, Style, NAME, dsk_getPropF32, dsk_setPropF32,                   \
+						((void *[]){NATIVE_GETTER, NATIVE_SETTER}))
+
 DSK_DEFINE_CLASS(libdesktop, Style) {
 	DSK_JS_FUNC_INIT()
 	DSK_EXACTLY_NARGS(2);
@@ -171,19 +275,19 @@ DSK_DEFINE_CLASS(libdesktop, Style) {
 	return this;
 }
 
-DSK_PROP_I32(direction, YGNodeStyleGetDirection, YGNodeStyleSetDirection);
-DSK_PROP_I32(flexDirection, YGNodeStyleGetFlexDirection, YGNodeStyleSetFlexDirection);
-DSK_PROP_I32(justifyContent, YGNodeStyleGetJustifyContent, YGNodeStyleSetJustifyContent);
-DSK_PROP_I32(alignContent, YGNodeStyleGetAlignContent, YGNodeStyleSetAlignContent);
-DSK_PROP_I32(alignItems, YGNodeStyleGetAlignItems, YGNodeStyleSetAlignItems);
-DSK_PROP_I32(alignSelf, YGNodeStyleGetAlignSelf, YGNodeStyleSetAlignSelf);
-DSK_PROP_I32(positionType, YGNodeStyleGetPositionType, YGNodeStyleSetPositionType);
-DSK_PROP_I32(flexWrap, YGNodeStyleGetFlexWrap, YGNodeStyleSetFlexWrap);
-DSK_PROP_I32(overflow, YGNodeStyleGetOverflow, YGNodeStyleSetOverflow);
-DSK_PROP_I32(display, YGNodeStyleGetDisplay, YGNodeStyleSetDisplay);
-DSK_PROP_F32(flex, YGNodeStyleGetFlex, YGNodeStyleSetFlex);
-DSK_PROP_F32(flexGrow, YGNodeStyleGetFlexGrow, YGNodeStyleSetFlexGrow);
-DSK_PROP_F32(flexShrink, YGNodeStyleGetFlexShrink, YGNodeStyleSetFlexShrink);
+PROP_I32(direction, YGNodeStyleGetDirection, YGNodeStyleSetDirection);
+PROP_I32(flexDirection, YGNodeStyleGetFlexDirection, YGNodeStyleSetFlexDirection);
+PROP_I32(justifyContent, YGNodeStyleGetJustifyContent, YGNodeStyleSetJustifyContent);
+PROP_I32(alignContent, YGNodeStyleGetAlignContent, YGNodeStyleSetAlignContent);
+PROP_I32(alignItems, YGNodeStyleGetAlignItems, YGNodeStyleSetAlignItems);
+PROP_I32(alignSelf, YGNodeStyleGetAlignSelf, YGNodeStyleSetAlignSelf);
+PROP_I32(positionType, YGNodeStyleGetPositionType, YGNodeStyleSetPositionType);
+PROP_I32(flexWrap, YGNodeStyleGetFlexWrap, YGNodeStyleSetFlexWrap);
+PROP_I32(overflow, YGNodeStyleGetOverflow, YGNodeStyleSetOverflow);
+PROP_I32(display, YGNodeStyleGetDisplay, YGNodeStyleSetDisplay);
+PROP_F32(flex, YGNodeStyleGetFlex, YGNodeStyleSetFlex);
+PROP_F32(flexGrow, YGNodeStyleGetFlexGrow, YGNodeStyleSetFlexGrow);
+PROP_F32(flexShrink, YGNodeStyleGetFlexShrink, YGNodeStyleSetFlexShrink);
 PROP_YGVALUE_F32(flexBasis, POINT, YGNodeStyleGetFlexBasis, YGNodeStyleSetFlexBasis);
 PROP_YGVALUE_F32(flexBasisPercent, PERCENT, YGNodeStyleGetFlexBasis,
 				 YGNodeStyleSetFlexBasisPercent);

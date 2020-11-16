@@ -56,21 +56,21 @@ struct dsk_event_args {
 };
 void dsk_connect_event(UIHandle widget, char *eventname, struct dsk_event_args *args);
 
-typedef enum dsk_types { dsk_i32, dsk_str, dsk_f64, dsk_bool } dsk_types;
+// typedef enum dsk_types { dsk_i32, dsk_str, dsk_f64, dsk_bool } dsk_types;
 
-#define DSK_UI_PROP_S(MODNAME, CLASSNAME, PROPNAME, UI_NAME)                                       \
-	DSK_DEFINE_PROPERTY(                                                                           \
-		MODNAME, CLASSNAME, PROPNAME, dsk_getPropSTR, dsk_setPropSTR,                              \
-		((void *[]){dsk_ui_get_prop_s, dsk_ui_set_prop_s, UI_NAME, (void *)dsk_str}))
+#define DSK_UI_PROP_S(MODNAME, CLASSNAME, PROPNAME, UI_NAME)
+//	DSK_DEFINE_PROPERTY(
+//		MODNAME, CLASSNAME, PROPNAME, dsk_getPropSTR, dsk_setPropSTR,
+//		((void *[]){dsk_ui_get_prop_s, dsk_ui_set_prop_s, UI_NAME, (void *)dsk_str}))
 
-#define DSK_UI_PROP_I32(MODNAME, CLASSNAME, PROPNAME, UI_NAME)                                     \
-	DSK_DEFINE_PROPERTY(                                                                           \
-		MODNAME, CLASSNAME, PROPNAME, dsk_getPropI32, dsk_setPropI32,                              \
-		((void *[]){dsk_ui_get_prop_i32, dsk_ui_set_prop_i32, UI_NAME, (void *)dsk_i32}))
+#define DSK_UI_PROP_I32(MODNAME, CLASSNAME, PROPNAME, UI_NAME)
+//	DSK_DEFINE_PROPERTY(
+//		MODNAME, CLASSNAME, PROPNAME, dsk_getPropI32, dsk_setPropI32,
+//		((void *[]){dsk_ui_get_prop_i32, dsk_ui_set_prop_i32, UI_NAME, (void *)dsk_i32}))
 
-#define DSK_UI_PROP_BOOL(MODNAME, CLASSNAME, PROPNAME, UI_NAME)                                    \
-	DSK_DEFINE_PROPERTY(                                                                           \
-		MODNAME, CLASSNAME, PROPNAME, dsk_getPropBOOL, dsk_setPropBOOL,                            \
-		((void *[]){dsk_ui_get_prop_bool, dsk_ui_set_prop_bool, UI_NAME, (void *)dsk_bool}))
+#define DSK_UI_PROP_BOOL(MODNAME, CLASSNAME, PROPNAME, UI_NAME)
+//	DSK_DEFINE_PROPERTY(
+//		MODNAME, CLASSNAME, PROPNAME, dsk_getPropBOOL, dsk_setPropBOOL,
+//		((void *[]){dsk_ui_get_prop_bool, dsk_ui_set_prop_bool, UI_NAME, (void *)dsk_bool}))
 
 #endif

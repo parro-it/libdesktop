@@ -156,41 +156,99 @@ void *dsk_unwrap(napi_env env, napi_value this) {
 	return data;
 }
 
-DSK_JS_FUNC(dsk_setPropI32) {
+DSK_JS_FUNC(dsk_setProp) {
 	DSK_JS_FUNC_INIT();
 	DSK_AT_LEAST_NARGS(1);
-	int32_t value;
-	DSK_NAPI_CALL(napi_get_value_int32(env, argv[0], &value));
-
-	void *instance;
-	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&instance));
 
 	void **datas;
 	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&datas));
 
-	dsk_SetterI32 *setter = datas[1];
+	dsk_prop_types prop_type = (dsk_prop_types)datas[2];
+	void *instance;
+	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&instance));
+	dsk_Setter *setter = datas[1];
 
-	setter(instance, value, datas);
+	switch (prop_type) {
+	case dsk_prop_i32: {
+		int32_t value;
+		DSK_NAPI_CALL(napi_get_value_int32(env, argv[0], &value));
+		DSK_NAPI_CALL(setter(instance, datas, value));
+
+		break;
+	}
+	case dsk_prop_str: {
+		char *value;
+		DSK_NAPI_CALL(dsk_get_utf8_cstr(env, argv[0], &value));
+		DSK_NAPI_CALL(setter(instance, datas, value));
+		break;
+	}
+	case dsk_prop_f64: {
+		double value;
+		DSK_NAPI_CALL(napi_get_value_double(env, argv[0], &value));
+		DSK_NAPI_CALL(setter(instance, datas, value));
+		break;
+	}
+	case dsk_prop_bool: {
+		bool value;
+		DSK_NAPI_CALL(napi_get_value_bool(env, argv[0], &value));
+		DSK_NAPI_CALL(setter(instance, datas, value));
+		break;
+	}
+	case dsk_prop_date: {
+		break;
+	}
+	}
+
 	return NULL;
 }
 
-DSK_JS_FUNC(dsk_getPropI32) {
+DSK_JS_FUNC(dsk_getProp) {
 	DSK_JS_FUNC_INIT()
 
 	void *instance;
 	DSK_NAPI_CALL(napi_unwrap(env, this, (void **)&instance));
 
 	void **datas;
-
 	DSK_NAPI_CALL(napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&datas));
 
-	dsk_GetterI32 *getter = datas[0];
-	int32_t result = getter(instance, datas);
-	napi_value ret;
-	DSK_NAPI_CALL(napi_create_int32(env, result, &ret));
+	dsk_Getter *getter = datas[0];
+	dsk_prop_types prop_type = (dsk_prop_types)datas[2];
+	napi_value ret = NULL;
+
+	switch (prop_type) {
+	case dsk_prop_i32: {
+		int32_t result;
+		DSK_NAPI_CALL(getter(instance, datas, &result));
+		DSK_NAPI_CALL(napi_create_int32(env, result, &ret));
+		break;
+	}
+	case dsk_prop_str: {
+		char *result;
+		DSK_NAPI_CALL(getter(instance, datas, &result));
+		DSK_NAPI_CALL(dsk_get_utf8_napistr(env, result, &ret));
+		free(result);
+		break;
+	}
+	case dsk_prop_f64: {
+		double result;
+		DSK_NAPI_CALL(getter(instance, datas, &result));
+		DSK_NAPI_CALL(napi_create_double(env, result, &ret));
+		break;
+	}
+	case dsk_prop_bool: {
+		bool result;
+		DSK_NAPI_CALL(getter(instance, datas, &result));
+		DSK_NAPI_CALL(napi_get_boolean(env, result, &ret));
+		break;
+	}
+	case dsk_prop_date: {
+		break;
+	}
+	}
+
 	return ret;
 }
-
+/*
 DSK_JS_FUNC(dsk_setPropF32) {
 	DSK_JS_FUNC_INIT()
 	DSK_AT_LEAST_NARGS(1)
@@ -258,7 +316,7 @@ DSK_JS_FUNC(dsk_getPropBOOL) {
 	DSK_NAPI_CALL(napi_get_boolean(env, result, &ret));
 	return ret;
 }
-
+*/
 napi_status dsk_get_utf8_cstr(napi_env env, napi_value str, char **result) {
 	DSK_ONERROR_THROW_RET(napi_pending_exception);
 
@@ -330,7 +388,7 @@ napi_status dsk_get_utf16_napistr(napi_env env, const char16_t *str, napi_value 
 	DSK_NAPI_CALL(napi_create_string_utf16(env, str, NAPI_AUTO_LENGTH, result));
 	return napi_ok;
 }
-
+/*
 DSK_JS_FUNC(dsk_setPropSTR) {
 	DSK_JS_FUNC_INIT();
 	DSK_AT_LEAST_NARGS(1);
@@ -367,7 +425,7 @@ DSK_JS_FUNC(dsk_getPropSTR) {
 	DSK_NAPI_CALL(dsk_get_utf8_napistr(env, result, &ret));
 	return ret;
 }
-
+*/
 napi_status dsk_call_cb_async(napi_env env, napi_value recv, napi_value cb, size_t argc,
 							  const napi_value *argv) {
 	DSK_ONERROR_THROW_RET(napi_pending_exception);
