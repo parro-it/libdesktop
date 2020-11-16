@@ -80,7 +80,7 @@ int dsk_wakeup_ui_loop() {
 	g_main_context_wakeup(NULL);
 	return 0;
 }
-
+/*
 YGNodeRef dsk_widget_get_node(napi_env env, napi_value widget) {
 	// printf("unwrap %p\n", widget);
 	GObject *widgetG;
@@ -137,11 +137,11 @@ void dsk_get_preferred_sizes(UIHandle widget, int *width, int *height) {
 	*width = natwidth;
 	*height = natheight;
 }
-
+*/
 void dsk_connect_event(UIHandle widget, char *eventname, struct dsk_event_args *args) {
 	g_signal_connect(G_OBJECT(widget), eventname, G_CALLBACK(dsk_on_event), args);
 }
-
+/*
 void dsk_ui_set_prop_s(void *instance, char *value, void **datas) {
 	GtkWidget *widget = instance;
 	char *propname = datas[2];
@@ -207,3 +207,4 @@ bool dsk_ui_get_prop_bool(void *instance, void **datas) {
 	g_object_get(widget, propname, &result, NULL);
 	return result;
 }
+*/

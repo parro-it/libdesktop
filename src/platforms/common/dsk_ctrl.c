@@ -327,3 +327,72 @@ DSK_DEFINE_TEST(tests_dsk_CtrlI_get_wrapper) {
 	return NULL;
 }
 DSK_TEST_CLOSE
+
+napi_status dsk_ui_getter(void *self, void **datas, ...) {
+
+	DskCtrlI *ctrl = self;
+	napi_env env = ctrl->env;
+	DSK_ONERROR_THROW_RET(napi_pending_exception);
+
+	dsk_prop_types prop_type = (dsk_prop_types)datas[2];
+	char *prop_name = datas[3];
+
+	va_list value_valist;
+
+	va_start(value_valist, datas);
+
+	void *value = va_arg(value_valist, void *);
+	DSK_CTRLI_CALL(ctrl, set_prop, prop_name, prop_type, value);
+
+	va_end(value_valist); /* Clean up. */
+
+	return napi_ok;
+}
+
+napi_status dsk_ui_setter(void *self, void **datas, ...) {
+
+	DskCtrlI *ctrl = self;
+	napi_env env = ctrl->env;
+	DSK_ONERROR_THROW_RET(napi_pending_exception);
+
+	char *prop_name = datas[3];
+	dsk_prop_types prop_type = (dsk_prop_types)datas[2];
+
+	va_list value_valist;
+
+	va_start(value_valist, datas);
+
+	switch (prop_type) {
+	case dsk_prop_i32: {
+		int32_t value = va_arg(value_valist, int32_t);
+		DSK_CTRLI_CALL(ctrl, set_prop, prop_name, prop_type, value);
+
+		break;
+	}
+	case dsk_prop_str: {
+		char *value = va_arg(value_valist, char *);
+		DSK_CTRLI_CALL(ctrl, set_prop, prop_name, prop_type, value);
+
+		break;
+	}
+	case dsk_prop_f64: {
+		double value = va_arg(value_valist, double);
+		DSK_CTRLI_CALL(ctrl, set_prop, prop_name, prop_type, value);
+
+		break;
+	}
+	case dsk_prop_bool: {
+		int value = va_arg(value_valist, int);
+		DSK_CTRLI_CALL(ctrl, set_prop, prop_name, prop_type, value);
+
+		break;
+	}
+	case dsk_prop_date: {
+		break;
+	}
+	}
+
+	va_end(value_valist); /* Clean up. */
+
+	return napi_ok;
+}

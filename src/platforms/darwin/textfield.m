@@ -37,4 +37,7 @@ DSK_DEFINE_CLASS(libdesktop, Textfield) {
 	return this;
 }
 
-DSK_UI_PROP_S(libdesktop, Textfield, text, "stringValue");
+DSK_UI_PROP(libdesktop, Textfield, left, dsk_prop_i32, "x");
+DSK_UI_PROP(libdesktop, Textfield, top, dsk_prop_i32, "y");
+DSK_UI_PROP(libdesktop, Textfield, text, dsk_prop_str, "stringValue");
+DSK_UI_PROP(libdesktop, Textfield, enabled, dsk_prop_bool, "enabled");

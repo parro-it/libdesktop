@@ -52,6 +52,13 @@ extern DskCtrlIProto DskControlProto;
 #define DSK_CTRLI_CALL(INSTANCE, METHOD, ...)                                                      \
 	DSK_NAPI_CALL((INSTANCE)->proto->METHOD((INSTANCE), __VA_ARGS__))
 
+napi_status dsk_ui_getter(void *self, void **datas, ...);
+napi_status dsk_ui_setter(void *self, void **datas, ...);
+
+#define DSK_UI_PROP(MODNAME, CLASSNAME, PROPNAME, TYPE, UI_NAME)                                   \
+	DSK_DEFINE_PROPERTY(MODNAME, CLASSNAME, PROPNAME, dsk_getProp, dsk_setProp,                    \
+						((void *[]){dsk_ui_getter, dsk_ui_setter, (void *)TYPE, UI_NAME}))
+
 #define DSK_CTRLI_CALL_STATIC(INSTANCE, METHOD, ...)                                               \
 	DSK_NAPI_CALL((INSTANCE)->METHOD((INSTANCE), __VA_ARGS__))
 
@@ -72,18 +79,5 @@ struct dsk_event_args {
 	napi_ref event;
 };
 void dsk_connect_event(UIHandle widget, char *eventname, struct dsk_event_args *args);
-
-#define DSK_UI_PROP_S(MODNAME, CLASSNAME, PROPNAME, UI_NAME)                                       \
-	DSK_DEFINE_PROPERTY(MODNAME, CLASSNAME, PROPNAME, dsk_getPropSTR, dsk_setPropSTR,              \
-						((void *[]){dsk_ui_get_prop_s, dsk_ui_set_prop_s, UI_NAME}))
-
-#define DSK_UI_PROP_I32(MODNAME, CLASSNAME, PROPNAME, UI_NAME)                                     \
-	DSK_DEFINE_PROPERTY(MODNAME, CLASSNAME, PROPNAME, dsk_getPropI32, dsk_setPropI32,              \
-						((void *[]){dsk_ui_get_prop_i32, dsk_ui_set_prop_i32, UI_NAME}))
-
-#define DSK_UI_PROP_BOOL(MODNAME, CLASSNAME, PROPNAME, UI_NAME)                                    \
-	DSK_DEFINE_PROPERTY(MODNAME, CLASSNAME, PROPNAME, dsk_getPropBOOL, dsk_setPropBOOL,            \
-						((void *[]){dsk_ui_get_prop_bool, dsk_ui_set_prop_bool, UI_NAME}))
 */
-
 #endif

@@ -126,9 +126,9 @@ DSK_DEFINE_CLASS(libdesktop, Window) {
 	return this;
 }
 
-DSK_UI_PROP_I32(libdesktop, Window, width, "default-width");
-DSK_UI_PROP_I32(libdesktop, Window, height, "default-height");
-DSK_UI_PROP_I32(libdesktop, Window, top, "y");
-DSK_UI_PROP_I32(libdesktop, Window, left, "x");
-DSK_UI_PROP_S(libdesktop, Window, title, "title");
-DSK_UI_PROP_BOOL(libdesktop, Window, visible, "visible");
+DSK_UI_PROP(libdesktop, Window, left, dsk_prop_i32, "x");
+DSK_UI_PROP(libdesktop, Window, top, dsk_prop_i32, "y");
+DSK_UI_PROP(libdesktop, Window, width, dsk_prop_i32, "default-width");
+DSK_UI_PROP(libdesktop, Window, height, dsk_prop_i32, "default-height");
+DSK_UI_PROP(libdesktop, Window, title, dsk_prop_str, "title");
+DSK_UI_PROP(libdesktop, Window, visible, dsk_prop_bool, "visible");

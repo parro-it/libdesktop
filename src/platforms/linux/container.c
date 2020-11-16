@@ -4,7 +4,7 @@
 #include <yoga/Yoga.h>
 
 DSK_EXTEND_MODULE(libdesktop);
-
+/*
 void dsk_widget_reposition(napi_env env, UIHandle container, UIHandle widget, float xcoord,
 						   float ycoord, float width, float height) {
 	GValue x = G_VALUE_INIT;
@@ -21,7 +21,7 @@ void dsk_widget_reposition(napi_env env, UIHandle container, UIHandle widget, fl
 void dsk_platform_container_add_child(UIHandle parent, UIHandle child) {
 	gtk_container_add(GTK_CONTAINER(parent), GTK_WIDGET(child));
 }
-
+*/
 DSK_DEFINE_CLASS(libdesktop, Container) {
 	DSK_JS_FUNC_INIT();
 	DSK_EXACTLY_NARGS(2);
@@ -31,6 +31,7 @@ DSK_DEFINE_CLASS(libdesktop, Container) {
 
 	return this;
 }
+/*
 
 DSK_DEFINE_METHOD(libdesktop, Container, append) {
 	DSK_JS_FUNC_INIT();
@@ -40,7 +41,6 @@ DSK_DEFINE_METHOD(libdesktop, Container, append) {
 
 	return this;
 }
-/*
 napi_ref ContainerRef;
 
 napi_value container_init(napi_env env, napi_value exports) {

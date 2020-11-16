@@ -253,7 +253,9 @@ DSK_DEFINE_CLASS(libdesktop, Style) {
 		if (argType == napi_null) {
 			node = YGNodeNew();
 		} else {
-			node = dsk_widget_get_node(env, argv[1]);
+			DskCtrlI *ctrl;
+			DSK_NAPI_CALL(dsk_CtrlI_from_wrapper(env, argv[1], &ctrl));
+			node = ctrl->yg_node;
 		}
 	}
 

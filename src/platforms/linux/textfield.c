@@ -23,7 +23,7 @@ DSK_DEFINE_CLASS(libdesktop, Textfield) {
 	return this;
 }
 
-DSK_UI_PROP_I32(libdesktop, Textfield, left, "x");
-DSK_UI_PROP_I32(libdesktop, Textfield, top, "y");
-DSK_UI_PROP_S(libdesktop, Textfield, text, "text");
-DSK_UI_PROP_BOOL(libdesktop, Textfield, visible, "visible");
+DSK_UI_PROP(libdesktop, Textfield, left, dsk_prop_i32, "x");
+DSK_UI_PROP(libdesktop, Textfield, top, dsk_prop_i32, "y");
+DSK_UI_PROP(libdesktop, Textfield, text, dsk_prop_str, "text");
+DSK_UI_PROP(libdesktop, Textfield, visible, dsk_prop_bool, "visible");

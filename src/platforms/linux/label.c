@@ -26,7 +26,7 @@ DSK_DEFINE_CLASS(libdesktop, Label) {
 	return this;
 }
 
-DSK_UI_PROP_I32(libdesktop, Label, left, "x");
-DSK_UI_PROP_I32(libdesktop, Label, top, "y");
-DSK_UI_PROP_S(libdesktop, Label, text, "label");
-DSK_UI_PROP_BOOL(libdesktop, Label, visible, "visible");
+DSK_UI_PROP(libdesktop, Label, left, dsk_prop_i32, "x");
+DSK_UI_PROP(libdesktop, Label, top, dsk_prop_i32, "y");
+DSK_UI_PROP(libdesktop, Label, text, dsk_prop_str, "label");
+DSK_UI_PROP(libdesktop, Label, visible, dsk_prop_bool, "visible");

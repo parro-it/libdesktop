@@ -81,5 +81,5 @@ DSK_DEFINE_CLASS(libdesktop, Window) {
 	return this;
 }
 
-DSK_UI_PROP_S(libdesktop, Window, title, "title");
-DSK_UI_PROP_BOOL(libdesktop, Window, visible, "visible");
+DSK_UI_PROP(libdesktop, Window, visible, dsk_prop_bool, "visible");
+DSK_UI_PROP(libdesktop, Window, title, dsk_prop_str, "title");

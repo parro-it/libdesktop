@@ -801,21 +801,9 @@ typedef napi_status dsk_Setter(void *self, void **datas, ...);
 DSK_JS_FUNC(dsk_setProp);
 DSK_JS_FUNC(dsk_getProp);
 
-#define DSK_PROP_STR(NAME, NATIVE_GETTER, NATIVE_SETTER)                                           \
+#define DSK_PROP(NAME, TYPE, NATIVE_GETTER, NATIVE_SETTER)                                         \
 	DSK_DEFINE_PROPERTY(libdesktop, Style, NAME, dsk_getProp, dsk_setProp,                         \
-						((void *[]){NATIVE_GETTER, NATIVE_SETTER, (void *)dsk_prop_str, #NAME}))
-
-#define DSK_PROP_I32(NAME, NATIVE_GETTER, NATIVE_SETTER)                                           \
-	DSK_DEFINE_PROPERTY(libdesktop, Style, NAME, dsk_getProp, dsk_setProp,                         \
-						((void *[]){NATIVE_GETTER, NATIVE_SETTER, (void *)dsk_prop_i32, #NAME}))
-
-#define DSK_PROP_F32(NAME, NATIVE_GETTER, NATIVE_SETTER)                                           \
-	DSK_DEFINE_PROPERTY(libdesktop, Style, NAME, dsk_getProp, dsk_setProp,                         \
-						((void *[]){NATIVE_GETTER, NATIVE_SETTER, (void *)dsk_prop_f64, #NAME}))
-
-#define DSK_PROP_BOOL(NAME, NATIVE_GETTER, NATIVE_SETTER)                                          \
-	DSK_DEFINE_PROPERTY(libdesktop, Style, NAME, dsk_getProp, dsk_setProp,                         \
-						((void *[]){NATIVE_GETTER, NATIVE_SETTER, (void *)dsk_prop_bool, #NAME}))
+						((void *[]){NATIVE_GETTER, NATIVE_SETTER, (void *)TYPE, #NAME}))
 
 napi_status dsk_call_cb_async(napi_env env, napi_value recv, napi_value cb, size_t argc,
 							  const napi_value *argv);
