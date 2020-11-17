@@ -16,7 +16,7 @@ static BOOL stepsIsRunning;
 NAPI_C_CTOR(_dsk_init_proc) {
 	ProcessSerialNumber psn = {0, kCurrentProcess};
 	TransformProcessType(&psn, kProcessTransformToForegroundApplication);
-	printf("Process initialized\n");
+	// printf("Process initialized\n");
 }
 
 typedef struct uiprivNextEventArgs {
@@ -174,18 +174,18 @@ int dsk_wakeup_ui_loop() {
 @end
 
 YGNodeRef dsk_widget_get_node(napi_env env, napi_value widget) {
-	// printf("unwrap %p\n", widget);
+	// // printf("unwrap %p\n", widget);
 	DskControl *widgetG;
 	napi_status status = napi_unwrap(env, widget, (void **)&widgetG);
 	if (status != napi_ok) {
-		// printf("non ok \n");
+		// // printf("non ok \n");
 		const napi_extended_error_info *result;
 		napi_get_last_error_info(env, &result);
-		// printf("napi_unwrap failed with code %d: %s\n", result->engine_error_code,
+		// // printf("napi_unwrap failed with code %d: %s\n", result->engine_error_code,
 		// result->error_message);
 		return NULL;
 	}
-	// printf("widgetG %p\n",widgetG);
+	// // printf("widgetG %p\n",widgetG);
 
 	return widgetG.yoganode;
 }
@@ -197,14 +197,14 @@ void dsk_widget_set_node(napi_env env, napi_value widget, YGNodeRef node) {
 		return;
 	}
 
-	// printf("node %p\n",node);
+	// // printf("node %p\n",node);
 
 	widgetG.yoganode = node;
 
 	napi_ref ref;
 	napi_create_reference(env, widget, 1, &ref);
 
-	// printf("ref %p\n",ref);
+	// // printf("ref %p\n",ref);
 	widgetG.wrapper = ref;
 }
 
@@ -213,7 +213,7 @@ napi_value dsk_widget_get_wrapper(napi_env env, UIHandle widget) {
 	if (ref == NULL) {
 		return NULL;
 	}
-	// printf("ref is %p\n",ref);
+	// // printf("ref is %p\n",ref);
 	napi_value node;
 	napi_get_reference_value(env, ref, &node);
 	return node;
@@ -254,7 +254,7 @@ void dsk_ui_set_prop_i32(void *instance, int32_t value, void **datas) {
 	if (strcmp(propname, "left") == 0 || strcmp(propname, "top")) {
 		GtkContainer *container = GTK_CONTAINER(gtk_widget_get_parent(widget));
 		if (container == NULL) {
-			printf("ERROR: THIS WIDGET HAS NO CONTAINER\n");
+			// printf("ERROR: THIS WIDGET HAS NO CONTAINER\n");
 			return;
 		}
 		GValue val = G_VALUE_INIT;

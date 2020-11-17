@@ -101,10 +101,8 @@
                                                                                                    \
 			bool DSK__exception_pending;                                                           \
 			if (DSK__status == napi_pending_exception) {                                           \
-				printf("DSK__status == napi_pending_exception\n");                                 \
 				DSK__exception_pending = true;                                                     \
 			} else {                                                                               \
-				printf("DSK__status != napi_pending_exception\n");                                 \
 				napi_is_exception_pending(env, &DSK__exception_pending);                           \
 			}                                                                                      \
 			if (DSK__exception_pending) {                                                          \
@@ -800,11 +798,11 @@ typedef napi_status dsk_Setter(void *self, void **datas, ...);
 
 DSK_JS_FUNC(dsk_setProp);
 DSK_JS_FUNC(dsk_getProp);
-
+/*
 #define DSK_PROP(NAME, TYPE, NATIVE_GETTER, NATIVE_SETTER)                                         \
 	DSK_DEFINE_PROPERTY(libdesktop, Style, NAME, dsk_getProp, dsk_setProp,                         \
 						((void *[]){NATIVE_GETTER, NATIVE_SETTER, (void *)TYPE, #NAME}))
-
+*/
 napi_status dsk_call_cb_async(napi_env env, napi_value recv, napi_value cb, size_t argc,
 							  const napi_value *argv);
 // other utilities

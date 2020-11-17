@@ -17,7 +17,7 @@ DSK_EXTEND_CLASS(libdesktop, Container);
 @end
 
 DSK_DEFINE_CLASS(libdesktop, Window) {
-	// printf("libdesktop, Window\n");
+	// // printf("libdesktop, Window\n");
 	DSK_JS_FUNC_INIT();
 	DSK_EXACTLY_NARGS(2);
 
@@ -68,7 +68,7 @@ DSK_DEFINE_CLASS(libdesktop, Window) {
 	int uw = win.frame.size.width;
 	int uh = win.frame.size.height;
 
-	printf("window: %dx%d layout:%.0fx%.0f\n", uw, uh, w, h);
+	// printf("window: %dx%d layout:%.0fx%.0f\n", uw, uh, w, h);
 
 	[win setContentSize:NSMakeSize(w, h)];
 	[win center];

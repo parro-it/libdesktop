@@ -35,7 +35,7 @@ void dsk_modexports_def_free(dsk_modexports_def *exports) {
 	for (uint32_t i = 0; i < exports->members_count; i++) {
 		dsk_export_def *def = exports->members[i];
 		// free the properties of the export, allocated in dsk_export_def_register_member
-		// printf("def: %p props:%p\n", def, def->properties);
+		// // printf("def: %p props:%p\n", def, def->properties);
 		if (def->malloced) {
 			free(def->properties);
 		}
@@ -43,7 +43,7 @@ void dsk_modexports_def_free(dsk_modexports_def *exports) {
 
 		// the  dsk_export_def itself is a static instance, so it cannot be freed.
 	}
-	// printf("exports: %p members:%p\n", exports, exports->members);
+	// // printf("exports: %p members:%p\n", exports, exports->members);
 	// free the members of the module, allocated in dsk_modexports_def_register_member
 	// free(exports->members);
 	exports->members = NULL;
@@ -56,9 +56,9 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 	DSK_ONERROR_FATAL_RET(NULL);
 	napi_property_descriptor *properties =
 		malloc(sizeof(napi_property_descriptor) * exports_def->members_count);
-	// printf("exports_def->members_count:%zu\n", exports_def->members_count);
+	// // printf("exports_def->members_count:%zu\n", exports_def->members_count);
 	for (uint32_t i = 0; i < exports_def->members_count; i++) {
-		// printf("i:%d\n", i);
+		// // printf("i:%d\n", i);
 		dsk_export_def *def = exports_def->members[i];
 		if (def->type == dsk_def_type_function) {
 			assert(def->properties_count == 1);
@@ -75,18 +75,18 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 			// first property contains name and constructor of the function
 			napi_property_descriptor classDef = def->properties[0];
 
-			// printf("properties_count for class %zu\n", def->properties_count);
+			// // printf("properties_count for class %zu\n", def->properties_count);
 			// other ones contains members of the class (both static and instance members)
 			napi_property_descriptor *classProperties =
 				malloc(sizeof(napi_property_descriptor) * (def->properties_count - 1));
 
 			for (uint32_t i = 0; i < (def->properties_count - 1); i++) {
-				// printf("i:%d\n", i);
+				// // printf("i:%d\n", i);
 
 				classProperties[i] = def->properties[i + 1];
 			}
 
-			// printf("properties_count for class DNNE %zu %s\n", def->properties_count,
+			// // printf("properties_count for class DNNE %zu %s\n", def->properties_count,
 			// classDef.utf8name);
 
 			napi_value Class;
@@ -94,7 +94,7 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 			DSK_NAPI_CALL(napi_define_class(env, classDef.utf8name, NAPI_AUTO_LENGTH,
 											classDef.method, NULL, def->properties_count - 1,
 											classProperties, &Class));
-			// printf("napi_define_class %p\n", &Class);
+			// // printf("napi_define_class %p\n", &Class);
 
 			free(classProperties);
 
@@ -105,7 +105,7 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 			} else {
 				ClassRef = classDef.data;
 			}
-			// printf("napi_create_reference %p\n", ClassRef);
+			// // printf("napi_create_reference %p\n", ClassRef);
 
 			DSK_NAPI_CALL(napi_create_reference(env, Class, 1, ClassRef));
 
@@ -142,10 +142,13 @@ napi_value dsk_new_instance(napi_env env, napi_ref class, size_t arg_c, napi_val
 
 	napi_value constructor;
 	napi_value instance;
+	// printf("iiiiiiiiiiiiiiiiiiiiii\n");
 
 	DSK_NAPI_CALL(napi_get_reference_value(env, class, &constructor));
-	DSK_NAPI_CALL(napi_new_instance(env, constructor, arg_c, arg_v, &instance));
 
+	// printf("AAAAAAAAAAAAAAAAAAAa\n");
+	DSK_NAPI_CALL(napi_new_instance(env, constructor, arg_c, arg_v, &instance));
+	// printf("BBBBBBBBBBBBBBB\n");
 	return instance;
 }
 
@@ -430,22 +433,22 @@ napi_status dsk_call_cb_async(napi_env env, napi_value recv, napi_value cb, size
 							  const napi_value *argv) {
 	DSK_ONERROR_THROW_RET(napi_pending_exception);
 
-	printf("1 dsk_call_cb_async\n");
+	// printf("1 dsk_call_cb_async\n");
 
 	napi_handle_scope handle_scope;
 	DSK_NAPI_CALL(napi_open_handle_scope(env, &handle_scope));
 
-	printf("2 dsk_call_cb_async\n");
+	// printf("2 dsk_call_cb_async\n");
 
 	napi_value res_name;
 	DSK_NAPI_CALL(napi_create_string_utf8(env, "libdesktop", NAPI_AUTO_LENGTH, &res_name));
 
-	printf("3 dsk_call_cb_async\n");
+	// printf("3 dsk_call_cb_async\n");
 
 	napi_async_context async_context;
 	DSK_NAPI_CALL(napi_async_init(env, NULL, res_name, &async_context));
 
-	printf("4 dsk_call_cb_async\n");
+	// printf("4 dsk_call_cb_async\n");
 
 	napi_value resource_object;
 	DSK_NAPI_CALL(napi_create_object(env, &resource_object));
@@ -454,7 +457,7 @@ napi_status dsk_call_cb_async(napi_env env, napi_value recv, napi_value cb, size
 	// DSK_NAPI_CALL(napi_open_callback_scope(env, resource_object, async_context, &cb_scope));
 
 	if (argc > 0) {
-		printf("5 dsk_call_cb_async %p %p\n", async_context, resource_object);
+		// printf("5 dsk_call_cb_async %p %p\n", async_context, resource_object);
 	}
 	napi_value result;
 	if (recv == NULL) {
@@ -464,11 +467,11 @@ napi_status dsk_call_cb_async(napi_env env, napi_value recv, napi_value cb, size
 
 	// DSK_NAPI_CALL(napi_close_callback_scope(env, cb_scope));
 
-	printf("6 dsk_call_cb_async\n");
+	// printf("6 dsk_call_cb_async\n");
 
 	DSK_NAPI_CALL(napi_async_destroy(env, async_context));
 
-	printf("7 dsk_call_cb_async\n");
+	// printf("7 dsk_call_cb_async\n");
 
 	DSK_NAPI_CALL(napi_close_handle_scope(env, handle_scope));
 

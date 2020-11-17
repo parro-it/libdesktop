@@ -6,23 +6,34 @@
 DSK_EXTEND_MODULE(libdesktop);
 
 DSK_DEFINE_CLASS(libdesktop, Label) {
+	// printf("LABEL START\n");
+
 	DSK_JS_FUNC_INIT();
 	DSK_EXACTLY_NARGS(2);
 
 	GtkWidget *widget = gtk_label_new("");
+
+	// printf("LABEL widget %p\n", widget);
 	gtk_label_set_xalign(GTK_LABEL(widget), GTK_ALIGN_END);
 
 	// GdkRGBA color;
 	// gdk_rgba_parse (&color, "rgba(100,90,80,1)");
 	// gtk_widget_override_background_color(widget,GTK_STATE_FLAG_NORMAL, &color);
-	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this, argv));
 
-	napi_value events;
-	DSK_NAPI_CALL(napi_get_named_property(env, this, "events", &events));
+	DskCtrlI *ctrl;
+	DSK_CTRLI_CALL_STATIC(&DskControlProto, init, env, widget, this, &ctrl);
 
-	napi_value click = dsk_event_new_for_widget(env, "click", this);
-	DSK_NAPI_CALL(napi_set_named_property(env, events, "click", click));
+	// printf("init done %p\n", ctrl);
 
+	DSK_CTRLI_CALL(ctrl, assign_props, argv[0]);
+
+	/*
+		napi_value events;
+		DSK_NAPI_CALL(napi_get_named_property(env, this, "events", &events));
+
+		napi_value click = dsk_event_new_for_widget(env, "click", this);
+		DSK_NAPI_CALL(napi_set_named_property(env, events, "click", click));
+	*/
 	return this;
 }
 

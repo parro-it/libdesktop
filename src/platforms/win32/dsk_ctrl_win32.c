@@ -86,7 +86,7 @@ DSK_DEFINE_TEST(tests_dsk_platform_get_preferred_size_t) {
 	ShowWindow(window, SW_SHOW);
 
 	dsk_platform_get_preferred_size_t(ctrl, &width, &height);
-	printf("%d x %d\n", width, height);
+	// printf\("%d x %d\n", width, height);
 	DSK_ASSERT(width == 130);
 	DSK_ASSERT(height == 30);
 

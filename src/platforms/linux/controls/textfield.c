@@ -11,15 +11,19 @@ DSK_DEFINE_CLASS(libdesktop, Textfield) {
 
 	GtkWidget *widget = gtk_entry_new();
 	/////
-	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this, argv));
+
 	gtk_widget_add_events(widget, GDK_BUTTON_PRESS_MASK);
 
-	napi_value events;
-	DSK_NAPI_CALL(napi_get_named_property(env, this, "events", &events));
+	DskCtrlI *ctrl;
+	DSK_CTRLI_CALL_STATIC(&DskControlProto, init, env, widget, this, &ctrl);
+	DSK_CTRLI_CALL(ctrl, assign_props, argv[0]);
+	/*
+		napi_value events;
+		DSK_NAPI_CALL(napi_get_named_property(env, this, "events", &events));
 
-	napi_value click = dsk_event_new_for_widget(env, "activate", this);
-	DSK_NAPI_CALL(napi_set_named_property(env, events, "click", click));
-
+		napi_value click = dsk_event_new_for_widget(env, "activate", this);
+		DSK_NAPI_CALL(napi_set_named_property(env, events, "click", click));
+	*/
 	return this;
 }
 

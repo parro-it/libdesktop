@@ -3,11 +3,11 @@ const app = App.create()
 
 const lbl = new Label({ style: { margin: { left: 0, top: 0 }, minWidth: 120 }, text: "Given Name" }, []);
 const fld = new Textfield({ style: { flexGrow: 1, margin: { left: 12, top: 0 } }, text: "Andrea" }, [])
-
+/*
 fld.events.click.listen(() => {
     console.log("THE LABEL HAS BEEN CLICKED");
 });
-
+*/
 app.start();
 
 const win = new Window({ title: "Running on " + process.platform, style: { padding: { left: 26, right: 26, top: 12, bottom: 12 } } }, [

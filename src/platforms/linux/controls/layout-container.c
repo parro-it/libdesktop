@@ -22,12 +22,18 @@ void dsk_platform_container_add_child(UIHandle parent, UIHandle child) {
 	gtk_container_add(GTK_CONTAINER(parent), GTK_WIDGET(child));
 }
 */
+
+extern DskCtrlIProto DskLayoutContainerProto;
+
 DSK_DEFINE_CLASS(libdesktop, Container) {
 	DSK_JS_FUNC_INIT();
 	DSK_EXACTLY_NARGS(2);
 
 	GtkWidget *widget = gtk_fixed_new();
-	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this, argv));
+	DskCtrlI *ctrl;
+	DSK_CTRLI_CALL_STATIC(&DskLayoutContainerProto, init, env, widget, this, &ctrl);
+	DSK_CTRLI_CALL(ctrl, assign_props, argv[0]);
+	DSK_CTRLI_CALL(ctrl, add_children, argv[1]);
 
 	return this;
 }

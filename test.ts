@@ -2,6 +2,7 @@ import './tests/style.ts'
 import './tests/event.ts'
 import './tests/dsknapi.ts'
 import './tests/dskctrl.ts'
+
 /*
 
 import test from 'tape-async'

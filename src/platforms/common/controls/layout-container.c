@@ -20,11 +20,35 @@ static napi_status add_child(struct DskCtrlI *self, UIHandle child_ui) {
 	return napi_ok;
 }
 
+static napi_status reposition(struct DskCtrlI *self, int x, int y, int width, int height) {
+	napi_env env = self->env;
+	DSK_ONERROR_THROW_RET(napi_pending_exception);
+
+	uint32_t childrenCount = YGNodeGetChildCount(self->yg_node);
+
+	for (uint32_t i = 0; i < childrenCount; i++) {
+		YGNodeRef childNode = YGNodeGetChild(self->yg_node, i);
+
+		DskCtrlI *child;
+		DSK_NAPI_CALL(dsk_CtrlI_from_YGNode(childNode, &child));
+
+		DSK_CTRLI_CALL(child, reposition, YGNodeLayoutGetLeft(childNode),
+					   YGNodeLayoutGetTop(childNode), YGNodeLayoutGetWidth(childNode),
+					   YGNodeLayoutGetHeight(childNode));
+	}
+
+	DSK_NAPI_CALL(DskControlProto.reposition(
+		self, YGNodeLayoutGetLeft(self->yg_node), YGNodeLayoutGetTop(self->yg_node),
+		YGNodeLayoutGetWidth(self->yg_node), YGNodeLayoutGetHeight(self->yg_node)));
+
+	return napi_ok;
+}
+
 NAPI_C_CTOR(init_layout_cntr) {
 	DskLayoutContainerProto.get_prop = DskControlProto.get_prop;
 	DskLayoutContainerProto.set_prop = DskControlProto.set_prop;
 	DskLayoutContainerProto.get_preferred_size = DskControlProto.get_preferred_size;
-	DskLayoutContainerProto.reposition = DskControlProto.reposition;
+	DskLayoutContainerProto.reposition = reposition;
 	DskLayoutContainerProto.add_child = add_child;
 	DskLayoutContainerProto.remove_child = DskControlProto.remove_child;
 	DskLayoutContainerProto.init = DskControlProto.init;

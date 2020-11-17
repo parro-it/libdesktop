@@ -245,20 +245,26 @@ DSK_DEFINE_CLASS(libdesktop, Style) {
 	napi_valuetype argType;
 
 	YGNodeRef node;
-	// printf("argc %zd\n",argc);
+	// printf("*****************1\n");
 	if (argc < 2) {
 		node = YGNodeNew();
 	} else {
+		// printf("*****************2\n");
 		DSK_NAPI_CALL(napi_typeof(env, argv[1], &argType));
+		// printf("*****************3\n");
 		if (argType == napi_null) {
+			// printf("*****************4\n");
 			node = YGNodeNew();
 		} else {
+			// printf("*****************5\n");
 			DskCtrlI *ctrl;
 			DSK_NAPI_CALL(dsk_CtrlI_from_wrapper(env, argv[1], &ctrl));
+			// printf("*****************6\n");
 			node = ctrl->yg_node;
 		}
 	}
 
+	// printf("*****************7\n");
 	DSK_NAPI_CALL(napi_wrap(env, this, node, NULL, NULL, NULL));
 
 	EDGED_PROP(position, YGUnitPoint, YGNodeStyleGetPosition, YGNodeStyleSetPosition);

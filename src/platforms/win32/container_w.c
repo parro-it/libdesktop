@@ -5,11 +5,11 @@
 
 void dsk_widget_reposition(napi_env env, UIHandle container, UIHandle widget, float x, float y,
 						   float width, float height) {
-	printf("SET POS %p TO %f, %f\n", widget, x, y);
+	// printf("SET POS %p TO %f, %f\n", widget, x, y);
 	bool ret =
 		SetWindowPos((HWND)widget, HWND_TOP, (int)x, (int)y, (int)width, (int)height, SWP_NOZORDER);
 	if (!ret) {
-		printf("ERROR\n");
+		// printf("ERROR\n");
 	}
 }
 
@@ -33,7 +33,7 @@ DSK_DEFINE_CLASS(libdesktop, Container) {
 								  // even if it doesn't, we're adjusting it later
 								  800, 600, dummy, NULL, hInstance, NULL);
 
-	// printf("CREATED container\n");
+	// // printf("CREATED container\n");
 
 	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this, argv));
 
@@ -130,7 +130,7 @@ void dsk_get_preferred_sizes(UIHandle widget, int *width, int *height) {
 
 	}
 	*height = 30;*/
-	printf("dsk_get_preferred_sizes %p\n", widget);
+	// printf("dsk_get_preferred_sizes %p\n", widget);
 	*height = 30;
 	*width = 130;
 }

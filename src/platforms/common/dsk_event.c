@@ -79,7 +79,7 @@ DSK_DEFINE_METHOD(libdesktop, Event, invoke) {
 	DSK_JS_FUNC_INIT();
 	DSK_EXACTLY_NARGS(1);
 	napi_value listeners;
-	printf("INVOKE\n");
+	// printf("INVOKE\n");
 	DSK_NAPI_CALL(napi_get_named_property(env, this, "listeners", &listeners));
 
 	napi_value null;
@@ -108,32 +108,32 @@ napi_value dsk_event_new_for_widget(napi_env env, const char *eventname, napi_va
 }
 
 void dsk_on_event(UIHandle *uihandle, void *data) {
-	printf("dsk_on_event\n");
+	// printf("dsk_on_event\n");
 	struct dsk_event_args *args = data;
 	napi_env env = args->env;
 	DSK_ONERROR_UNCAUGHT_RET(;);
 
-	printf("napi_open_handle_scope\n");
+	// printf("napi_open_handle_scope\n");
 	napi_handle_scope handle_scope;
 	DSK_NAPI_CALL(napi_open_handle_scope(env, &handle_scope));
 
 	napi_value sender;
 	napi_value event;
 
-	printf("napi_get_reference_value\n");
+	// printf("napi_get_reference_value\n");
 	DSK_NAPI_CALL(napi_get_reference_value(env, args->sender, &sender));
 	DSK_NAPI_CALL(napi_get_reference_value(env, args->event, &event));
 
-	printf("napi_get_named_property\n");
+	// printf("napi_get_named_property\n");
 	napi_value invoke;
 	DSK_NAPI_CALL(napi_get_named_property(env, event, "invoke", &invoke));
 
 	napi_valuetype type;
 	DSK_NAPI_CALL(napi_typeof(env, invoke, &type));
 
-	printf("dsk_call_cb_async is func %d\n", type == napi_function);
+	// printf("dsk_call_cb_async is func %d\n", type == napi_function);
 	dsk_call_cb_async(env, event, invoke, 1, (napi_value[]){sender});
 
-	printf("napi_close_handle_scope\n");
+	// printf("napi_close_handle_scope\n");
 	DSK_NAPI_CALL(napi_close_handle_scope(env, handle_scope));
 }

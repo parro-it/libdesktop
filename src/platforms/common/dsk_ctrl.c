@@ -9,9 +9,13 @@ static void widget_finalize(napi_env env, void *finalize_data, void *finalize_hi
 	YGNodeFree(node);*/
 }
 
+DSK_EXTEND_CLASS(libdesktop, Style);
+
 static napi_status def_init_t(DskCtrlIProto *proto, napi_env env, UIHandle ctrl_handle,
 							  napi_value js_wrapper, struct DskCtrlI **ctrl) {
 	DSK_ONERROR_THROW_RET(napi_pending_exception);
+
+	// // printf("init 1 \n");
 
 	struct DskCtrlI *instance = calloc(1, sizeof(struct DskCtrlI));
 	if (instance == NULL) {
@@ -23,13 +27,31 @@ static napi_status def_init_t(DskCtrlIProto *proto, napi_env env, UIHandle ctrl_
 	instance->yg_node = YGNodeNew();
 	YGNodeSetContext(instance->yg_node, instance);
 
+	// printf("init 2 \n");
+	napi_value null;
+	DSK_NAPI_CALL(napi_get_null(env, &null));
+
+	// printf("init 4 \n");
+
+	// printf("init 6\n");
 	instance->ctrl_handle = ctrl_handle;
 	DSK_NAPI_CALL(dsk_CtrlI_link_UIHandle(ctrl_handle, instance));
-
+	// printf("init 7\n");
 	DSK_NAPI_CALL(
 		napi_wrap(env, js_wrapper, instance, widget_finalize, NULL, &instance->js_wrapper_ref));
+	// printf("init 8\n");
+
+	// printf("init 3 %p\n", libdesktop_Style_ref);
+	napi_value style =
+		dsk_new_instance(env, libdesktop_Style_ref, 2, (napi_value[]){null, js_wrapper});
+	if (style == NULL) {
+		// printf("init 5\n");
+		return napi_pending_exception;
+	}
+	DSK_NAPI_CALL(napi_set_named_property(env, js_wrapper, "style", style));
 
 	*ctrl = instance;
+
 	return napi_ok;
 }
 
@@ -38,12 +60,20 @@ static napi_status set_properties(napi_env env, napi_value props, napi_value tar
 
 	napi_value names;
 	DSK_NAPI_CALL(napi_get_property_names(env, props, &names));
+	// printf\("set_properties props=%p target=%p\n", props, target);
 	DSK_ARRAY_FOREACH(names, {
 		napi_value propName = dsk_iter_item;
 		bool hasProp;
 
+		char *p;
+		DSK_NAPI_CALL(dsk_get_utf8_cstr(env, propName, &p));
+		// printf\("property %s\n", p);
+		// free(p);
+
 		DSK_NAPI_CALL(napi_has_property(env, target, propName, &hasProp));
 		if (hasProp) {
+			// printf\("property has prop %s\n", p);
+
 			napi_value propValue;
 			DSK_NAPI_CALL(napi_get_property(env, props, propName, &propValue));
 
@@ -82,7 +112,7 @@ static napi_status def_add_children_t(struct DskCtrlI *self, napi_value children
 	DSK_ARRAY_FOREACH(children, {
 		struct DskCtrlI *child;
 		DSK_NAPI_CALL(dsk_CtrlI_from_wrapper(env, dsk_iter_item, &child));
-		printf("add_Child %p\n", self->proto->add_child);
+		// // printf("add_Child %p\n", self->proto->add_child);
 		DSK_CTRLI_CALL(self, add_child, child->ctrl_handle);
 	});
 	return napi_ok;
@@ -157,10 +187,10 @@ DSK_DEFINE_TEST(tests_def_add_children_t) {
 		ctrl_parent->proto->add_child = test_add_child_t;
 		def_add_children_t(ctrl_parent, children);
 		ctrl_parent->proto->add_child = old_add_child;
-		// printf("1 %ld\n", (uintptr_t)ui_child1);
-		// printf("2 %ld\n", (uintptr_t)ui_child2);
-		// printf("1+2 %ld\n", (uintptr_t)ui_child1 + (uintptr_t)ui_child2);
-		// printf("yoga %ld\n", (uintptr_t)ctrl_parent->yg_node);
+		// // printf("1 %ld\n", (uintptr_t)ui_child1);
+		// // printf("2 %ld\n", (uintptr_t)ui_child2);
+		// // printf("1+2 %ld\n", (uintptr_t)ui_child1 + (uintptr_t)ui_child2);
+		// // printf("yoga %ld\n", (uintptr_t)ctrl_parent->yg_node);
 		DSK_ASSERT(ctrl_parent->yg_node == (void *)((uintptr_t)ui_child1 + (uintptr_t)ui_child2));
 	}
 
@@ -172,21 +202,29 @@ DSK_DEFINE_TEST(tests_def_assign_props_t) {
 	DskCtrlI *ctrl = NULL;
 	UIHandle widget;
 	napi_value wrapper;
+	// printf\("setup\n");
 	{ // setup
 		DSK_NAPI_CALL(new_wrapped_Ctrl(&DskControlProto, env, &ctrl, &widget, &wrapper));
 
-		napi_value num, props, style;
+		napi_value num, props, style, props_style;
+		DSK_NAPI_CALL(napi_get_named_property(env, wrapper, "style", &style));
+
 		DSK_NAPI_CALL(napi_create_uint32(env, 4242, &num));
 		DSK_NAPI_CALL(napi_create_object(env, &props));
-		DSK_NAPI_CALL(napi_create_object(env, &style));
 		DSK_NAPI_CALL(napi_set_named_property(env, style, "stylenum", num));
+
+		DSK_NAPI_CALL(napi_create_object(env, &props_style));
+		DSK_NAPI_CALL(napi_set_named_property(env, props_style, "stylenum", num));
+
 		DSK_NAPI_CALL(napi_set_named_property(env, props, "num", num));
-		DSK_NAPI_CALL(napi_set_named_property(env, props, "style", style));
+		DSK_NAPI_CALL(napi_set_named_property(env, props, "style", props_style));
 		DSK_NAPI_CALL(napi_set_named_property(env, props, "nonexistent", num));
-		DSK_NAPI_CALL(napi_set_named_property(env, style, "nonexistent", num));
+		DSK_NAPI_CALL(napi_set_named_property(env, props_style, "nonexistent", num));
 
 		def_assign_props_t(ctrl, props);
 	}
+
+	// printf\("1\n");
 
 	{ // already existing props are setted in wrapper
 		napi_value num;
@@ -196,7 +234,7 @@ DSK_DEFINE_TEST(tests_def_assign_props_t) {
 		DSK_NAPI_CALL(napi_get_value_uint32(env, num, &res));
 		DSK_ASSERT(res == 4242);
 	}
-
+	// printf\("2\n");
 	{ // non already existing props are not setted in wrapper
 		napi_value num;
 		DSK_NAPI_CALL(napi_get_named_property(env, wrapper, "nonexistent", &num));
@@ -204,7 +242,7 @@ DSK_DEFINE_TEST(tests_def_assign_props_t) {
 		DSK_NAPI_CALL(napi_typeof(env, num, &res));
 		DSK_ASSERT(res == napi_undefined);
 	}
-
+	// printf\("3\n");
 	{ // props of sub-objects are deeply assigned
 		napi_value style;
 		DSK_NAPI_CALL(napi_get_named_property(env, wrapper, "style", &style));
@@ -216,7 +254,7 @@ DSK_DEFINE_TEST(tests_def_assign_props_t) {
 		DSK_NAPI_CALL(napi_get_value_uint32(env, stylenum, &res));
 		DSK_ASSERT(res == 4242);
 	}
-
+	// printf\("4\n");
 	{ // non already existing props are not setted in sub-objects
 		napi_value style;
 		DSK_NAPI_CALL(napi_get_named_property(env, wrapper, "style", &style));
@@ -255,7 +293,7 @@ DSK_DEFINE_TEST(tests_dsk_CtrlIFuncs_init) {
 
 	DskCtrlI *ctrl_from_uihandle = NULL;
 	DSK_NAPI_CALL(dsk_CtrlI_from_UIHandle(widget, &ctrl_from_uihandle));
-	// printf("ctrl_from_uihandle %p\n", ctrl_from_uihandle);
+	// // printf("ctrl_from_uihandle %p\n", ctrl_from_uihandle);
 	DSK_ASSERT(ctrl == ctrl_from_uihandle);
 
 	DSK_END_TEST();
@@ -356,6 +394,9 @@ napi_status dsk_ui_setter(void *self, void **datas, ...) {
 	DSK_ONERROR_THROW_RET(napi_pending_exception);
 
 	char *prop_name = datas[3];
+
+	// printf("prop_name %s\n", prop_name);
+
 	dsk_prop_types prop_type = (dsk_prop_types)datas[2];
 
 	va_list value_valist;

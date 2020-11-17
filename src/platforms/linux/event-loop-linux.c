@@ -123,7 +123,6 @@ napi_value dsk_widget_get_wrapper(napi_env env, UIHandle widget) {
 	return node;
 }
 
-void dsk_on_event(UIHandle *uihandle, void *data);
 
 void dsk_get_preferred_sizes(UIHandle widget, int *width, int *height) {
 	int minwidth, natwidth;
@@ -138,6 +137,8 @@ void dsk_get_preferred_sizes(UIHandle widget, int *width, int *height) {
 	*height = natheight;
 }
 */
+void dsk_on_event(UIHandle *uihandle, void *data);
+
 void dsk_connect_event(UIHandle widget, char *eventname, struct dsk_event_args *args) {
 	g_signal_connect(G_OBJECT(widget), eventname, G_CALLBACK(dsk_on_event), args);
 }

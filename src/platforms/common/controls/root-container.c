@@ -30,13 +30,19 @@ static napi_status set_preferred_sizes(struct DskCtrlI *self) {
 	return napi_ok;
 }
 
-napi_status reposition(struct DskCtrlI *self, int x, int y, int width, int height) {
+static napi_status reposition(struct DskCtrlI *self, int x, int y, int width, int height) {
 	napi_env env = self->env;
 	DSK_ONERROR_THROW_RET(napi_pending_exception);
 
 	set_preferred_sizes(self);
 
-	YGNodeCalculateLayout(self->yg_node, width, height, YGDirectionInherit);
+	YGNodePrint(self->yg_node, YGPrintOptionsChildren | YGPrintOptionsStyle);
+
+	YGNodeCalculateLayout(self->yg_node, width == -1 ? YGUndefined : width,
+						  height == -1 ? YGUndefined : height, YGDirectionInherit);
+
+	YGNodePrint(self->yg_node, YGPrintOptionsChildren | YGPrintOptionsLayout);
+
 	uint32_t childrenCount = YGNodeGetChildCount(self->yg_node);
 
 	for (uint32_t i = 0; i < childrenCount; i++) {
@@ -51,7 +57,7 @@ napi_status reposition(struct DskCtrlI *self, int x, int y, int width, int heigh
 	}
 
 	DSK_NAPI_CALL(DskLayoutContainerProto.reposition(
-		self, 0, 0, YGNodeLayoutGetWidth(self->yg_node), YGNodeLayoutGetHeight(self->yg_node)));
+		self, -1, -1, YGNodeLayoutGetWidth(self->yg_node), YGNodeLayoutGetHeight(self->yg_node)));
 
 	return napi_ok;
 }
@@ -99,3 +105,18 @@ DSK_DEFINE_TEST(tests_DskRootContainerProto) {
 	DSK_END_TEST();
 }
 DSK_TEST_CLOSE
+
+#include <gtk/gtk.h>
+
+DSK_DEFINE_CLASS(libdesktop, RootContainer) {
+	DSK_JS_FUNC_INIT();
+	DSK_EXACTLY_NARGS(2);
+
+	void *widget = gtk_fixed_new();
+	DskCtrlI *ctrl;
+	DSK_CTRLI_CALL_STATIC(&DskRootContainerProto, init, env, widget, this, &ctrl);
+	DSK_CTRLI_CALL(ctrl, assign_props, argv[0]);
+	DSK_CTRLI_CALL(ctrl, add_children, argv[1]);
+
+	return this;
+}

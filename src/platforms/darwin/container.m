@@ -28,14 +28,14 @@ void dsk_widget_reposition(napi_env env, UIHandle container, UIHandle widget, fl
 	// xcoord -= parent.origin.x;
 	// ycoord -= parent.origin.y;
 
-	printf("MOVE %.0f:%.0f %.0fx%.0f\n", xcoord, ycoord, width, height);
+	// printf("MOVE %.0f:%.0f %.0fx%.0f\n", xcoord, ycoord, width, height);
 
 	[view setFrame:NSMakeRect(xcoord, ycoord, width, height)];
 }
 
 void dsk_platform_container_add_child(UIHandle parent, UIHandle child) {
 	NSView *cnt = parent;
-	// printf("\n\nCHILD: %p\n\n");
+	// // printf("\n\nCHILD: %p\n\n");
 
 	[cnt addSubview:(NSView *)child];
 }

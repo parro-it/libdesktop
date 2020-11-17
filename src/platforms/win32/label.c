@@ -65,7 +65,7 @@ DSK_DEFINE_CLASS(libdesktop, Label) {
 	*/
 	// printf("done\n");
 
-	printf("CREATED LABEL\n");
+	// printf\("CREATED LABEL\n");
 	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this, argv));
 
 	return this;
