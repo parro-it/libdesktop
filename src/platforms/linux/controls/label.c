@@ -6,14 +6,11 @@
 DSK_EXTEND_MODULE(libdesktop);
 
 DSK_DEFINE_CLASS(libdesktop, Label) {
-	// printf("LABEL START\n");
 
 	DSK_JS_FUNC_INIT();
 	DSK_EXACTLY_NARGS(2);
 
 	GtkWidget *widget = gtk_label_new("");
-
-	// printf("LABEL widget %p\n", widget);
 	gtk_label_set_xalign(GTK_LABEL(widget), GTK_ALIGN_END);
 
 	// GdkRGBA color;
@@ -22,8 +19,6 @@ DSK_DEFINE_CLASS(libdesktop, Label) {
 
 	DskCtrlI *ctrl;
 	DSK_CTRLI_CALL_STATIC(&DskControlProto, init, env, widget, this, &ctrl);
-
-	// printf("init done %p\n", ctrl);
 
 	DSK_CTRLI_CALL(ctrl, assign_props, argv[0]);
 

@@ -4,8 +4,7 @@
 #import <Cocoa/Cocoa.h>
 
 @interface DskTextField : NSTextField
-@property(nonatomic, readwrite) napi_ref wrapper;
-@property(nonatomic, readwrite) YGNodeRef yoganode;
+	@property(nonatomic, readwrite) DskCtrlI *DskCtrlI;
 @end
 
 @implementation DskTextField
@@ -27,12 +26,14 @@ DSK_DEFINE_CLASS(libdesktop, Textfield) {
 	DSK_JS_FUNC_INIT();
 	DSK_EXACTLY_NARGS(2);
 
-	DskTextField *widget;
-	widget = [[DskTextField alloc] init];
+	DskTextField *widget = [[DskTextField alloc] init];
 	[widget setEditable:true];
 	[widget setSelectable:true];
 	[widget setHidden:false];
-	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this, argv));
+
+	DskCtrlI *ctrl;
+	DSK_CTRLI_CALL_STATIC(&DskControlProto, init, env, widget, this, &ctrl);
+	DSK_CTRLI_CALL(ctrl, assign_props, argv[0]);
 
 	return this;
 }

@@ -91,8 +91,8 @@ DSK_DEFINE_CLASS(libdesktop, Window) {
 
 	napi_value cntr_wrapper =
 		dsk_new_instance(env, libdesktop_RootContainer_ref, 2, (napi_value[]){props, argv[1]});
-	DskCtrlI *cntr_ctrl;
 
+	DskCtrlI *cntr_ctrl;
 	DSK_NAPI_CALL(dsk_CtrlI_from_wrapper(env, cntr_wrapper, &cntr_ctrl));
 
 	GtkWidget *cntr_gtk = cntr_ctrl->ctrl_handle;

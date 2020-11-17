@@ -106,13 +106,13 @@ DSK_DEFINE_TEST(tests_DskRootContainerProto) {
 }
 DSK_TEST_CLOSE
 
-#include <gtk/gtk.h>
+UIHandle dsk_new_container_platform_ui_control();
 
 DSK_DEFINE_CLASS(libdesktop, RootContainer) {
 	DSK_JS_FUNC_INIT();
 	DSK_EXACTLY_NARGS(2);
 
-	void *widget = gtk_fixed_new();
+	UIHandle widget = dsk_new_container_platform_ui_control();
 	DskCtrlI *ctrl;
 	DSK_CTRLI_CALL_STATIC(&DskRootContainerProto, init, env, widget, this, &ctrl);
 	DSK_CTRLI_CALL(ctrl, assign_props, argv[0]);

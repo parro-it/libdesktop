@@ -3,11 +3,13 @@
 #import <Cocoa/Cocoa.h>
 
 DSK_EXTEND_MODULE(libdesktop);
-DSK_EXTEND_CLASS(libdesktop, Container);
+
+extern DskCtrlIProto DskRootContainerProto;
+
+DSK_EXTEND_CLASS(libdesktop, RootContainer)
 
 @interface DskWindow : NSWindow
-@property(nonatomic, readwrite) napi_ref wrapper;
-@property(nonatomic, readwrite) YGNodeRef yoganode;
+	@property(nonatomic, readwrite) DskCtrlI *DskCtrlI;
 @end
 
 @implementation DskWindow
@@ -28,16 +30,12 @@ DSK_DEFINE_CLASS(libdesktop, Window) {
 					backing:NSBackingStoreBuffered
 					  defer:NO];
 
-	napi_value nochildren;
-	DSK_NAPI_CALL(napi_create_array_with_length(env, 0, &nochildren));
-	DSK_NAPI_CALL(dsk_wrap_widget(env, win, this, (napi_value[]){argv[0], nochildren}));
-
-	napi_value Container;
-	napi_value container;
+	DskCtrlI *ctrl;
+	DSK_CTRLI_CALL_STATIC(&DskControlProto, init, env, win, this, &ctrl);
+	DSK_CTRLI_CALL(ctrl, assign_props, argv[0]);
+	
 	napi_value props;
-
 	napi_create_object(env, &props);
-	napi_get_reference_value(env, libdesktop_Container_ref, &Container);
 
 	bool hasStyle;
 	DSK_NAPI_CALL(napi_has_named_property(env, argv[0], "style", &hasStyle));
@@ -47,26 +45,27 @@ DSK_DEFINE_CLASS(libdesktop, Window) {
 		DSK_NAPI_CALL(napi_set_named_property(env, props, "style", containerStyle));
 	}
 
-	napi_new_instance(env, Container, 2, (napi_value[]){props, argv[1]}, &container);
-	napi_set_named_property(env, this, "container", container);
+	napi_value cntr_wrapper =
+		dsk_new_instance(env, libdesktop_RootContainer_ref, 2, (napi_value[]){props, argv[1]});
 
-	NSView *child_gtk;
-	napi_unwrap(env, container, (void **)&child_gtk);
+	DskCtrlI *cntr_ctrl;
+	DSK_NAPI_CALL(dsk_CtrlI_from_wrapper(env, cntr_wrapper, &cntr_ctrl));
+
+	NSView *child_gtk=cntr_ctrl->ctrl_handle;
+	
 	win.contentView = child_gtk;
 
-	YGNodeRef root = dsk_widget_get_node(env, container);
-	dsk_set_children_preferred_sizes(root, child_gtk);
-	dsk_calculate_layout(env, child_gtk, root, YGUndefined, YGUndefined);
+	DSK_CTRLI_CALL(cntr_ctrl, reposition, -1, -1, -1, -1);
 
 	//[win setStyleMask: (NSWindowStyleMaskTitled | NSWindowStyleMaskClosable |
 	// NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskResizable)];
 
-	float w = YGNodeLayoutGetWidth(root);
-	float h = YGNodeLayoutGetHeight(root);
+	float w = YGNodeLayoutGetWidth(cntr_ctrl->yg_node);
+	float h = YGNodeLayoutGetHeight(cntr_ctrl->yg_node);
 	// float pd = YGNodeLayoutGetPadding(root, YGEdgeRight);
 
-	int uw = win.frame.size.width;
-	int uh = win.frame.size.height;
+	//int uw = win.frame.size.width;
+	//int uh = win.frame.size.height;
 
 	// printf("window: %dx%d layout:%.0fx%.0f\n", uw, uh, w, h);
 

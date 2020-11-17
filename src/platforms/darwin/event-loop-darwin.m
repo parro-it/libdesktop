@@ -172,7 +172,7 @@ int dsk_wakeup_ui_loop() {
 @property napi_ref wrapper;
 @property YGNodeRef yoganode;
 @end
-
+/*
 YGNodeRef dsk_widget_get_node(napi_env env, napi_value widget) {
 	// // printf("unwrap %p\n", widget);
 	DskControl *widgetG;
@@ -229,9 +229,9 @@ void dsk_get_preferred_sizes(UIHandle widget, int *width, int *height) {
 	}
 	*height = sz.height;
 }
-
+*/
 void dsk_connect_event(UIHandle widget, char *eventname, struct dsk_event_args *args) {}
-
+#if 0
 void dsk_ui_set_prop_s(void *instance, char *value, void **datas) {
 	NSObject *widget = instance;
 	char *propname = datas[2];
@@ -298,3 +298,4 @@ bool dsk_ui_get_prop_bool(void *instance, void **datas) {
 	return result;*/
 	return true;
 }
+#endif
