@@ -52,8 +52,11 @@ DSK_DEFINE_CLASS(libdesktop, Window) {
 	DSK_NAPI_CALL(dsk_CtrlI_from_wrapper(env, cntr_wrapper, &cntr_ctrl));
 
 	NSView *child_gtk=cntr_ctrl->ctrl_handle;
-	
+	printf("child_gtk %p\n",child_gtk);
+
 	win.contentView = child_gtk;
+
+
 
 	DSK_CTRLI_CALL(cntr_ctrl, reposition, -1, -1, -1, -1);
 
@@ -64,10 +67,10 @@ DSK_DEFINE_CLASS(libdesktop, Window) {
 	float h = YGNodeLayoutGetHeight(cntr_ctrl->yg_node);
 	// float pd = YGNodeLayoutGetPadding(root, YGEdgeRight);
 
-	//int uw = win.frame.size.width;
-	//int uh = win.frame.size.height;
+	int uw = win.frame.size.width;
+	int uh = win.frame.size.height;
 
-	// printf("window: %dx%d layout:%.0fx%.0f\n", uw, uh, w, h);
+	 printf("window: %dx%d layout:%.0fx%.0f\n", uw, uh, w, h);
 
 	[win setContentSize:NSMakeSize(w, h)];
 	[win center];

@@ -25,11 +25,19 @@ DSK_EXTEND_MODULE(libdesktop);
 DSK_DEFINE_CLASS(libdesktop, Textfield) {
 	DSK_JS_FUNC_INIT();
 	DSK_EXACTLY_NARGS(2);
-
+	printf ("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT\n");
 	DskTextField *widget = [[DskTextField alloc] init];
 	[widget setEditable:true];
 	[widget setSelectable:true];
-	[widget setHidden:false];
+	[widget setHidden:NO];
+	[widget setDrawsBackground:true];
+
+	//[widget setEditable:NO];
+	//[widget setSelectable:NO];
+	//[widget setDrawsBackground:true];
+	//[widget setHidden:NO];
+	//[widget setBezeled:NO];
+	//[widget setAlignment:NSTextAlignmentRight];
 
 	DskCtrlI *ctrl;
 	DSK_CTRLI_CALL_STATIC(&DskControlProto, init, env, widget, this, &ctrl);

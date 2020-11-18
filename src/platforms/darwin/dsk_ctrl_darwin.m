@@ -42,7 +42,6 @@ napi_status dsk_platform_reposition_t(struct DskCtrlI *self, int x, int y, int w
 }
 
 napi_status dsk_platform_add_child_t(struct DskCtrlI *self, UIHandle child) {
-
 	NSView *parent = (NSView *)self->ctrl_handle;
 	[parent addSubview:(NSView *)child];
 
@@ -60,8 +59,12 @@ napi_status dsk_platform_get_preferred_size_t(struct DskCtrlI *self, int *width,
 	NSView *view = self->ctrl_handle;
 
 	NSSize sz = [view fittingSize];
-
-	*width = sz.width;
+	if (sz.width < 160) {
+		*width = 160;
+	} else {
+		*width = sz.width;
+	}
+	
 	*height = sz.height;
 	return napi_ok;
 }
@@ -89,7 +92,7 @@ DSK_DEFINE_TEST(tests_dsk_platform_get_preferred_size_t) {
 
 	dsk_platform_get_preferred_size_t(ctrl, &width, &height);
 	// printf("%d x %d\n", width, height);
-	DSK_ASSERT(width == 72);
+	DSK_ASSERT(width == 160);
 	DSK_ASSERT(height == 21);
 
 	[window close];
@@ -171,7 +174,6 @@ napi_status dsk_platform_set_prop_t(struct DskCtrlI *self, const char *prop_name
 	va_list value_valist;
 
 	va_start(value_valist, prop_type);
-printf("set prop %s\n",prop_name);
 	NSView* widget = self->ctrl_handle;
 
 	NSString* key = [NSString stringWithUTF8String:prop_name];
@@ -223,13 +225,11 @@ DSK_DEFINE_TEST(tests_dsk_platform_set_prop_t) {
 	// how to test for throw here????
 	//napi_status res = ctrl->proto->set_prop(ctrl, "non-existent", dsk_prop_str, "ciao mondo");
 	//DSK_NAPI_CALL(res);
-printf("11\n");
 	DSK_CTRLI_CALL(ctrl, set_prop, "preferredMaxLayoutWidth", dsk_prop_f64, 42.42);
 
 	double dval;
 	DSK_CTRLI_CALL(ctrl, get_prop, "preferredMaxLayoutWidth", dsk_prop_f64, &dval);
 	DSK_ASSERT(dval == 42.42);
-printf("22\n");
 	DSK_CTRLI_CALL(ctrl, set_prop, "maximumNumberOfLines", dsk_prop_i32, 42);
 
 	int32_t i32val;

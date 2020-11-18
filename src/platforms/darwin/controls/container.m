@@ -23,5 +23,7 @@
 
 
 UIHandle dsk_new_container_platform_ui_control() {
-	return  [[DskNSRootContainer alloc] init];
+	DskNSRootContainer *widget = [[DskNSRootContainer alloc] init];
+	[widget setHidden:false];
+	return widget;
 } 

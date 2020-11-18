@@ -36,5 +36,5 @@ DSK_DEFINE_CLASS(libdesktop, Label) {
 
 DSK_UI_PROP(libdesktop, Label, left, dsk_prop_i32, "x");
 DSK_UI_PROP(libdesktop, Label, top, dsk_prop_i32, "y");
-DSK_UI_PROP(libdesktop, Label, label, dsk_prop_str, "stringValue");
+DSK_UI_PROP(libdesktop, Label, text, dsk_prop_str, "stringValue");
 DSK_UI_PROP(libdesktop, Label, enabled, dsk_prop_bool, "enabled");
