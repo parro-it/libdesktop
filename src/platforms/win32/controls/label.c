@@ -30,7 +30,6 @@ void ErrorExit(LPTSTR lpszFunction) {
 }
 extern HWND dummy;
 
-int icc = 0;
 
 DSK_EXTEND_MODULE(libdesktop);
 
@@ -39,18 +38,8 @@ DSK_DEFINE_CLASS(libdesktop, Label) {
 	DSK_EXACTLY_NARGS(2);
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 
-	char *lbl;
-	if (icc % 3 == 0) {
-		lbl = "111ciao win32";
-	} else if (icc % 3 == 1) {
-		lbl = "222ciao win32";
-	} else {
-		lbl = "333ciao win32";
-	}
-	icc++;
-
 	HWND widget =
-		CreateWindow("STATIC", lbl, WS_CHILD | WS_VISIBLE | WS_BORDER, CW_USEDEFAULT, CW_USEDEFAULT,
+		CreateWindow("STATIC", "ciao", WS_CHILD | WS_VISIBLE | WS_BORDER, CW_USEDEFAULT, CW_USEDEFAULT,
 					 // use the raw width and height for now
 					 // this will get CW_USEDEFAULT (hopefully) predicting well
 					 // even if it doesn't, we're adjusting it later
@@ -59,14 +48,12 @@ DSK_DEFINE_CLASS(libdesktop, Label) {
 	if (widget == NULL) {
 		ErrorExit("CreateWindow");
 	}
-	/*
-		SetWindowPos(widget, 0, 0, 0, 0, 0,
-		SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
-	*/
-	// printf("done\n");
+	
+	DskCtrlI *ctrl;
+	DSK_CTRLI_CALL_STATIC(&DskControlProto, init, env, widget, this, &ctrl);
 
-	// printf\("CREATED LABEL\n");
-	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this, argv));
+	DSK_CTRLI_CALL(ctrl, assign_props, argv[0]);
+
 
 	return this;
 }

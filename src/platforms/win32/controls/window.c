@@ -82,6 +82,7 @@ ATOM registerWindowClass(HICON hDefaultIcon, HCURSOR hDefaultCursor) {
 
 DSK_EXTEND_MODULE(libdesktop);
 DSK_EXTEND_CLASS(libdesktop, Container);
+DSK_EXTEND_CLASS(libdesktop, RootContainer)
 
 DSK_DEFINE_CLASS(libdesktop, Window) {
 	DSK_JS_FUNC_INIT();
@@ -96,34 +97,40 @@ DSK_DEFINE_CLASS(libdesktop, Window) {
 						// even if it doesn't, we're adjusting it later
 						800, 600, NULL, NULL, hInstance, NULL);
 
-	napi_value nochildren;
-	DSK_NAPI_CALL(napi_create_array_with_length(env, 0, &nochildren));
-	DSK_NAPI_CALL(dsk_wrap_widget(env, win, this, (napi_value[]){argv[0], nochildren}));
-
-	napi_value Container;
-	napi_value container;
-	napi_value null;
-
-	napi_get_reference_value(env, libdesktop_Container_ref, &Container);
-	napi_get_null(env, &null);
-
+	DskCtrlI *ctrl;
+	DSK_CTRLI_CALL_STATIC(&DskControlProto, init, env, win, this, &ctrl);
+	DSK_CTRLI_CALL(ctrl, assign_props, argv[0]);
+	
+	
 	napi_value props;
-	napi_create_object(env, &props);
 
-	napi_new_instance(env, Container, 2, (napi_value[]){props, argv[1]}, &container);
-	napi_set_named_property(env, this, "container", container);
+	DSK_NAPI_CALL(napi_create_object(env, &props));
 
-	HWND child_gtk;
-	napi_unwrap(env, container, (void **)&child_gtk);
-	SetParent(child_gtk, win);
+	bool hasStyle;
+	DSK_NAPI_CALL(napi_has_named_property(env, argv[0], "style", &hasStyle));
+	if (hasStyle) {
+		napi_value containerStyle;
+		DSK_NAPI_CALL(napi_get_named_property(env, argv[0], "style", &containerStyle));
+		DSK_NAPI_CALL(napi_set_named_property(env, props, "style", containerStyle));
+	}
 
-	YGNodeRef root = dsk_widget_get_node(env, container);
+	napi_value cntr_wrapper =
+		dsk_new_instance(env, libdesktop_RootContainer_ref, 2, (napi_value[]){props, argv[1]});
 
-	dsk_set_children_preferred_sizes(root, win);
+	DskCtrlI *cntr_ctrl;
+	DSK_NAPI_CALL(dsk_CtrlI_from_wrapper(env, cntr_wrapper, &cntr_ctrl));
 
-	dsk_calculate_layout(env, child_gtk, root, YGUndefined, YGUndefined);
+	HWND cntr_gtk = cntr_ctrl->ctrl_handle;
 
-	ShowWindow(win, SW_SHOW);
+	SetParent(cntr_gtk, win);
+
+	DSK_CTRLI_CALL(cntr_ctrl, reposition, -1, -1, -1, -1);
+
+	float w = YGNodeLayoutGetWidth(cntr_ctrl->yg_node);
+	float h = YGNodeLayoutGetHeight(cntr_ctrl->yg_node);
+	float pd = YGNodeLayoutGetPadding(cntr_ctrl->yg_node, YGEdgeRight);
+
+	SetWindowPos(win,NULL,0,0,w,h, SWP_NOZORDER | SWP_NOMOVE | SWP_SHOWWINDOW);
 
 	return this;
 }

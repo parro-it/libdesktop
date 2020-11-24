@@ -222,7 +222,7 @@ struct _internal_uv_loop_s {
 	*/
 };
 
-int dsk_wait_node_events(void *loop, int timeout) {
+int dsk_wait_node_events(uv_loop_t *loop, int timeout) {
 	DWORD bytes;
 	ULONG_PTR key;
 	OVERLAPPED *overlapped;
@@ -252,6 +252,11 @@ int dsk_wait_node_events(void *loop, int timeout) {
 	return ret;
 }
 
+
+void dsk_connect_event(UIHandle widget, char *eventname, struct dsk_event_args *args) {
+	// g_signal_connect(G_OBJECT(widget), eventname, G_CALLBACK(dsk_on_event), args);
+}
+/*
 struct win32_ref {
 	void *wrapper;
 	void *node;
@@ -299,6 +304,5 @@ napi_value dsk_widget_get_wrapper(napi_env env, UIHandle widget) {
 	return wrapper;
 }
 
-void dsk_connect_event(UIHandle widget, char *eventname, struct dsk_event_args *args) {
-	// g_signal_connect(G_OBJECT(widget), eventname, G_CALLBACK(dsk_on_event), args);
-}
+
+*/

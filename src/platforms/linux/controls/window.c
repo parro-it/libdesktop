@@ -52,7 +52,7 @@ static bool on_window_resize(GtkWindow *window, GdkEvent *event, gpointer data) 
 	*/
 }
 
-extern DskCtrlIProto DskRootContainerProto;
+//extern DskCtrlIProto DskRootContainerProto;
 
 DSK_EXTEND_CLASS(libdesktop, RootContainer)
 

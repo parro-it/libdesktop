@@ -3,45 +3,9 @@
 #include <windows.h>
 #include <yoga/Yoga.h>
 
-void dsk_widget_reposition(napi_env env, UIHandle container, UIHandle widget, float x, float y,
-						   float width, float height) {
-	// printf("SET POS %p TO %f, %f\n", widget, x, y);
-	bool ret =
-		SetWindowPos((HWND)widget, HWND_TOP, (int)x, (int)y, (int)width, (int)height, SWP_NOZORDER);
-	if (!ret) {
-		// printf("ERROR\n");
-	}
-}
-
-void dsk_platform_container_add_child(UIHandle parent, UIHandle child) {
-
-	SetParent((HWND)child, (HWND)parent);
-}
 
 extern HWND dummy;
-DSK_EXTEND_MODULE(libdesktop);
 
-DSK_DEFINE_CLASS(libdesktop, Container) {
-	DSK_JS_FUNC_INIT();
-	DSK_EXACTLY_NARGS(2);
-
-	HINSTANCE hInstance = GetModuleHandle(NULL);
-	HWND widget = CreateWindowExW(WS_EX_CONTROLPARENT, L"DSKcontainerClass", L"", WS_CHILD,
-								  CW_USEDEFAULT, CW_USEDEFAULT,
-								  // use the raw width and height for now
-								  // this will get CW_USEDEFAULT (hopefully) predicting well
-								  // even if it doesn't, we're adjusting it later
-								  800, 600, dummy, NULL, hInstance, NULL);
-
-	// // printf("CREATED container\n");
-
-	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this, argv));
-
-	SetWindowPos(widget, 0, 0, 0, 0, 0,
-				 SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
-
-	return this;
-}
 
 static LRESULT CALLBACK containerWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	/*RECT r;
@@ -121,16 +85,14 @@ void uninitContainer(void) {
 	// logLastError(L"error unregistering container window class");
 }
 
-void dsk_get_preferred_sizes(UIHandle widget, int *width, int *height) {
-	/*NSView* view = widget;
-	NSSize sz = [view fittingSize];
+UIHandle dsk_new_container_platform_ui_control() {
+	HINSTANCE hInstance = GetModuleHandle(NULL);
+	HWND widget = CreateWindowExW(WS_EX_CONTROLPARENT, L"DSKcontainerClass", L"", WS_CHILD,
+								  CW_USEDEFAULT, CW_USEDEFAULT,
+								  // use the raw width and height for now
+								  // this will get CW_USEDEFAULT (hopefully) predicting well
+								  // even if it doesn't, we're adjusting it later
+								  800, 600, dummy, NULL, hInstance, NULL);
+	return widget;								  
+} 
 
-	*width = sz.width;
-	if (*width < 130) {
-
-	}
-	*height = 30;*/
-	// printf("dsk_get_preferred_sizes %p\n", widget);
-	*height = 30;
-	*width = 130;
-}

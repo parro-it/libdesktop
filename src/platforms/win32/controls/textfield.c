@@ -23,7 +23,9 @@ DSK_DEFINE_CLASS(libdesktop, Textfield) {
 					 // even if it doesn't, we're adjusting it later
 					 100, 20, dummy, NULL, hInstance, NULL);
 
-	DSK_NAPI_CALL(dsk_wrap_widget(env, widget, this, argv));
+	DskCtrlI *ctrl;
+	DSK_CTRLI_CALL_STATIC(&DskControlProto, init, env, widget, this, &ctrl);
+	DSK_CTRLI_CALL(ctrl, assign_props, argv[0]);
 
 	return NULL;
 }
