@@ -11,6 +11,7 @@ export interface Control {
 	 * Set or return whether the control is visible.
 	 */
 	visible: boolean;
+	
 	/**
 	 * Set or return whether the control is a top level one.
 	 */

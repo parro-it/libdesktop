@@ -52,7 +52,7 @@ static bool on_window_resize(GtkWindow *window, GdkEvent *event, gpointer data) 
 	*/
 }
 
-//extern DskCtrlIProto DskRootContainerProto;
+// extern DskCtrlIProto DskRootContainerProto;
 
 DSK_EXTEND_CLASS(libdesktop, RootContainer)
 
@@ -120,6 +120,51 @@ DSK_DEFINE_CLASS(libdesktop, Window) {
 	g_signal_connect(G_OBJECT(window), "configure-event", G_CALLBACK(on_window_resize), args);
 
 	return this;
+}
+
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdk.h>
+#include <gdk/gdkdrawingcontext.h>
+
+DSK_DEFINE_METHOD(libdesktop, Window, saveAsPNGImage) {
+	DSK_JS_FUNC_INIT();
+	DSK_EXACTLY_NARGS(1);
+
+	napi_value filename = argv[0];
+
+	struct DskCtrlI *ctrl;
+	DSK_NAPI_CALL(dsk_CtrlI_from_wrapper(env, this, &ctrl));
+
+	GtkWindow *win = ctrl->ctrl_handle;
+
+	gint width, height;
+	gtk_window_get_size(win, &width, &height);
+
+	GdkWindow *g_win = GDK_WINDOW(win);
+
+	GdkPixbuf *pb = gdk_pixbuf_get_from_window(g_win, 0, 0, width, height);
+
+	if (pb != NULL) {
+		char *c_filename;
+		DSK_NAPI_CALL(dsk_get_utf8_cstr(env, filename, &c_filename));
+		gdk_pixbuf_save(pb, c_filename, "png", NULL, NULL);
+	} else {
+		DSK_FAILURE("Unable to get the screenshot.");
+	}
+	return 0;
+}
+
+DSK_DEFINE_METHOD(libdesktop, Window, close) {
+	DSK_JS_FUNC_INIT();
+	DSK_EXACTLY_NARGS(0);
+
+	struct DskCtrlI *ctrl;
+	DSK_NAPI_CALL(dsk_CtrlI_from_wrapper(env, this, &ctrl));
+
+	GtkWindow *win = ctrl->ctrl_handle;
+	gtk_window_close(win);
+
+	return NULL;
 }
 
 DSK_UI_PROP(libdesktop, Window, left, dsk_prop_i32, "x");

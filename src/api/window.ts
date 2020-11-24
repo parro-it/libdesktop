@@ -32,6 +32,12 @@ export interface Window {
 	close(): void;
 
 	/**
+	 * Saves the content of a window to a PNG file
+	 * @param filename path to save to
+	 */
+	saveAsPNGImage(filename: string): void;
+
+	/**
 	 * Set or return the text to show in window title bar.
 	 */
 	title: string;
@@ -73,6 +79,8 @@ export interface Window {
 	 * Set or return the height of the window.
 	 */
 	height: number;
+
+
 }
 
 
