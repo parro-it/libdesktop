@@ -10,3 +10,8 @@
 ## Running on macOS
 
 [![Example window running on macOS platform](https://github.com/parro-it/libdesktop/raw/master/src/docs/media/darwin.png)](https://github.com/parro-it/libdesktop/tree/master/src/platforms/darwin)
+
+## Running on Linux
+
+[![Example window running on Linux platform](https://github.com/parro-it/libdesktop/raw/master/src/docs/media/gtk.png)](https://github.com/parro-it/libdesktop/tree/master/src/platforms/linux)
+
