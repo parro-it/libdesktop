@@ -87,7 +87,7 @@ void uninitContainer(void) {
 
 UIHandle dsk_new_container_platform_ui_control() {
 	HINSTANCE hInstance = GetModuleHandle(NULL);
-	HWND widget = CreateWindowExW(WS_EX_CONTROLPARENT, L"DSKcontainerClass", L"", WS_CHILD,
+	HWND widget = CreateWindowExW(WS_EX_CONTROLPARENT, L"DSKcontainerClass", L"", WS_CHILD | WS_VISIBLE,
 								  CW_USEDEFAULT, CW_USEDEFAULT,
 								  // use the raw width and height for now
 								  // this will get CW_USEDEFAULT (hopefully) predicting well

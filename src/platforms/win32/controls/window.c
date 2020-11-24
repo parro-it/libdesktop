@@ -131,6 +131,5 @@ DSK_DEFINE_CLASS(libdesktop, Window) {
 	float pd = YGNodeLayoutGetPadding(cntr_ctrl->yg_node, YGEdgeRight);
 
 	SetWindowPos(win,NULL,0,0,w,h, SWP_NOZORDER | SWP_NOMOVE | SWP_SHOWWINDOW);
-
 	return this;
 }

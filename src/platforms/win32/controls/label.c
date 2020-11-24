@@ -39,12 +39,12 @@ DSK_DEFINE_CLASS(libdesktop, Label) {
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 
 	HWND widget =
-		CreateWindow("STATIC", "ciao", WS_CHILD | WS_VISIBLE | WS_BORDER, CW_USEDEFAULT, CW_USEDEFAULT,
+		CreateWindow("STATIC", "ciao", WS_CHILD | WS_VISIBLE , CW_USEDEFAULT, CW_USEDEFAULT,
 					 // use the raw width and height for now
 					 // this will get CW_USEDEFAULT (hopefully) predicting well
 					 // even if it doesn't, we're adjusting it later
 					 100, 20, dummy, NULL, hInstance, NULL);
-	// printf("CREATED LABEL %p\n",widget );
+	printf("CREATED LABEL %p\n",widget );
 	if (widget == NULL) {
 		ErrorExit("CreateWindow");
 	}

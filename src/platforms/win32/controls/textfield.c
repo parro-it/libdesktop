@@ -17,7 +17,9 @@ DSK_DEFINE_CLASS(libdesktop, Textfield) {
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 
 	HWND widget =
-		CreateWindow("STATIC", "", WS_CHILD | WS_VISIBLE | WS_BORDER, CW_USEDEFAULT, CW_USEDEFAULT,
+		CreateWindowEx(WS_EX_CLIENTEDGE,"edit", "", 
+			WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | ES_LEFT | ES_NOHIDESEL | WS_TABSTOP, 
+			0, 0, 
 					 // use the raw width and height for now
 					 // this will get CW_USEDEFAULT (hopefully) predicting well
 					 // even if it doesn't, we're adjusting it later
@@ -29,3 +31,4 @@ DSK_DEFINE_CLASS(libdesktop, Textfield) {
 
 	return NULL;
 }
+
