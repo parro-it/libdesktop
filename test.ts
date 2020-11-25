@@ -3,10 +3,9 @@ import './tests/event.ts'
 import './tests/dsknapi.ts'
 import './tests/dskctrl.ts'
 
-/*
 
 import test from 'tape-async'
-import {App,Window,Label,Container,YogaFlexDirection} from './index'
+import {App,Window,Label,Textfield,Container,YogaFlexDirection} from './index'
 const app = App.create()
 test('run on multiple platforms', async (t:any): Promise<void> => {
     t.equal(app.arch, process.platform)
@@ -38,46 +37,35 @@ test('start stop', async (t:any): Promise<void> => {
 test('Window', async (t:any): Promise<void> => {
     t.equal(typeof Window, "function")
     const app = App.create()
-    const [l1,l2,l3] = [
-        new Label({style: {
-            margin:{left:6,top:6}
-        },
-        label:"plutone",visible:false},[]),
-        new Label({
-            label:"lunabadula lunabadulalunabadula",
-            enabled:false,
-            style: {
-                margin:{left:6,top:6},
-                padding: {left: 50},
-                minHeight: 350,
-                height: 350,
-            }
-        },[]),
-        new Label({
-            style: {
-                margin:{left:6,top:6}
-            },
-            label:"terra mondo tondo"
-        },[]),
-        
-    ];
-    //(l3 as any).setLabel("SALVE");
-    const win = new Window({},[   
-        new Container({style: {flexDirection: YogaFlexDirection.Row}},[l1,l2,l3]),
-        new Container({style: {flexDirection: YogaFlexDirection.Row}},[
-            new Label({style: {margin:{left:6,top:6}},label: "A1"},[]),
-            new Label({style: {margin:{left:6,top:6}},label: "A2"},[]),
-            new Label({style: {margin:{left:6,top:6}},label: "A3"},[])
+    
+    const lbl = new Label({ style: { margin: { left: 0, top: 0 }, minWidth: 120 }, text: "Given Name" }, []);
+    const fld = new Textfield({ style: { flexGrow: 1, margin: { left: 12, top: 0 } }, text: "Andrea" }, [])
+
+    const win = new Window({ title: "Running on " + process.platform, style: { padding: { left: 26, right: 26, top: 12, bottom: 12 } } }, [
+        new Container({ style: { flexDirection: YogaFlexDirection.Row } }, [
+            lbl,
+            fld,
         ]),
-        new Container({style: {flexDirection: YogaFlexDirection.Row}},[
-            new Label({style: {margin:{left:6,top:6}},label: "B1"},[]),
-            new Label({style: {margin:{left:6,top:6}},label: "B2"},[]),
-            new Label({style: {margin:{left:6,top:6}},label: "B3"},[])
+        new Container({ style: { flexGrow: 1, flexDirection: YogaFlexDirection.Row } }, [
+            new Label({ style: { margin: { left: 0, top: 12 }, minWidth: 120 }, text: "Family Name" }, []),
+            new Textfield({ style: { flexGrow: 1, margin: { left: 12, top: 12 } }, text: "Parodi" }, []),
+        ]),
+
+        new Container({ style: { flexDirection: YogaFlexDirection.Row } }, [
+            new Label({ style: { margin: { left: 0, top: 12 }, minWidth: 120 }, text: "City" }, []),
+            new Textfield({ style: { flexGrow: 1, margin: { left: 12, top: 12 } }, text: "Genoa" }, []),
         ]),
     ]);
 
     app.start();
+    setTimeout(()=>{
+        win.saveAsPNGImage("win.png");
+        console.log("saved");
+        win.close();
+        app.stop();
+
+    },600);
+    
 
     //(l1 as any).print();
 })
-*/

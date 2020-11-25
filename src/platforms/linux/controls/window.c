@@ -124,7 +124,6 @@ DSK_DEFINE_CLASS(libdesktop, Window) {
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gdk/gdk.h>
-#include <gdk/gdkdrawingcontext.h>
 
 DSK_DEFINE_METHOD(libdesktop, Window, saveAsPNGImage) {
 	DSK_JS_FUNC_INIT();
@@ -140,18 +139,22 @@ DSK_DEFINE_METHOD(libdesktop, Window, saveAsPNGImage) {
 	gint width, height;
 	gtk_window_get_size(win, &width, &height);
 
-	GdkWindow *g_win = GDK_WINDOW(win);
+	GdkWindow *g_win = gtk_widget_get_window(GTK_WIDGET(win));
 
-	GdkPixbuf *pb = gdk_pixbuf_get_from_window(g_win, 0, 0, width, height);
+	char *c_filename;
+	DSK_NAPI_CALL(dsk_get_utf8_cstr(env, filename, &c_filename));
 
-	if (pb != NULL) {
-		char *c_filename;
-		DSK_NAPI_CALL(dsk_get_utf8_cstr(env, filename, &c_filename));
-		gdk_pixbuf_save(pb, c_filename, "png", NULL, NULL);
-	} else {
-		DSK_FAILURE("Unable to get the screenshot.");
-	}
-	return 0;
+	cairo_surface_t *surface = cairo_image_surface_create(
+		CAIRO_FORMAT_RGB24, width, height); // <<= Reduced size to get only a part of the window.
+	cairo_t *cr = cairo_create(surface);
+
+	gdk_cairo_set_source_window(cr, g_win, 0, 0);
+
+	cairo_paint(cr);
+
+	cairo_surface_write_to_png(surface, c_filename);
+
+	return NULL;
 }
 
 DSK_DEFINE_METHOD(libdesktop, Window, close) {
