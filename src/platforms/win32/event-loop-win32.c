@@ -38,60 +38,18 @@ const char *dsk_init() {
 }
 void noop(void *data) {}
 
+enum {
+	// redirected WM_COMMAND and WM_NOTIFY
+	msgCOMMAND = WM_APP + 0x40,		// start offset just to be safe
+	msgQueued,
+};
+
 int dsk_wakeup_ui_loop() {
-	uiQueueMain(noop, NULL);
+	PostMessageW(dummy, msgQueued, 0,0);
+	//uiQueueMain(noop, NULL);
 	return 0;
 }
-#if 0
-static HHOOK filter;
 
-static LRESULT CALLBACK filterProc(int code, WPARAM wParam, LPARAM lParam)
-{
-	MSG *msg = (MSG *) lParam;
-
-	if (code < 0)
-		goto callNext;
-
-	/*if (areaFilter(msg))		// don't continue to our IsDialogMessage() hack if the area handled it
-		goto discard;
-*/
-	// TODO IsDialogMessage() hack here
-
-	// otherwise keep going
-	goto callNext;
-
-discard:
-	// we handled it; discard the message so the dialog manager doesn't see it
-	return 1;
-
-callNext:
-	return CallNextHookEx(filter, code, wParam, lParam);
-}
-
-int registerMessageFilter(void)
-{
-	filter = SetWindowsHookExW(WH_MSGFILTER,
-		filterProc,
-		hInstance,
-		GetCurrentThreadId());
-	return filter != NULL;
-}
-
-void unregisterMessageFilter(void)
-{
-	if (UnhookWindowsHookEx(filter) == 0)
-		logLastError(L"error unregistering libui message filter");
-}
-
-// LONGTERM http://blogs.msdn.com/b/oldnewthing/archive/2005/04/08/406509.aspx when adding accelerators, TranslateAccelerators() before IsDialogMessage()
-
-
-void uiMain(void)
-{
-	while (dsk_process_ui_event(1))
-		;
-}
-#endif
 
 void uiMainSteps(void) {
 	// don't need to do anything here
@@ -164,11 +122,6 @@ void dsk_quit(void) {
 	PostQuitMessage(0);
 }
 
-void uiQueueMain(void (*f)(void *data), void *data) {
-	/*if (PostMessageW(utilWindow, msgQueued, (WPARAM) f, (LPARAM) data) == 0)
-		// LONGTERM this is likely not safe to call across threads (allocates memory)
-		logLastError(L"error queueing function to run on main thread");*/
-}
 
 int dsk_ui_events_pending() {
 	MSG msg;
@@ -256,53 +209,3 @@ int dsk_wait_node_events(uv_loop_t *loop, int timeout) {
 void dsk_connect_event(UIHandle widget, char *eventname, struct dsk_event_args *args) {
 	// g_signal_connect(G_OBJECT(widget), eventname, G_CALLBACK(dsk_on_event), args);
 }
-/*
-struct win32_ref {
-	void *wrapper;
-	void *node;
-};
-
-YGNodeRef dsk_widget_get_node(napi_env env, napi_value widget) {
-	HWND widgetG;
-	napi_status status = napi_unwrap(env, widget, (void **)&widgetG);
-	if (status != napi_ok) {
-		const napi_extended_error_info *result;
-		napi_get_last_error_info(env, &result);
-		return NULL;
-	}
-	struct win32_ref *data = (void *)GetWindowLongPtr(widgetG, GWLP_USERDATA);
-
-	return data->node;
-}
-
-#include <assert.h>
-
-void dsk_widget_set_node(napi_env env, napi_value widget, YGNodeRef node) {
-	HWND widgetG;
-	napi_status status = napi_unwrap(env, widget, (void **)&widgetG);
-	assert(status == napi_ok);
-	assert(widgetG != NULL);
-
-	napi_ref ref;
-	napi_create_reference(env, widget, 1, &ref);
-
-	struct win32_ref *data = malloc(sizeof(struct win32_ref));
-	data->wrapper = ref;
-	data->node = node;
-	// printf("SET NODE napi_value %p widget %p\n", widget, widgetG);
-	SetWindowLongPtr(widgetG, GWLP_USERDATA, (LONG_PTR)data);
-}
-
-napi_value dsk_widget_get_wrapper(napi_env env, UIHandle widget) {
-	struct win32_ref *data = (void *)GetWindowLongPtr((HWND)widget, GWLP_USERDATA);
-	napi_ref ref = data->wrapper;
-	if (ref == NULL) {
-		return NULL;
-	}
-	napi_value wrapper;
-	napi_get_reference_value(env, ref, &wrapper);
-	return wrapper;
-}
-
-
-*/

@@ -141,7 +141,22 @@ DSK_DEFINE_METHOD(libdesktop, Window, close) {
 	DSK_NAPI_CALL(dsk_CtrlI_from_wrapper(env, this, &ctrl));
 
 	HWND win = ctrl->ctrl_handle;
-	CloseWindow(win);
+	printf("HIDE\n");
+	ShowWindow(win, SW_HIDE);
+	printf("DESTROY\n");
+	DestroyWindow(win);
+	printf("DESTROIED\n");
 
+	return NULL;
+}
+
+
+DSK_DEFINE_METHOD(libdesktop, Window, saveAsPNGImage) {
+	DSK_JS_FUNC_INIT();
+	DSK_EXACTLY_NARGS(1);
+	napi_value filename = argv[0];
+	char *c_filename;
+	DSK_NAPI_CALL(dsk_get_utf8_cstr(env, filename, &c_filename));
+	printf ("SAVED\n");
 	return NULL;
 }

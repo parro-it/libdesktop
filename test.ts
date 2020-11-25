@@ -11,7 +11,7 @@ test('run on multiple platforms', async (t:any): Promise<void> => {
     t.equal(app.arch, process.platform)
     t.equal(app.ver, "0.0.1")
 })
-
+/*
 test('start stop', async (t:any): Promise<void> => {
     t.equal(typeof app.start, "function")
     t.equal(typeof app.stop, "function")
@@ -33,7 +33,7 @@ test('start stop', async (t:any): Promise<void> => {
         )),
     ])
 })
-
+*/
 test('Window', async (t:any): Promise<void> => {
     t.equal(typeof Window, "function")
     const app = App.create()
