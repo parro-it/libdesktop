@@ -100,8 +100,7 @@ DSK_DEFINE_CLASS(libdesktop, Window) {
 	DskCtrlI *ctrl;
 	DSK_CTRLI_CALL_STATIC(&DskControlProto, init, env, win, this, &ctrl);
 	DSK_CTRLI_CALL(ctrl, assign_props, argv[0]);
-	
-	
+
 	napi_value props;
 
 	DSK_NAPI_CALL(napi_create_object(env, &props));
@@ -130,6 +129,19 @@ DSK_DEFINE_CLASS(libdesktop, Window) {
 	float h = YGNodeLayoutGetHeight(cntr_ctrl->yg_node);
 	float pd = YGNodeLayoutGetPadding(cntr_ctrl->yg_node, YGEdgeRight);
 
-	SetWindowPos(win,NULL,0,0,w,h, SWP_NOZORDER | SWP_NOMOVE | SWP_SHOWWINDOW);
+	SetWindowPos(win, NULL, 0, 0, w, h, SWP_NOZORDER | SWP_NOMOVE | SWP_SHOWWINDOW);
 	return this;
+}
+
+DSK_DEFINE_METHOD(libdesktop, Window, close) {
+	DSK_JS_FUNC_INIT();
+	DSK_EXACTLY_NARGS(0);
+
+	struct DskCtrlI *ctrl;
+	DSK_NAPI_CALL(dsk_CtrlI_from_wrapper(env, this, &ctrl));
+
+	HWND *win = ctrl->ctrl_handle;
+	CloseWindow(win);
+
+	return NULL;
 }

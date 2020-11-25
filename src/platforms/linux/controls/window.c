@@ -143,8 +143,7 @@ DSK_DEFINE_METHOD(libdesktop, Window, saveAsPNGImage) {
 	char *c_filename;
 	DSK_NAPI_CALL(dsk_get_utf8_cstr(env, filename, &c_filename));
 
-	cairo_surface_t *surface = cairo_image_surface_create(
-		CAIRO_FORMAT_RGB24, width, height); // <<= Reduced size to get only a part of the window.
+	cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
 	cairo_t *cr = cairo_create(surface);
 
 	gdk_cairo_set_source_window(cr, g_win, 0, 0);
