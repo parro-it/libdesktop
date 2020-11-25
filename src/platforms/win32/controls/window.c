@@ -140,7 +140,7 @@ DSK_DEFINE_METHOD(libdesktop, Window, close) {
 	struct DskCtrlI *ctrl;
 	DSK_NAPI_CALL(dsk_CtrlI_from_wrapper(env, this, &ctrl));
 
-	HWND *win = ctrl->ctrl_handle;
+	HWND win = ctrl->ctrl_handle;
 	CloseWindow(win);
 
 	return NULL;
