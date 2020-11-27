@@ -105,10 +105,19 @@ DSK_DEFINE_METHOD(libdesktop, Window, saveAsPNGImage) {
 	struct DskCtrlI *ctrl;
 	DSK_NAPI_CALL(dsk_CtrlI_from_wrapper(env, this, &ctrl));
 
-	NSView *win = ctrl->ctrl_handle;
+	NSWindow *view = ctrl->ctrl_handle;
 
 	char *c_filename;
 	DSK_NAPI_CALL(dsk_get_utf8_cstr(env, filename, &c_filename));
+
+	NSString* file = [NSString stringWithUTF8String:c_filename];
+
+	NSBitmapImageRep *rep = [view.contentView bitmapImageRepForCachingDisplayInRect:[view.contentView bounds]];
+	[view.contentView cacheDisplayInRect:view.contentView.bounds toBitmapImageRep:rep];
+	NSMutableDictionary* p = [[NSMutableDictionary alloc] init];
+	NSData *data = [rep representationUsingType:NSPNGFileType properties:p];
+	[data writeToFile:file atomically:YES];
+	[p release];
 
 	return NULL;
 }
