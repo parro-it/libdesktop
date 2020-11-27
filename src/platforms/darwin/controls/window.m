@@ -83,5 +83,24 @@ DSK_DEFINE_CLASS(libdesktop, Window) {
 	return this;
 }
 
+
+DSK_DEFINE_METHOD(libdesktop, Window, saveAsPNGImage) {
+	DSK_JS_FUNC_INIT();
+	DSK_EXACTLY_NARGS(1);
+
+	napi_value filename = argv[0];
+
+	struct DskCtrlI *ctrl;
+	DSK_NAPI_CALL(dsk_CtrlI_from_wrapper(env, this, &ctrl));
+
+	NSView *win = ctrl->ctrl_handle;
+
+	char *c_filename;
+	DSK_NAPI_CALL(dsk_get_utf8_cstr(env, filename, &c_filename));
+
+	return NULL;
+}
+
+
 DSK_UI_PROP(libdesktop, Window, visible, dsk_prop_bool, "visible");
 DSK_UI_PROP(libdesktop, Window, title, dsk_prop_str, "title");
