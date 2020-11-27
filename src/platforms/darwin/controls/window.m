@@ -83,6 +83,18 @@ DSK_DEFINE_CLASS(libdesktop, Window) {
 	return this;
 }
 
+DSK_DEFINE_METHOD(libdesktop, Window, close) {
+	DSK_JS_FUNC_INIT();
+	DSK_EXACTLY_NARGS(0);
+
+	struct DskCtrlI *ctrl;
+	DSK_NAPI_CALL(dsk_CtrlI_from_wrapper(env, this, &ctrl));
+
+	NSWindow *win = ctrl->ctrl_handle;
+	[win close];
+
+	return NULL;
+}
 
 DSK_DEFINE_METHOD(libdesktop, Window, saveAsPNGImage) {
 	DSK_JS_FUNC_INIT();
