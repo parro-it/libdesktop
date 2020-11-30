@@ -10,7 +10,7 @@ function join(...args) {
 function listDir(dir) {
 	if (existsSync(dir)) {
 		readdirSync(dir)
-			.filter(f => f.endsWith('.c') || f.endsWith('.m'))
+			.filter(f => f.endsWith('.c') || f.endsWith('.m')|| f.endsWith('.cc'))
 			.forEach(f => console.log(join(dir,f)));
 		
 		readdirSync(dir,{withFileTypes:true})
