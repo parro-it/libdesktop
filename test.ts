@@ -59,7 +59,7 @@ test('Window', async (t:any): Promise<void> => {
 
     app.start();
     setTimeout(()=>{
-        win.saveAsPNGImage("win.png");
+        win.saveAsPNGImage("win-"+app.arch+".png");
         console.log("saved");
         win.close();
         app.stop();

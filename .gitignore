@@ -187,4 +187,4 @@ dkms.conf
 
 build
 docs/tmp
-win.png
+win-*.png
