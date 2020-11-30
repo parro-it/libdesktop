@@ -50,3 +50,9 @@ jobs:
     - name: Run tests
       if:   matrix.os != 'ubuntu-latest'
       run:  npm test
+    - name: Archive test artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: example-window
+        path: win.png
+      
