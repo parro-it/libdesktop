@@ -32,3 +32,4 @@ DSK_DEFINE_CLASS(libdesktop, Textfield) {
 	return NULL;
 }
 
+DSK_UI_PROP(libdesktop, Textfield, text, dsk_prop_str, "text");

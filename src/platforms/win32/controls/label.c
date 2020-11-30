@@ -39,7 +39,7 @@ DSK_DEFINE_CLASS(libdesktop, Label) {
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 
 	HWND widget =
-		CreateWindow("STATIC", "ciao", WS_CHILD | WS_VISIBLE , CW_USEDEFAULT, CW_USEDEFAULT,
+		CreateWindow("STATIC", "", WS_CHILD | WS_VISIBLE , CW_USEDEFAULT, CW_USEDEFAULT,
 					 // use the raw width and height for now
 					 // this will get CW_USEDEFAULT (hopefully) predicting well
 					 // even if it doesn't, we're adjusting it later
@@ -57,3 +57,5 @@ DSK_DEFINE_CLASS(libdesktop, Label) {
 
 	return this;
 }
+
+DSK_UI_PROP(libdesktop, Label, text, dsk_prop_str, "text");

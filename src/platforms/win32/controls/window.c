@@ -145,13 +145,12 @@ DSK_DEFINE_METHOD(libdesktop, Window, close) {
 	ShowWindow(win, SW_HIDE);
 	printf("DESTROY\n");
 	DestroyWindow(win);
-	printf("DESTROIED\n");
+	printf("DESTROYED\n");
 
 	return NULL;
 }
 
-PBITMAPINFO CreateBitmapInfoStruct(HBITMAP hBmp)
-{ 
+PBITMAPINFO CreateBitmapInfoStruct(HBITMAP hBmp) { 
     BITMAP bmp; 
     PBITMAPINFO pbmi; 
     WORD    cClrBits; 
@@ -214,8 +213,7 @@ PBITMAPINFO CreateBitmapInfoStruct(HBITMAP hBmp)
      return pbmi; 
  }
 
-void CreateBMPFile(HWND hwnd, LPTSTR pszFile, HBITMAP hBMP, HDC hDC) 
- { 
+void CreateBMPFile(HWND hwnd, LPTSTR pszFile, HBITMAP hBMP, HDC hDC) { 
     HANDLE hf;                 // file handle  
     BITMAPFILEHEADER hdr;       // bitmap file-header  
     PBITMAPINFOHEADER pbih;     // bitmap info-header  
