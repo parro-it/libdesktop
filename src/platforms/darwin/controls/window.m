@@ -83,5 +83,45 @@ DSK_DEFINE_CLASS(libdesktop, Window) {
 	return this;
 }
 
+DSK_DEFINE_METHOD(libdesktop, Window, close) {
+	DSK_JS_FUNC_INIT();
+	DSK_EXACTLY_NARGS(0);
+
+	struct DskCtrlI *ctrl;
+	DSK_NAPI_CALL(dsk_CtrlI_from_wrapper(env, this, &ctrl));
+
+	NSWindow *win = ctrl->ctrl_handle;
+	[win close];
+
+	return NULL;
+}
+
+DSK_DEFINE_METHOD(libdesktop, Window, saveAsPNGImage) {
+	DSK_JS_FUNC_INIT();
+	DSK_EXACTLY_NARGS(1);
+
+	napi_value filename = argv[0];
+
+	struct DskCtrlI *ctrl;
+	DSK_NAPI_CALL(dsk_CtrlI_from_wrapper(env, this, &ctrl));
+
+	NSWindow *view = ctrl->ctrl_handle;
+
+	char *c_filename;
+	DSK_NAPI_CALL(dsk_get_utf8_cstr(env, filename, &c_filename));
+
+	NSString* file = [NSString stringWithUTF8String:c_filename];
+
+	NSBitmapImageRep *rep = [view.contentView bitmapImageRepForCachingDisplayInRect:[view.contentView bounds]];
+	[view.contentView cacheDisplayInRect:view.contentView.bounds toBitmapImageRep:rep];
+	NSMutableDictionary* p = [[NSMutableDictionary alloc] init];
+	NSData *data = [rep representationUsingType:NSPNGFileType properties:p];
+	[data writeToFile:file atomically:YES];
+	[p release];
+
+	return NULL;
+}
+
+
 DSK_UI_PROP(libdesktop, Window, visible, dsk_prop_bool, "visible");
 DSK_UI_PROP(libdesktop, Window, title, dsk_prop_str, "title");
