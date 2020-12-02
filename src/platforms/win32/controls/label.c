@@ -37,13 +37,13 @@ DSK_DEFINE_CLASS(libdesktop, Label) {
 	DSK_EXACTLY_NARGS(2);
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 
-	HWND widget = CreateWindow("STATIC", "ciao", WS_CHILD | WS_VISIBLE | SS_RIGHT, CW_USEDEFAULT,
-							   CW_USEDEFAULT,
-							   // use the raw width and height for now
-							   // this will get CW_USEDEFAULT (hopefully) predicting well
-							   // even if it doesn't, we're adjusting it later
-							   100, 20, dummy, NULL, hInstance, NULL);
-
+	HWND widget =
+		CreateWindow("STATIC", "", WS_CHILD | WS_VISIBLE | SS_RIGHT, CW_USEDEFAULT, CW_USEDEFAULT,
+					 // use the raw width and height for now
+					 // this will get CW_USEDEFAULT (hopefully) predicting well
+					 // even if it doesn't, we're adjusting it later
+					 100, 20, dummy, NULL, hInstance, NULL);
+	printf("CREATED LABEL %p\n", widget);
 	if (widget == NULL) {
 		ErrorExit("CreateWindow");
 	}
@@ -55,3 +55,5 @@ DSK_DEFINE_CLASS(libdesktop, Label) {
 
 	return this;
 }
+
+DSK_UI_PROP(libdesktop, Label, text, dsk_prop_str, "text");
