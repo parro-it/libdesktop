@@ -50,6 +50,10 @@ static napi_status def_init_t(DskCtrlIProto *proto, napi_env env, UIHandle ctrl_
 	}
 	DSK_NAPI_CALL(napi_set_named_property(env, js_wrapper, "style", style));
 
+	napi_value events;
+	DSK_NAPI_CALL(napi_create_object(env, &events));
+	DSK_NAPI_CALL(napi_set_named_property(env, js_wrapper, "events", events));
+
 	*ctrl = instance;
 
 	return napi_ok;

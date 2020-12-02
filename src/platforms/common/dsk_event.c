@@ -44,8 +44,9 @@ DSK_DEFINE_METHOD(libdesktop, Event, listen) {
 		napi_valuetype sender_type;
 		DSK_NAPI_CALL(napi_typeof(env, sender, &sender_type));
 		if (sender_type != napi_null) {
-			UIHandle widget;
-			DSK_NAPI_CALL(napi_unwrap(env, sender, (void **)&widget));
+			DskCtrlI *cntr_ctrl;
+			DSK_NAPI_CALL(dsk_CtrlI_from_wrapper(env, sender, &cntr_ctrl));
+			UIHandle widget = cntr_ctrl->ctrl_handle;
 
 			napi_value eventname;
 			DSK_NAPI_CALL(napi_get_named_property(env, this, "eventname", &eventname));
@@ -58,7 +59,7 @@ DSK_DEFINE_METHOD(libdesktop, Event, listen) {
 			DSK_NAPI_CALL(napi_create_reference(env, sender, 1, &args->sender));
 
 			args->env = env;
-
+			printf("dsk_connect_event %s\n", eventname_s);
 			dsk_connect_event(widget, eventname_s, args);
 		}
 	}
@@ -79,7 +80,7 @@ DSK_DEFINE_METHOD(libdesktop, Event, invoke) {
 	DSK_JS_FUNC_INIT();
 	DSK_EXACTLY_NARGS(1);
 	napi_value listeners;
-	// printf("INVOKE\n");
+	printf("INVOKE\n");
 	DSK_NAPI_CALL(napi_get_named_property(env, this, "listeners", &listeners));
 
 	napi_value null;

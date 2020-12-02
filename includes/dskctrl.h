@@ -70,7 +70,6 @@ napi_status dsk_CtrlI_from_YGNode(YGNodeRef node_ref, DskCtrlI **ctrl);
 napi_status dsk_CtrlI_from_wrapper(napi_env env, napi_value wrapper, DskCtrlI **ctrl);
 
 /* reimplemented on top of DskCtrlI ???????? */
-/*
 napi_value dsk_event_new_for_widget(napi_env env, const char *eventname, napi_value sender);
 
 struct dsk_event_args {
@@ -79,5 +78,4 @@ struct dsk_event_args {
 	napi_ref event;
 };
 void dsk_connect_event(UIHandle widget, char *eventname, struct dsk_event_args *args);
-*/
 #endif
