@@ -4,7 +4,7 @@
 #import <Cocoa/Cocoa.h>
 
 @interface DskTextField : NSTextField
-	@property(nonatomic, readwrite) DskCtrlI *DskCtrlI;
+@property(nonatomic, readwrite) DskCtrlI *DskCtrlI;
 @end
 
 @implementation DskTextField
@@ -25,7 +25,6 @@ DSK_EXTEND_MODULE(libdesktop);
 DSK_DEFINE_CLASS(libdesktop, Textfield) {
 	DSK_JS_FUNC_INIT();
 	DSK_EXACTLY_NARGS(2);
-	printf ("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT\n");
 	DskTextField *widget = [[DskTextField alloc] init];
 	[widget setEditable:true];
 	[widget setSelectable:true];
