@@ -110,6 +110,8 @@ napi_status dsk_platform_remove_child_t(struct DskCtrlI *self, UIHandle child) {
 
 napi_status dsk_platform_get_prop_t(struct DskCtrlI *self, const char *prop_name,
 									dsk_prop_types prop_type, ...) {
+	printf("dsk_platform_get_prop_t\n");
+
 	napi_env env = self->env;
 	DSK_ONERROR_THROW_RET(napi_pending_exception);
 

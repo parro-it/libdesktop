@@ -13,6 +13,8 @@ export interface Textfield extends Control {
 
 	events: {
 		click: Event;
+		changed: Event;
+
 	};
 }
 

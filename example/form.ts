@@ -8,6 +8,11 @@ fld.events.click.listen(() => {
     console.log("THE LABEL HAS BEEN CLICKED");
 });
 
+fld.events.changed.listen(() => {
+    console.log("THE field has changed to", fld.text);
+});
+
+
 app.start();
 
 const win = new Window({ title: "Running on " + process.platform, style: { padding: { left: 26, right: 26, top: 12, bottom: 12 } } }, [

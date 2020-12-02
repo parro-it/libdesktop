@@ -24,6 +24,9 @@ DSK_DEFINE_CLASS(libdesktop, Textfield) {
 	napi_value click = dsk_event_new_for_widget(env, "activate", this);
 	DSK_NAPI_CALL(napi_set_named_property(env, events, "click", click));
 
+	napi_value changed = dsk_event_new_for_widget(env, "changed", this);
+	DSK_NAPI_CALL(napi_set_named_property(env, events, "changed", changed));
+
 	return this;
 }
 

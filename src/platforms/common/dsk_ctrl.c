@@ -371,20 +371,20 @@ DSK_DEFINE_TEST(tests_dsk_CtrlI_get_wrapper) {
 DSK_TEST_CLOSE
 
 napi_status dsk_ui_getter(void *self, void **datas, ...) {
-
 	DskCtrlI *ctrl = self;
 	napi_env env = ctrl->env;
 	DSK_ONERROR_THROW_RET(napi_pending_exception);
 
 	dsk_prop_types prop_type = (dsk_prop_types)datas[2];
 	char *prop_name = datas[3];
+	printf("dsk_ui_getter %s\n", prop_name);
 
 	va_list value_valist;
 
 	va_start(value_valist, datas);
 
 	void *value = va_arg(value_valist, void *);
-	DSK_CTRLI_CALL(ctrl, set_prop, prop_name, prop_type, value);
+	DSK_CTRLI_CALL(ctrl, get_prop, prop_name, prop_type, value);
 
 	va_end(value_valist); /* Clean up. */
 

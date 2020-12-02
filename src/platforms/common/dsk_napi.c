@@ -229,6 +229,8 @@ DSK_JS_FUNC(dsk_getProp) {
 		char *result;
 		DSK_NAPI_CALL(getter(instance, datas, &result));
 		DSK_NAPI_CALL(dsk_get_utf8_napistr(env, result, &ret));
+		printf("result: %s\n", result);
+
 		free(result);
 		break;
 	}
