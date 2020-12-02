@@ -30,7 +30,6 @@ void ErrorExit(LPTSTR lpszFunction) {
 }
 extern HWND dummy;
 
-
 DSK_EXTEND_MODULE(libdesktop);
 
 DSK_DEFINE_CLASS(libdesktop, Label) {
@@ -38,22 +37,21 @@ DSK_DEFINE_CLASS(libdesktop, Label) {
 	DSK_EXACTLY_NARGS(2);
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 
-	HWND widget =
-		CreateWindow("STATIC", "ciao", WS_CHILD | WS_VISIBLE , CW_USEDEFAULT, CW_USEDEFAULT,
-					 // use the raw width and height for now
-					 // this will get CW_USEDEFAULT (hopefully) predicting well
-					 // even if it doesn't, we're adjusting it later
-					 100, 20, dummy, NULL, hInstance, NULL);
-	printf("CREATED LABEL %p\n",widget );
+	HWND widget = CreateWindow("STATIC", "ciao", WS_CHILD | WS_VISIBLE | SS_RIGHT, CW_USEDEFAULT,
+							   CW_USEDEFAULT,
+							   // use the raw width and height for now
+							   // this will get CW_USEDEFAULT (hopefully) predicting well
+							   // even if it doesn't, we're adjusting it later
+							   100, 20, dummy, NULL, hInstance, NULL);
+
 	if (widget == NULL) {
 		ErrorExit("CreateWindow");
 	}
-	
+
 	DskCtrlI *ctrl;
 	DSK_CTRLI_CALL_STATIC(&DskControlProto, init, env, widget, this, &ctrl);
 
 	DSK_CTRLI_CALL(ctrl, assign_props, argv[0]);
-
 
 	return this;
 }
