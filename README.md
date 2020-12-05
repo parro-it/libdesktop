@@ -3,7 +3,9 @@
 </p>
 
 <p align="center">
-  [![Node.js CI](https://github.com/parro-it/libdesktop/workflows/Node.js%20CI/badge.svg)](https://github.com/parro-it/libdesktop/actions?query=workflow%3A%22Node.js+CI%22)
+  <a href="https://github.com/parro-it/libdesktop/actions?query=workflow%3A%22Node.js+CI%22">
+    <img alt="Node.js CI" src="https://github.com/parro-it/libdesktop/workflows/Node.js%20CI/badge.svg">
+  </a>
 </p>
 
 <p align="center">
