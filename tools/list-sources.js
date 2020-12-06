@@ -24,14 +24,13 @@ function listCPPDir(dir) {
 		readdirSync(dir)
 			.filter(f => f.endsWith('.cc') || f.endsWith('.cpp'))
 			.forEach(f => console.log(join(dir,f)));
-		/*readdirSync(dir,{withFileTypes:true})
+		readdirSync(dir,{withFileTypes:true})
 			.filter(f => f.isDirectory())
-			.forEach(f => listCPPDir(join(dir,f.name)));*/
+			.forEach(f => listCPPDir(join(dir,f.name)));
 	}
 }
 
 listCPPDir(join('yoga','yoga'));
-listCPPDir(join('yoga','yoga', 'internal'));
 listDir(join('src','platforms','common'));
 listDir(join('src','platforms',platform()));
 if (process.env.LIBDESKTOP_TARGET === 'test') {
