@@ -82,8 +82,8 @@ DSK_DEFINE_TEST(tests_dsk_platform_get_preferred_size_t) {
 	gtk_widget_show_all(GTK_WIDGET(window));
 
 	dsk_platform_get_preferred_size_t(ctrl, &width, &height);
-	// printf("%d x %d\n", width, height);
-	DSK_ASSERT(width == 129 /*ubuntu*/ || width == 134 /*deepin*/);
+	printf("%d x %d\n", width, height);
+	DSK_ASSERT(width == 129 /*ubuntu*/ || width == 134 /*deepin*/ || width == 132 /*ubuntu 20*/);
 	DSK_ASSERT(height == 17 /*ubuntu*/ || height == 22 /*deepin*/);
 
 	gtk_window_close(window);

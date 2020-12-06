@@ -620,7 +620,7 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
 	/* class constructor C prototype (predeclared because it's used in the initialezer below) */   \
 	DSK_JS_FUNC(MODNAME##_##CLASSNAME);                                                            \
 	/* reference of constructor function napi_value */                                             \
-	_DSK_USE_CLASS(MODNAME, CLASSNAME);                                                            \
+	_DSK_USE_CLASS(MODNAME, CLASSNAME, );                                                            \
 	/* static dsk_export_def instance that could be used to enhance the class with */              \
 	/* further methods and properties */                                                           \
 	dsk_export_def _DSK_CLASS_DEFS(MODNAME, CLASSNAME) = /**/ {                                    \
@@ -654,12 +654,12 @@ napi_value dsk_init_module_def(napi_env env, napi_value exports, dsk_modexports_
  * the extern class or object definition can be extended using any of the DSK_DEFINE_*,
  * or otherwise by directly using dsk_export_def_register_member function.
  */
-#define DSK_EXTEND_CLASS(MODNAME, CLASSNAME) extern _DSK_USE_CLASS(MODNAME, CLASSNAME)
+#define DSK_EXTEND_CLASS(MODNAME, CLASSNAME) _DSK_USE_CLASS(MODNAME, CLASSNAME, extern)
 
-#define _DSK_USE_CLASS(MODNAME, CLASSNAME)                                                         \
+#define _DSK_USE_CLASS(MODNAME, CLASSNAME, EXTERN)                                                         \
 	/* reference to class constructor function napi_value */                                       \
-	napi_ref MODNAME##_##CLASSNAME##_ref;                                                          \
-	dsk_export_def _DSK_CLASS_DEFS(MODNAME, CLASSNAME);
+	EXTERN napi_ref MODNAME##_##CLASSNAME##_ref;                                                          \
+	EXTERN dsk_export_def _DSK_CLASS_DEFS(MODNAME, CLASSNAME);
 
 /**
  * @name DSK_DEFINE_FUNCTION

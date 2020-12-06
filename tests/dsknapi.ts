@@ -19,7 +19,7 @@ test('property definition', (t:any) => {
 
 test('method definition', (t:any) => {
     const d = new Decimal(4,42)
-    t.equal("4.42", String(d));
+    t.equal("4,42", String(d));
     t.end()
 })
 

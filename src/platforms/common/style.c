@@ -2,7 +2,7 @@
 
 #include <yoga/Yoga.h>
 DSK_EXTEND_MODULE(libdesktop);
-_DSK_USE_CLASS(libdesktop, EdgedProp);
+DSK_EXTEND_CLASS(libdesktop, EdgedProp);
 
 typedef YGValue GetterYGVALUE(const YGNodeConstRef node);
 typedef YGValue GetterEdgedYGVALUE(const YGNodeConstRef node, YGEdge edge);

@@ -5,8 +5,6 @@ function join(...args) {
 	return args.join('/');
 }
 
-
-
 function listDir(dir) {
 	if (existsSync(dir)) {
 		readdirSync(dir)
