@@ -25,7 +25,6 @@
     "@types/tape-async": "^2.3.1",
     "consolidate": "^0.16.0",
     "handlebars": "^4.7.6",
-    "javadoc": "^2.0.0",
     "node-gyp": "^7.1.0",
     "tape-async": "^2.3.0",
     "ts-node": "^9.0.0",
