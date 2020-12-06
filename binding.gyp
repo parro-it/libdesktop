@@ -7,6 +7,7 @@
 		"sources": [
 			'<!@(node tools/list-sources.js)'
 		],
+		"cflags_cc": ['-fexceptions'],
 		
 		"conditions": [
 			["OS=='win'", {
@@ -19,7 +20,7 @@
 					'<!@(pkg-config gtk+-3.0 --libs-only-l)',
 					'<!@(pkg-config gdk-pixbuf-2.0 --libs-only-l)'
 				],
-				"cflags_cc": ['-fexceptions'],
+				
 				"cflags": [
 					'<!@(pkg-config gtk+-3.0 --cflags-only-I)',
 					'<!@(pkg-config gdk-pixbuf-2.0 --cflags-only-I)'
